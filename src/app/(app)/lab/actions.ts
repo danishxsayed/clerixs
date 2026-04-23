@@ -263,6 +263,7 @@ export async function getLabCatalog() {
 // -------------------------------------------------------------------------------- //
 // 2. Orders & Workflows Actions
 // -------------------------------------------------------------------------------- //
+import { createInvoice } from '../billing/actions';
 
 export async function createLabOrder(data: any) {
   const { error, supabase, organizationId, user } = await getAuthAndOrg();
@@ -276,6 +277,25 @@ export async function createLabOrder(data: any) {
     if (err.message?.includes('STORAGE_QUOTA_EXCEEDED')) return { error: err.message };
   }
 
+  // 0. Auto-generate Invoice
+  const invoiceItems = data.items.map((item: any) => ({
+    description: `Lab Test: ${item.name || 'Test'}`,
+    quantity: 1,
+    unit_price: item.price
+  }));
+
+  const invoiceData: any = {
+    patient_id: data.patient_id,
+    issue_date: new Date().toISOString().split('T')[0],
+    status: 'issued',
+    discount_amount: data.discount_amount || 0,
+    items: invoiceItems,
+    notes: `Invoice for Lab Order. ${data.notes || ''}`
+  };
+
+  const invoiceRes = await createInvoice(invoiceData);
+  const invoiceId = invoiceRes.success ? invoiceRes.invoiceId : null;
+
   // Insert order
   const { data: order, error: orderError } = await supabase
     .from('lab_orders')
@@ -284,8 +304,9 @@ export async function createLabOrder(data: any) {
       patient_id: data.patient_id,
       appointment_id: data.appointment_id || null,
       doctor_membership_id: data.doctor_membership_id || null,
-      invoice_id: data.invoice_id || null,
+      invoice_id: invoiceId,
       total_amount: data.total_amount || 0,
+      discount_amount: data.discount_amount || 0,
       notes: data.notes || null,
       created_by_profile_id: user?.id,
       status: 'ordered'
@@ -369,8 +390,8 @@ export async function submitLabResults(orderId: string, results: any[]) {
     if (insertError) return { error: 'Failed to submit results' };
   }
 
-  // Mark order as completed
-  await supabase.from('lab_orders').update({ status: 'completed' }).eq('id', orderId);
+  // Mark order as submitted for review
+  await supabase.from('lab_orders').update({ status: 'submitted' }).eq('id', orderId);
 
   revalidatePath(`/lab/${orderId}`);
   revalidatePath('/lab');
@@ -464,3 +485,45 @@ export async function uploadExternalLabReport(formData: FormData) {
     return { error: err.message || 'Failed to save external report' };
   }
 }
+
+export async function requestLabRevision(orderId: string, comments: string) {
+  const { error, supabase, user } = await getAuthAndOrg();
+  if (error || !supabase) return { error };
+
+  const { error: updateError } = await supabase
+    .from('lab_orders')
+    .update({ 
+      status: 'revision_requested',
+      doctor_comments: comments
+    })
+    .eq('id', orderId);
+
+  if (updateError) return { error: 'Failed to request revision' };
+
+  revalidatePath(`/lab/${orderId}`);
+  revalidatePath('/lab');
+  return { success: true };
+}
+
+export async function approveLabReport(orderId: string, doctorComments?: string) {
+  const { error, supabase, user } = await getAuthAndOrg();
+  if (error || !supabase) return { error };
+
+  const { error: updateError } = await supabase
+    .from('lab_orders')
+    .update({ 
+      status: 'completed',
+      doctor_comments: doctorComments || null,
+      approved_at: new Date().toISOString(),
+      approved_by_profile_id: user?.id
+    })
+    .eq('id', orderId);
+
+  if (updateError) return { error: 'Failed to approve report' };
+
+  revalidatePath(`/lab/${orderId}`);
+  revalidatePath('/lab');
+  revalidatePath(`/lab/print/${orderId}`);
+  return { success: true };
+}
+

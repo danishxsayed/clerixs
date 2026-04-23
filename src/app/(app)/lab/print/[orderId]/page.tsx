@@ -241,10 +241,16 @@ export default async function LabReportPrintPage({ params }: PrintPageProps) {
         {/* Footer & Signature block */}
         <div className="mt-20 pt-8 flex justify-between items-end">
            <div className="text-sm text-muted-foreground w-2/3">
-             <p className="font-semibold text-slate-700">Comments / Notes:</p>
+             {order.doctor_comments && (
+               <div className="mb-4">
+                 <p className="font-bold text-slate-800">Medical Interpretation:</p>
+                 <p className="mt-1 text-slate-700 italic">"{order.doctor_comments}"</p>
+               </div>
+             )}
+             <p className="font-semibold text-slate-700">{order.doctor_comments ? 'Technician Notes:' : 'Comments / Notes:'}</p>
              <p className="mt-1">{order.notes || 'End of Report'}</p>
              <p className="mt-6 text-xs italic">
-               * This report has been electronically validated. Test results belong to the submitted specimen only.
+               * This report has been electronically validated by {doctor?.full_name || 'the department head'}. Test results belong to the submitted specimen only.
              </p>
            </div>
            <div className="text-center flex flex-col items-center">

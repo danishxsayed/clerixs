@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PrescriptionList } from '@/components/prescriptions/prescription-list';
 import { PastAppointmentsTable } from './past-appointments-table';
+import { ClinicalNotesView } from './clinical-notes-view';
 import {
   Table,
   TableBody,
@@ -31,7 +32,7 @@ export async function PatientDashboard({ id }: PatientDashboardProps) {
     return notFound();
   }
 
-  const { patient, appointments, invoices, prescriptions, labOrders, role } = result.data;
+  const { patient, appointments, invoices, prescriptions, labOrders, clinicalNotes, role } = result.data;
 
   // Compute initials
   const initials = patient.full_name
@@ -155,19 +156,7 @@ export async function PatientDashboard({ id }: PatientDashboardProps) {
             </CardContent>
           </Card>
 
-          <Card className="border shadow-sm">
-            <CardHeader>
-              <CardTitle>Medical Notes</CardTitle>
-              <CardDescription>Internal clinic notes about {patient.full_name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {patient.medical_history ? (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{patient.medical_history}</p>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No medical history noted yet.</p>
-              )}
-            </CardContent>
-          </Card>
+          <ClinicalNotesView patientId={patient.id} initialNotes={clinicalNotes || []} patientName={patient.full_name} />
         </div>
 
         {/* Right Column: Appointments & Billing */}

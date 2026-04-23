@@ -22,6 +22,7 @@ const patientSchema = z.object({
   emergency_contact: z.string().regex(/^\d{10}$/, 'Must be exactly 10 digits').optional().or(z.literal('')),
   gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']).optional(),
   address: z.string().optional(),
+  medical_history: z.string().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientSchema>;
@@ -48,6 +49,7 @@ export function PatientEditForm({ patient }: { patient: any }) {
       emergency_contact: patient.emergency_contact?.startsWith('+91') ? patient.emergency_contact.substring(3) : patient.emergency_contact || '',
       gender: patient.gender || 'prefer_not_to_say',
       address: patient.address || '',
+      medical_history: patient.medical_history || '',
     },
   });
 
@@ -196,6 +198,17 @@ export function PatientEditForm({ patient }: { patient: any }) {
         <div className="space-y-2">
           <Label htmlFor="address">Home Address</Label>
           <Input id="address" placeholder="123 Main St, City, Country" {...register('address')} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="medical_history">Medical Notes / History</Label>
+          <textarea 
+            id="medical_history" 
+            rows={4}
+            placeholder="Enter allergies, past surgeries, chronic conditions, etc." 
+            className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            {...register('medical_history')} 
+          />
         </div>
 
       </div>

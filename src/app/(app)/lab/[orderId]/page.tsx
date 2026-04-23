@@ -12,7 +12,18 @@ export default async function LabOrderDetailPage({ params }: { params: Promise<{
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return notFound();
 
-  // Fetch Lab Order Deep
+  // Get User Role
+  const { data: profile } = await supabase.from('profiles').select('default_organization_id').eq('id', user.id).single();
+  const { data: membership } = await supabase
+    .from('organization_memberships')
+    .select('role')
+    .eq('organization_id', profile?.default_organization_id)
+    .eq('profile_id', user.id)
+    .single();
+
+  const userRole = membership?.role || 'staff';
+  console.log(`[LabOrder] User: ${user.email}, Role Identified: ${userRole}, Org: ${profile?.default_organization_id}`);
+
   const { data: order, error } = await supabase
     .from('lab_orders')
     .select(`
@@ -82,7 +93,7 @@ export default async function LabOrderDetailPage({ params }: { params: Promise<{
         </div>
       </div>
 
-      <OrderManagementView order={order} tests={tests} />
+      <OrderManagementView order={order} tests={tests} userRole={userRole} />
     </div>
   );
 }

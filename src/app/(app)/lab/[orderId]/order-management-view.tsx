@@ -2,22 +2,85 @@
 
 import * as React from 'react';
 import { format } from 'date-fns';
-import { updateSampleStatus, submitLabResults } from '@/app/(app)/lab/actions';
+import { updateSampleStatus, submitLabResults, approveLabReport, requestLabRevision } from '@/app/(app)/lab/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { CheckCircle, Clock, Printer, User, FlaskConical, AlertTriangle } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Clock, 
+  Printer, 
+  User, 
+  FlaskConical, 
+  AlertTriangle, 
+  Save, 
+  Check, 
+  History,
+  FileText,
+  Activity,
+  CreditCard
+} from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
-export function OrderManagementView({ order, tests }: { order: any, tests: any[] }) {
+// --- Sub-components (Styled to match Clerixs UI) ---
+
+const WorkflowStep = ({ 
+  label, 
+  isActive, 
+  isCompleted, 
+  isLast 
+}: { 
+  label: string; 
+  isActive: boolean; 
+  isCompleted: boolean; 
+  isLast?: boolean;
+}) => (
+  <div className="flex items-center">
+    <div className="flex flex-col items-center gap-2">
+      <div 
+        className={cn(
+          "h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all",
+          isCompleted ? "bg-green-600 border-green-600 text-white" : 
+          isActive ? "bg-white border-blue-600 text-blue-600 shadow-sm" : 
+          "bg-white border-muted text-muted-foreground"
+        )}
+      >
+        {isCompleted ? <Check className="h-4 w-4 text-white" /> : <div className="h-2 w-2 rounded-full bg-current" />}
+      </div>
+      <span 
+        className={cn(
+          "text-[11px] font-semibold uppercase tracking-tight",
+          isActive || isCompleted ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </span>
+    </div>
+    {!isLast && (
+      <div className="w-12 sm:w-24 h-[2px] mx-4 bg-muted overflow-hidden mb-6">
+        <motion.div 
+          className="h-full bg-green-600 font-outfit"
+          initial={{ width: 0 }}
+          animate={{ width: isCompleted ? "100%" : "0%" }}
+        />
+      </div>
+    )}
+  </div>
+);
+
+export function OrderManagementView({ order, tests, userRole }: { order: any, tests: any[], userRole: string }) {
   const sample = order.lab_samples?.[0];
   const [sampleStatus, setSampleStatus] = React.useState(sample?.status || 'pending');
   const [barcode, setBarcode] = React.useState(sample?.barcode || '');
   const [loadingSample, setLoadingSample] = React.useState(false);
 
-  // Result Form State -> Map of param_id -> { result_value, is_abnormal }
+  // Result Form State
   const initialResults = React.useMemo(() => {
     const map: Record<string, any> = {};
     if (order.lab_results && order.lab_results.length > 0) {
@@ -30,6 +93,9 @@ export function OrderManagementView({ order, tests }: { order: any, tests: any[]
 
   const [results, setResults] = React.useState<Record<string, any>>(initialResults);
   const [loadingResults, setLoadingResults] = React.useState(false);
+  const [doctorComments, setDoctorComments] = React.useState(order.doctor_comments || '');
+  const [isApproving, setIsApproving] = React.useState(false);
+  const [isRevising, setIsRevising] = React.useState(false);
 
   const handleUpdateSample = async () => {
     setLoadingSample(true);
@@ -37,7 +103,7 @@ export function OrderManagementView({ order, tests }: { order: any, tests: any[]
     const res = await updateSampleStatus(order.id, newStatus, barcode);
     if (res.error) toast.error(res.error);
     else {
-      toast.success('Sample status updated');
+      toast.success('Sample updated');
       if (newStatus === 'collected') setSampleStatus('collected');
     }
     setLoadingSample(false);
@@ -45,11 +111,8 @@ export function OrderManagementView({ order, tests }: { order: any, tests: any[]
 
   const handleResultChange = (paramId: string, value: string, paramConfig: any) => {
     let is_abnormal = false;
-
-    // Check abnormal condition
     if (value && value.trim() !== '') {
       const expectedStr = paramConfig.expected_string_value?.trim();
-      
       const hasMin = paramConfig.reference_range_min !== null && paramConfig.reference_range_min !== undefined && String(paramConfig.reference_range_min).trim() !== '';
       const hasMax = paramConfig.reference_range_max !== null && paramConfig.reference_range_max !== undefined && String(paramConfig.reference_range_max).trim() !== '';
 
@@ -59,23 +122,17 @@ export function OrderManagementView({ order, tests }: { order: any, tests: any[]
           if (hasMin && numValue < parseFloat(paramConfig.reference_range_min)) is_abnormal = true;
           if (hasMax && numValue > parseFloat(paramConfig.reference_range_max)) is_abnormal = true;
         } else {
-          is_abnormal = true; // Non-numeric entered in a quantitative field
+          is_abnormal = true;
         }
       } else if (expectedStr) {
         if (value.trim().toLowerCase() !== expectedStr.toLowerCase()) is_abnormal = true;
       }
     }
-
-    setResults(prev => ({
-      ...prev,
-      [paramId]: { result_value: value, is_abnormal }
-    }));
+    setResults(prev => ({ ...prev, [paramId]: { result_value: value, is_abnormal } }));
   };
 
   const handleSubmitResults = async () => {
     setLoadingResults(true);
-    
-    // Construct flat array
     const resultsData: any[] = [];
     tests.forEach((test: any) => {
       test.lab_test_parameters?.forEach((param: any) => {
@@ -90,206 +147,287 @@ export function OrderManagementView({ order, tests }: { order: any, tests: any[]
         }
       });
     });
-
     const res = await submitLabResults(order.id, resultsData);
     if (res.error) toast.error(res.error);
-    else toast.success('Results saved and order marked as completed successfully!');
+    else toast.success('Results submitted for doctor review.');
     setLoadingResults(false);
   };
 
+  const handleApprove = async () => {
+    setIsApproving(true);
+    const res = await approveLabReport(order.id, doctorComments);
+    if (res.error) toast.error(res.error);
+    else toast.success('Report approved and finalized!');
+    setIsApproving(false);
+  };
+
+  const handleRequestRevision = async () => {
+    if (!doctorComments.trim()) {
+      toast.error('Please clarify the requested changes');
+      return;
+    }
+    setIsRevising(true);
+    const res = await requestLabRevision(order.id, doctorComments);
+    if (res.error) toast.error(res.error);
+    else toast.success('Revision requested successfully.');
+    setIsRevising(false);
+  };
+
   const isCompleted = order.status === 'completed';
+  const isDoctorOrOwner = userRole === 'doctor' || userRole === 'org_owner';
+
+  const showReviewActions = isDoctorOrOwner && !isCompleted && 
+    (order.status === 'submitted' || order.status === 'ordered' || order.status === 'sample_collected' || order.status === 'revision_requested');
 
   if (order.is_external) {
     return (
-      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-8 flex flex-col items-center max-w-2xl mx-auto space-y-6 text-center mt-12">
-        <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center">
-          <FlaskConical className="h-8 w-8 text-blue-600" />
+      <Card className="max-w-2xl mx-auto mt-12 p-12 text-center space-y-6">
+        <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-blue-600">
+           <FileText className="h-8 w-8" />
         </div>
-        <div>
-          <h3 className="text-2xl font-bold tracking-tight">External Lab Report</h3>
-          <p className="text-muted-foreground mt-2 max-w-sm">
-            This report was uploaded externally and does not follow the internal sample tracking workflow.
-          </p>
+        <h3 className="text-2xl font-bold">External Lab Report</h3>
+        <p className="text-muted-foreground">{order.notes || "This is an externally uploaded report."}</p>
+        <div className="flex gap-4">
+          <Button variant="outline" className="flex-1" asChild><Link href="/lab">Back</Link></Button>
+          <Button className="flex-1" asChild><a href={order.external_report_url} target="_blank" rel="noopener noreferrer">View Document</a></Button>
         </div>
-        
-        {order.notes && (
-          <div className="bg-muted/50 p-4 rounded-lg text-sm text-left w-full border">
-            <p className="font-semibold mb-1">Notes:</p>
-            <p className="whitespace-pre-wrap">{order.notes}</p>
-          </div>
-        )}
-
-        <div className="pt-2 flex justify-center gap-4 w-full">
-          <Button variant="outline" className="flex-1" asChild>
-            <Link href="/lab">Back to Dashboard</Link>
-          </Button>
-          <Button className="flex-1 bg-blue-600 hover:bg-blue-700" asChild>
-            <a href={order.external_report_url} target="_blank" rel="noopener noreferrer">View Document</a>
-          </Button>
-        </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-6 max-w-7xl mx-auto w-full pb-20">
       
-      {/* LEFT COL: Patient & Sample Info */}
-      <div className="space-y-6">
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4">
-          <div className="flex justify-between items-center border-b pb-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2"><User className="h-4 w-4"/> Patient Info</h3>
-            <Badge variant="outline" className="font-mono text-xs">{order.patients?.patient_code}</Badge>
-          </div>
-          <div>
-            <p className="text-xl font-bold">{order.patients?.full_name}</p>
-            <div className="text-sm text-muted-foreground mt-1 space-y-1">
-              <p>Gender: <span className="capitalize">{order.patients?.gender?.replace('_', ' ') || '-'}</span></p>
-              <p>DOB: {order.patients?.date_of_birth ? format(new Date(order.patients?.date_of_birth), 'PP') : '-'}</p>
-              <p>Ordered: {format(new Date(order.order_date), 'PP p')}</p>
-            </div>
-          </div>
+      {/* 1. Progress Stepper */}
+      <Card className="p-6 overflow-hidden">
+        <div className="flex justify-center items-center">
+          <WorkflowStep label="Ordered" isActive={order.status === 'ordered'} isCompleted={true} />
+          <WorkflowStep label="Collected" isActive={sampleStatus === 'collected'} isCompleted={sampleStatus === 'collected' || isCompleted} />
+          <WorkflowStep label="Submitted" isActive={order.status === 'submitted'} isCompleted={order.status === 'submitted' || isCompleted} />
+          <WorkflowStep label="Completed" isActive={isCompleted} isCompleted={isCompleted} isLast />
         </div>
+      </Card>
 
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 space-y-4">
-          <div className="flex justify-between items-center border-b pb-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2"><FlaskConical className="h-4 w-4"/> Sample Tracking</h3>
-            <Badge variant={sampleStatus === 'collected' ? 'default' : 'secondary'} className="capitalize">
-              {sampleStatus}
-            </Badge>
-          </div>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label>Sample Type</Label>
-              <p className="font-medium text-foreground">{sample?.sample_type || 'Unknown'}</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Barcode / Accession #</Label>
-              <Input 
-                value={barcode} 
-                onChange={(e) => setBarcode(e.target.value)} 
-                placeholder="Scan or enter barcode" 
-                disabled={isCompleted}
-              />
-            </div>
-            {!isCompleted && (
-              <Button 
-                variant={sampleStatus === 'pending' ? 'default' : 'outline'} 
-                className="w-full" 
-                onClick={handleUpdateSample}
-                disabled={loadingSample}
-              >
-                {sampleStatus === 'pending' ? 'Mark Sample as Collected' : 'Update Barcode'}
-              </Button>
-            )}
-            {sample?.collected_at && (
-              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                <Clock className="w-3 h-3" /> Collected {format(new Date(sample.collected_at), 'MMM d, h:mm a')}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {isCompleted && (
-          <div className="rounded-xl border bg-green-50 text-green-900 border-green-200 shadow-sm p-6 space-y-3">
-             <div className="flex items-center gap-2 font-semibold">
-               <CheckCircle className="h-5 w-5 text-green-600" /> Report Finalized
-             </div>
-             <p className="text-sm opacity-90">All test results have been saved and validated. The report is ready to be printed or shared with the patient.</p>
-             <Button className="w-full bg-green-600 hover:bg-green-700 text-white gap-2" asChild>
-               <Link href={`/lab/print/${order.id}`}>
-                 <Printer className="w-4 h-4" /> Print Final Report
-               </Link>
-             </Button>
-          </div>
-        )}
-      </div>
-
-      {/* RIGHT COL: Results Entry */}
-      <div className="md:col-span-2 space-y-6">
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-0 overflow-hidden">
-          <div className="p-6 border-b bg-muted/20 flex justify-between items-center">
-            <div>
-              <h3 className="font-semibold text-lg">Test Results Entry</h3>
-              <p className="text-sm text-muted-foreground mt-1">Enter values below. Abnormal values will be flagged automatically.</p>
-            </div>
-            {sampleStatus === 'pending' && <Badge variant="destructive">Needs Collection</Badge>}
-          </div>
-
-          <div className="p-0">
-            {tests.map((test: any, testIdx: number) => (
-              <div key={test.id} className="border-b last:border-0 border-muted">
-                <div className="bg-muted/40 px-6 py-3 border-y font-semibold text-foreground flex justify-between uppercase text-xs tracking-wider">
-                  <span>{test.name}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Sidebar Info */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="py-4 border-b">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <User className="h-4 w-4" /> Patient Context
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+              <div>
+                <h4 className="text-lg font-bold">{order.patients?.full_name}</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="outline" className="text-[10px] uppercase">{order.patients?.patient_code}</Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase font-bold">{order.patients?.gender}</Badge>
                 </div>
-                
-                {(!test.lab_test_parameters || test.lab_test_parameters.length === 0) ? (
-                  <div className="px-6 py-4 text-sm text-muted-foreground italic">No measurable parameters defined for this test.</div>
-                ) : (
-                  <div className="divide-y">
-                    {test.lab_test_parameters
-                      .sort((a: any, b: any) => a.display_order - b.display_order)
-                      .map((param: any) => {
-                        const val = results[param.id]?.result_value || '';
-                        const isAbnormal = results[param.id]?.is_abnormal || false;
-
-                        return (
-                          <div key={param.id} className={`px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-4 transition-colors ${isAbnormal ? 'bg-red-50/50' : ''}`}>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm flex items-center gap-2">
-                                {param.name} 
-                                {isAbnormal && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1 gap-3 flex flex-wrap">
-                                {param.reference_range_min || param.reference_range_max ? (
-                                  <span>Ref: {param.reference_range_min || '-'} to {param.reference_range_max || '-'} {param.unit}</span>
-                                ) : param.expected_string_value ? (
-                                  <span>Expected: {param.expected_string_value}</span>
-                                ) : (
-                                  <span>No ref range set</span>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-3 xl:w-1/3">
-                              <Input 
-                                value={val} 
-                                onChange={(e) => handleResultChange(param.id, e.target.value, param)} 
-                                placeholder="Enter value" 
-                                className={`w-full ${isAbnormal ? 'border-red-500 focus-visible:ring-red-500 text-red-700 bg-red-50' : ''}`}
-                                disabled={sampleStatus === 'pending'} // Require collection first
-                              />
-                              <span className="text-sm font-medium text-muted-foreground w-12">{param.unit}</span>
-                            </div>
-                          </div>
-                      );
-                    })}
+              </div>
+              <Separator />
+              <div className="text-sm space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Order Date:</span>
+                  <span className="font-medium">{format(new Date(order.order_date), 'dd MMM, yyyy')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Role:</span>
+                  <span className="font-medium capitalize">{userRole.replace('_', ' ')}</span>
+                </div>
+                {order.discount_amount > 0 && (
+                  <div className="flex justify-between pt-2 text-green-600 font-bold border-t">
+                    <span>Discount:</span>
+                    <span>-₹{order.discount_amount}</span>
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-          
-          <div className="p-6 bg-muted/20 border-t flex justify-end gap-4">
-            <Button variant="outline" asChild>
-              <Link href="/lab">Back to Dashboard</Link>
-            </Button>
-            <Button 
-              onClick={handleSubmitResults} 
-              disabled={loadingResults || sampleStatus === 'pending'}
-              className="px-8 shadow-sm"
-            >
-              {loadingResults ? 'Saving...' : 'Save & Finalize Results'}
-            </Button>
-          </div>
-        </div>
-        {sampleStatus === 'pending' && (
-          <p className="text-center text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-            You must mark the sample as collected before you can enter test results.
-          </p>
-        )}
-      </div>
+            </CardContent>
+          </Card>
 
+          <Card>
+            <CardHeader className="py-4 border-b">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-orange-600">
+                <FlaskConical className="h-4 w-4" /> Sample Detail
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-4">
+               <div>
+                  <Label className="text-xs text-muted-foreground uppercase font-bold">Barcode / Identifier</Label>
+                  <Input 
+                    value={barcode} 
+                    onChange={(e) => setBarcode(e.target.value)} 
+                    placeholder="Scan or enter ID" 
+                    className="mt-1 font-mono"
+                    disabled={isCompleted}
+                  />
+               </div>
+               {!isCompleted && (
+                 <Button 
+                   className={cn(
+                     "w-full gap-2",
+                     sampleStatus === 'pending' ? "bg-orange-600 hover:bg-orange-700" : "bg-white text-foreground border shadow-none"
+                   )}
+                   onClick={handleUpdateSample}
+                   disabled={loadingSample}
+                 >
+                   {sampleStatus === 'pending' ? <CheckCircle className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                   {sampleStatus === 'pending' ? 'Collect Sample' : 'Update ID'}
+                 </Button>
+               )}
+            </CardContent>
+          </Card>
+
+          {isCompleted && (
+            <Card className="bg-green-600 text-white border-green-700">
+              <CardContent className="pt-6 text-center space-y-4">
+                <CheckCircle className="h-10 w-10 mx-auto" />
+                <div>
+                  <h4 className="font-bold text-lg">Report Finalized</h4>
+                  <p className="text-sm opacity-80">The medical report is validated and ready.</p>
+                </div>
+                <Button variant="secondary" className="w-full gap-2" asChild>
+                  <Link href={`/lab/print/${order.id}`}>
+                    <Printer className="h-4 w-4" /> Print Final Report
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Results & Actions Area */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Review Notice */}
+          <AnimatePresence>
+            {(order.status === 'submitted' || order.status === 'revision_requested') && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "p-4 rounded-xl border flex gap-4 items-start shadow-sm",
+                  order.status === 'submitted' ? "bg-blue-50 border-blue-100" : "bg-red-50 border-red-100"
+                )}
+              >
+                <div className="mt-1">
+                  {order.status === 'submitted' ? <Activity className="h-5 w-5 text-blue-600" /> : <AlertTriangle className="h-5 w-5 text-red-600" />}
+                </div>
+                <div className="space-y-1">
+                  <h5 className={cn("text-sm font-bold", order.status === 'submitted' ? "text-blue-900" : "text-red-900")}>
+                    {order.status === 'submitted' ? 'Review Submission' : 'Revision Feedback'}
+                  </h5>
+                  {order.doctor_comments && (
+                    <p className="text-sm text-slate-700 italic border-l-2 border-red-200 pl-3 py-1">"{order.doctor_comments}"</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-muted/10 border-b">
+              <CardTitle className="text-lg">Test Parameters</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+               {tests.map((test: any) => (
+                 <div key={test.id}>
+                    <div className="bg-muted/40 px-6 py-2 border-y text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                      {test.name}
+                    </div>
+                    <div className="divide-y">
+                       {test.lab_test_parameters?.map((param: any) => {
+                         const val = results[param.id]?.result_value || '';
+                         const isAbnormal = results[param.id]?.is_abnormal || false;
+
+                         return (
+                           <div key={param.id} className={cn(
+                             "px-6 py-5 flex items-center justify-between gap-6",
+                             isAbnormal ? "bg-red-50/50" : ""
+                           )}>
+                             <div className="flex-1">
+                               <div className="text-sm font-semibold flex items-center gap-2">
+                                 {param.name}
+                                 {isAbnormal && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                               </div>
+                               <div className="text-xs text-muted-foreground mt-1">
+                                 Norm: {param.reference_range_min || param.reference_range_max ? `${param.reference_range_min || ''}-${param.reference_range_max || ''}` : param.expected_string_value || 'N/A'} {param.unit}
+                               </div>
+                             </div>
+                             <div className="flex items-center gap-3 w-40 shrink-0">
+                               <Input 
+                                 value={val} 
+                                 onChange={(e) => handleResultChange(param.id, e.target.value, param)} 
+                                 className={cn("h-9 font-medium", isAbnormal && "border-red-500 focus-visible:ring-red-500")}
+                                 disabled={sampleStatus === 'pending' || isCompleted}
+                               />
+                               <span className="text-[10px] font-bold text-muted-foreground uppercase w-8">{param.unit}</span>
+                             </div>
+                           </div>
+                         );
+                       })}
+                    </div>
+                 </div>
+               ))}
+            </CardContent>
+            
+            <CardFooter className="bg-muted/10 border-t p-6 flex justify-between items-center">
+                <Button variant="outline" asChild><Link href="/lab">Back to Dashboard</Link></Button>
+                {!isCompleted && (order.status !== 'submitted' || isDoctorOrOwner) && (
+                  <Button 
+                    onClick={handleSubmitResults} 
+                    disabled={loadingResults || sampleStatus === 'pending'}
+                    className="gap-2 px-8"
+                  >
+                    {loadingResults ? <Clock className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {order.status === 'revision_requested' ? 'Resubmit Data' : (order.status === 'submitted' ? 'Save Updates' : 'Submit Results')}
+                  </Button>
+                )}
+            </CardFooter>
+          </Card>
+
+          {/* Dedicated Doctor Action Area */}
+          <AnimatePresence>
+            {showReviewActions && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
+                <Card className="border-blue-200 bg-blue-50/20">
+                  <CardHeader className="py-4">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2 text-blue-800 uppercase tracking-widest">
+                      <CheckCircle className="h-4 w-4" /> Medical Interpretation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <textarea 
+                      className="w-full h-24 rounded-lg border border-blue-200 p-3 text-sm focus:ring-blue-500 font-outfit" 
+                      placeholder="Add medical notes or instructions..."
+                      value={doctorComments}
+                      onChange={(e) => setDoctorComments(e.target.value)}
+                    />
+                    <div className="flex gap-4">
+                       <Button 
+                         variant="outline" 
+                         className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                         onClick={handleRequestRevision}
+                         disabled={isApproving || isRevising}
+                       >
+                         Request Revision
+                       </Button>
+                       <Button 
+                         className="flex-1 bg-green-600 hover:bg-green-700"
+                         onClick={handleApprove}
+                         disabled={isApproving || isRevising}
+                       >
+                         {isApproving ? 'Finalizing...' : 'Approve & Finalize Report'}
+                       </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+      </div>
     </div>
   );
 }

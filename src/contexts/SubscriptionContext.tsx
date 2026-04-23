@@ -65,6 +65,11 @@ export function SubscriptionProvider({
   let trialDaysLeft = 0;
   let isExpired = (!subscription && !orgCreatedAt) || subscription?.status === 'expired' || subscription?.status === 'past_due';
 
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const now = new Date();
 
   // 1. Handle Virtual Trial (if no DB record exists)
@@ -101,8 +106,10 @@ export function SubscriptionProvider({
     }
   }
 
+  const displayExpired = isMounted ? isExpired : false;
+
   return (
-    <SubscriptionContext.Provider value={{ subscription, hasFeature, isExpired, isTrialing, trialDaysLeft }}>
+    <SubscriptionContext.Provider value={{ subscription, hasFeature, isExpired: displayExpired, isTrialing, trialDaysLeft }}>
       {children}
     </SubscriptionContext.Provider>
   );

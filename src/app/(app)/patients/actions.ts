@@ -249,29 +249,86 @@ export async function getPatientDashboard(patientId: string) {
 
     if (prescriptionsError) throw new Error('Failed to fetch prescriptions');
     
-    // 7. Fetch Lab Orders
-    const { data: labOrders, error: labOrdersError } = await supabase
-      .from('lab_orders')
-      .select('*, lab_order_items(lab_test_id, lab_tests(name), lab_package_id, lab_packages(name)), doctor_membership_id(profiles(full_name))')
-      .eq('patient_id', patientId)
-      .order('order_date', { ascending: false });
-
-    return {
-      success: true,
-      data: {
-        patient,
-        appointments: appointments || [],
-        invoices: invoices || [],
-        prescriptions: prescriptions || [],
-        labOrders: labOrders || [],
-        role
-      }
-    };
-  } catch (error: any) {
-    console.error('Failed to get patient dashboard:', error);
-    return { error: error.message || 'An unexpected error occurred.' };
-  }
-}
+     // 7. Fetch Lab Orders
+     const { data: labOrders, error: labOrdersError } = await supabase
+       .from('lab_orders')
+       .select('*, lab_order_items(lab_test_id, lab_tests(name), lab_package_id, lab_packages(name)), doctor_membership_id(profiles(full_name))')
+       .eq('patient_id', patientId)
+       .order('order_date', { ascending: false });
+ 
+     // 8. Fetch Clinical Notes
+     const { data: clinicalNotes, error: clinicalNotesError } = await supabase
+       .from('clinical_notes')
+       .select('*, author_membership_id(profile_id(full_name, avatar_url))')
+       .eq('patient_id', patientId)
+       .order('created_at', { ascending: false });
+ 
+     return {
+       success: true,
+       data: {
+         patient,
+         appointments: appointments || [],
+         invoices: invoices || [],
+         prescriptions: prescriptions || [],
+         labOrders: labOrders || [],
+         clinicalNotes: clinicalNotes || [],
+         role
+       }
+     };
+   } catch (error: any) {
+     console.error('Failed to get patient dashboard:', error);
+     return { error: error.message || 'An unexpected error occurred.' };
+   }
+ }
+ 
+ export async function addClinicalNote(patientId: string, content: string, noteType: string = 'general') {
+   const supabase = await createClient();
+ 
+   const { data: { user } } = await supabase.auth.getUser();
+   if (!user) return { error: 'Authentication required' };
+ 
+   const { data: membership, error: membershipError } = await supabase
+     .from('organization_memberships')
+     .select('id, organization_id')
+     .eq('profile_id', user.id)
+     .eq('status', 'active')
+     .single();
+ 
+   if (membershipError || !membership) {
+     return { error: `Membership error: ${membershipError?.message || 'No active membership found'}` };
+   }
+ 
+   const { error } = await supabase
+     .from('clinical_notes')
+     .insert({
+       organization_id: membership.organization_id,
+       patient_id: patientId,
+       author_membership_id: membership.id,
+       content,
+       note_type: noteType
+     });
+ 
+   if (error) {
+     console.error('Clinical note insert error:', error);
+     return { error: `Database error: ${error.message} (Code: ${error.code})` };
+   }
+ 
+   revalidatePath(`/patients/${patientId}`);
+   return { success: true };
+ }
+ 
+ export async function deleteClinicalNote(noteId: string, patientId: string) {
+   const supabase = await createClient();
+   const { error } = await supabase
+     .from('clinical_notes')
+     .delete()
+     .eq('id', noteId);
+ 
+   if (error) return { error: error.message };
+ 
+   revalidatePath(`/patients/${patientId}`);
+   return { success: true };
+ }
 
 export async function bulkImportPatients(rows: any[]) {
   const supabase = await createClient();

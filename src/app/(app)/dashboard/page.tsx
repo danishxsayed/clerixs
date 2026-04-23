@@ -143,7 +143,9 @@ export default async function DashboardPage({
           <p className="text-muted-foreground/90 font-medium mt-1">{currentDate}</p>
         </div>
         <div className="flex items-center gap-2">
-           <ListFilter groups={filterGroups} showDatePicker />
+           <React.Suspense fallback={<div className="h-10 w-24 bg-muted animate-pulse rounded-md" />}>
+             <ListFilter groups={filterGroups} showDatePicker />
+           </React.Suspense>
         </div>
       </div>
 
