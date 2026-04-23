@@ -31,3 +31,7 @@ Total Usage = **File Usage** + **Record (Text) Usage**
 - Calculated via the PostgreSQL RPC `calculate_organization_data_size`.
 - It uses `pg_column_size` to sum the actual byte weight of rows across 13+ related tables (Notes, Prescriptions, Appointments, etc.).
 - **Fallback**: If the RPC fails or returns 0, a TypeScript fallback in `quota.ts` estimates usage based on note content length and patient row count.
+
+## Subscription Impact
+- **Dynamic Limits**: The quota limit is automatically updated upon successful payment in the `verify-payment` route.
+- **Immediate Fulfillment**: Upgrading from Trial (5GB) to Pro (10GB) instantly re-enables all data-saving functions globally across the app by updating the `plan_code` in the `organizations` table.

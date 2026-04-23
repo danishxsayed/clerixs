@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { FeatureLock } from '@/components/subscription/FeatureLock';
+import { ClinicalNotesEditor } from './clinical-notes-editor';
 
 interface AppointmentDetailsProps {
   id: string;
@@ -139,30 +140,13 @@ export async function AppointmentDetails({ id }: AppointmentDetailsProps) {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-6 space-y-8 flex-1">
-              
-              <div className="space-y-2">
-                <h4 className="font-semibold text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-primary rounded-full"></span>
-                  Chief Complaint / Reason for Visit
-                </h4>
-                <div className="pl-3.5">
-                  <p className="text-muted-foreground whitespace-pre-wrap">{appointment.chief_complaint || 'No specific reason provided.'}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <h4 className="font-semibold text-foreground flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-secondary/80 rounded-full"></span>
-                  Additional Notes
-                </h4>
-                <div className="pl-3.5">
-                  <p className="text-muted-foreground whitespace-pre-wrap">{appointment.notes || 'No additional notes recorded.'}</p>
-                </div>
-              </div>
-
+            <CardContent className="pt-6 flex flex-col flex-1">
+              <ClinicalNotesEditor 
+                appointmentId={appointment.id}
+                initialChiefComplaint={appointment.chief_complaint}
+                initialNotes={appointment.notes}
+                isActive={isActive}
+              />
             </CardContent>
             {isActive && (
               <CardFooter className="bg-muted/10 border-t pt-4">

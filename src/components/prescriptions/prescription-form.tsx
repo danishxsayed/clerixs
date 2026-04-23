@@ -453,7 +453,7 @@ export function PrescriptionForm({
               name="instructions"
               render={({ field }) => (
                 <FormItem className="bg-white p-5 rounded-xl border shadow-sm">
-                  <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">General Advice / Next Steps</FormLabel>
+                    <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">General Advice / Next Steps</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Drink plenty of fluids. Review after 5 days." className="min-h-[100px] resize-none mt-2" {...field} />
                   </FormControl>

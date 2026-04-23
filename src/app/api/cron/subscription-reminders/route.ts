@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     // Query both trials and active subs ending in the 3-day window
     const { data: expiringSubs, error: fetchError } = await supabase
       .from('organization_subscriptions')
-      .select('*, organization_id, subscription_plans(name)')
+      .select('*, organization_id, subscription_plans!organization_subscriptions_plan_id_fkey(name)')
       .or(`current_period_end.gte.${startOfTarget},trial_ends_at.gte.${startOfTarget}`)
       .or(`current_period_end.lte.${endOfTarget},trial_ends_at.lte.${endOfTarget}`)
       .eq('status', 'active'); // Or trialing
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     // Actually, simple way: fetch all active/trialing and filter in JS if the count is small
     const { data: allActiveSubs } = await supabase
       .from('organization_subscriptions')
-      .select('*, organization_id, subscription_plans(name)')
+      .select('*, organization_id, subscription_plans!organization_subscriptions_plan_id_fkey(name)')
       .in('status', ['active', 'trialing']);
 
     const targetExpiring = allActiveSubs?.filter(sub => {
@@ -69,23 +69,38 @@ export async function GET(request: Request) {
 
         const ownerEmail = authUser.user.email;
         const ownerName = (owner.profiles as any)?.full_name || 'Clinic Owner';
-        const isTrial = sub.status === 'trialing';
-
         // 3. Send Email via Resend
+        const isTrial = sub.status === 'trialing';
+        const renewalDate = new Date(isTrial ? sub.trial_ends_at : sub.current_period_end).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+        const autoRenew = sub.auto_renewal_enabled !== false;
+        
+        let subject, content;
+        if (isTrial) {
+          subject = 'Trial Reminder: 3 Days Left';
+          content = `<p>Your <strong>free trial</strong> will expire in <strong>3 days</strong>. Upgrade now to keep access to your clinic tools.</p>
+                     <div style="margin: 30px 0;">
+                       <a href="${process.env.NEXT_PUBLIC_SITE_URL}/settings/subscription" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Upgrade Now</a>
+                     </div>`;
+        } else if (autoRenew) {
+          subject = `Your Clerixs subscription will automatically renew on ${renewalDate}`;
+          content = `<p>Your Clerixs subscription will automatically renew on <strong>${renewalDate}</strong> for <strong>₹${sub.price_paid || '999'}</strong>. No action needed.</p>`;
+        } else {
+          subject = `Your subscription expires in 3 days — Action Required`;
+          content = `<p>Your subscription expires in 3 days and <strong>auto-renewal is off</strong>. Renew here to avoid losing access on ${renewalDate}.</p>
+                     <div style="margin: 30px 0;">
+                       <a href="${process.env.NEXT_PUBLIC_SITE_URL}/settings/subscription" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Renew Now</a>
+                     </div>`;
+        }
+
         await resend.emails.send({
-          from: 'Clerixs <billing@clerixs.com>', // Ensure this domain is verified in Resend
+          from: 'Clerixs <billing@clerixs.com>',
           to: ownerEmail,
-          subject: `${isTrial ? 'Trial' : 'Subscription'} Reminder: 3 Days Left`,
+          subject: subject,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #2563eb;">Subscription Reminder</h2>
+              <h2 style="color: #2563eb;">Subscription Update</h2>
               <p>Hello ${ownerName},</p>
-              <p>This is a friendly reminder that your <strong>${sub.subscription_plans?.name || 'Clerixs'}</strong> ${isTrial ? 'free trial' : 'plan'} will expire in <strong>3 days</strong>.</p>
-              <p>To ensure uninterrupted access to your clinic's dashboard, patients, and reporting tools, please ensure your payment details are up to date.</p>
-              <div style="margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL}/settings/subscription" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; rounded: 5px; font-weight: bold;">Manage Subscription</a>
-              </div>
-              <p style="font-size: 12px; color: #666;">If you have already renewed, please ignore this message.</p>
+              ${content}
               <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;" />
               <p style="font-size: 10px; color: #999;">Clerixs Healthcare Platform &copy; 2026</p>
             </div>

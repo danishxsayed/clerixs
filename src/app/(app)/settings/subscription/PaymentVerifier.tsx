@@ -27,7 +27,7 @@ export function PaymentVerifier({
 
     async function verify() {
       try {
-        const res = await fetch(`/api/cashfree/verify-payment?order_id=${orderId}`);
+        const res = await fetch(`/api/cashfree/verify-payment?order_id=${orderId}&t=${Date.now()}`);
         const data = await res.json();
 
         if (data.success) {

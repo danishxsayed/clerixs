@@ -20,56 +20,64 @@ export function PricingClient({ plans, user }: PricingClientProps) {
   const [interval, setInterval] = React.useState<'monthly' | 'yearly'>('monthly');
   const [loadingPlanId, setLoadingPlanId] = React.useState<string | null>(null);
 
-  const handleGetStarted = async (planId: string) => {
-    if (!user) {
-      // Save selected plan to cookie and redirect to signup
-      import('js-cookie').then((Cookies) => {
-        Cookies.default.set('selected_plan_id', planId, { expires: 1 }); // 1 day expiry
-      });
-      router.push('/signup');
-      return;
-    }
-
-    if (planId === 'free_trial') {
-      // Authed users already have their trial or don't need checkout to access the dashboard
-      router.push('/');
-      return;
-    }
-
-    // Proceed to Cashfree checkout
-    try {
-      setLoadingPlanId(planId);
-      
-      const response = await fetch('/api/cashfree/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ planId, interval }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment session');
-      }
-
-      const { paymentSessionId } = data;
-      
-      // Load Cashfree SDK and redirect
-      const cashfree = await load({ mode: 'sandbox' }); 
-      
-      cashfree.checkout({
-        paymentSessionId,
-        redirectTarget: '_top', 
-        // will redirect back to the return_url provided to backend
-      });
-
-    } catch (err: any) {
-      toast.error(err.message || 'Error initializing checkout');
-      setLoadingPlanId(null);
-    }
-  };
+   const handleGetStarted = async (planId: string) => {
+     console.log('[Pricing] Starting checkout flow for plan:', planId);
+     
+     if (!user) {
+       console.log('[Pricing] No user logged in, redirecting to signup');
+       // Save selected plan to cookie and redirect to signup
+       import('js-cookie').then((Cookies) => {
+         Cookies.default.set('selected_plan_id', planId, { expires: 1 }); // 1 day expiry
+       });
+       router.push('/signup');
+       return;
+     }
+ 
+     if (planId === 'free_trial') {
+       console.log('[Pricing] Free trial selected, redirecting to dashboard');
+       router.push('/');
+       return;
+     }
+ 
+     // Proceed to Cashfree checkout
+     try {
+       setLoadingPlanId(planId);
+       
+       console.log('[Pricing] Fetching payment session from API...');
+       const response = await fetch('/api/cashfree/create-order', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ planId, interval }),
+       });
+ 
+       const data = await response.json();
+       
+       if (!response.ok) {
+         console.error('[Pricing] API Error:', data.error);
+         throw new Error(data.error || 'Failed to create payment session');
+       }
+ 
+       const { paymentSessionId } = data;
+       console.log('[Pricing] Received paymentSessionId, loading Cashfree SDK...');
+       
+       // Sync mode with environment variable if possible, or fallback to sensible default
+       const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV?.toLowerCase() === 'production' ? 'production' : 'sandbox';
+       const cashfree = await load({ mode: mode as 'sandbox' | 'production' }); 
+       
+       console.log('[Pricing] SDK Loaded, opening checkout checkout...');
+       cashfree.checkout({
+         paymentSessionId,
+         redirectTarget: '_top', 
+       });
+ 
+     } catch (err: any) {
+       console.error('[Pricing] Checkout initialization failed:', err);
+       toast.error(err.message || 'Error initializing checkout');
+       setLoadingPlanId(null);
+     }
+   };
 
   if (!plans || plans.length === 0) {
      return <div className="text-center p-12 text-muted-foreground">No plans configured yet.</div>;

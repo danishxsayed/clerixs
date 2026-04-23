@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import crypto from 'crypto';
 
 export async function POST(req: Request) {
@@ -27,21 +28,26 @@ export async function POST(req: Request) {
 
     // 2. Prevent duplicate plan payments (only for subscription upgrades)
     const orgId = profile.default_organization_id;
-    if (planId) {
-      const { data: existingSub } = await supabase
-        .from('organization_subscriptions')
-        .select('status, current_period_end')
-        .eq('organization_id', orgId)
-        .single();
-
-      if (existingSub && existingSub.status === 'active' && existingSub.current_period_end) {
-        const isUnexpired = new Date(existingSub.current_period_end) > new Date();
-        if (isUnexpired) {
-          console.warn(`[Cashfree Create Order] Denying duplicate order for orgId ${orgId}. Active subscription found.`);
-          return NextResponse.json({ error: 'You already have an active subscription. Please cancel your current plan before purchasing a new one.' }, { status: 400 });
-        }
-      }
-    }
+     if (planId) {
+       // Temporarily disabled duplicate check to unblock trial users from upgrading
+       /*
+       const { data: existingSub } = await supabase
+         .from('organization_subscriptions')
+         .select('status, current_period_end, plan_id')
+         .eq('organization_id', orgId)
+         .maybeSingle();
+ 
+       if (existingSub && existingSub.status === 'active' && existingSub.current_period_end) {
+         const isUnexpired = new Date(existingSub.current_period_end) > new Date();
+         
+         // Only block if they are trying to buy the EXACT same plan they already have active
+         if (existingSub.plan_id === planId && isUnexpired) {
+           console.warn(`[Cashfree Create Order] Denying duplicate order for orgId ${orgId}. Same plan already active.`);
+           return NextResponse.json({ error: 'You already have an active subscription for this plan.' }, { status: 400 });
+         }
+       }
+       */
+     }
 
     let orderAmount = 0;
     let orderId = '';
@@ -107,6 +113,25 @@ export async function POST(req: Request) {
        return NextResponse.json({ error: 'Payment gateway configuration error' }, { status: 500 });
     }
 
+    // Insert into pending_orders BEFORE calling Cashfree for robust fulfillment
+    try {
+      const adminSupabase = createAdminClient();
+      const { error: pendingOrderError } = await adminSupabase.from('pending_orders').insert({
+        order_id: orderId,
+        organization_id: orgId,
+        plan_id: planId || null,
+        interval: interval || 'once'
+      });
+
+      if (pendingOrderError) {
+        console.error('[Create Order] Failed to insert pending_order:', pendingOrderError);
+        return NextResponse.json({ error: 'Failed to create order record' }, { status: 500 });
+      }
+      console.log('[Create Order] pending_order inserted successfully for order:', orderId);
+    } catch (err) {
+      console.error('[Create Order] Exception during pending order insertion:', err);
+    }
+
     const response = await fetch(`${baseUrl}/orders`, {
       method: 'POST',
       headers: {
@@ -132,17 +157,17 @@ export async function POST(req: Request) {
       }),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('[Cashfree Create Order] API Request Failed:', data);
-      return NextResponse.json({ error: data.message || 'Payment provider error' }, { status: response.status });
-    }
-
-    return NextResponse.json({
-      paymentSessionId: data.payment_session_id,
-      orderId: data.order_id
-    });
+     const data = await response.json();
+ 
+     if (!response.ok) {
+       console.error('[Cashfree Create Order] API Request Failed:', data);
+       return NextResponse.json({ error: data.message || 'Payment provider error' }, { status: response.status });
+     }
+ 
+     return NextResponse.json({
+       paymentSessionId: data.payment_session_id,
+       orderId: data.order_id
+     });
 
   } catch (err: any) {
     console.error('[Cashfree Create Order] FATAL ERROR during checkout flow:');

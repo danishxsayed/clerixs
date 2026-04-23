@@ -33,6 +33,8 @@ import { StartTrialButton } from './StartTrialButton';
 import { CancelSubscriptionButton } from './CancelSubscriptionButton';
 import { PaymentVerifier } from './PaymentVerifier';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { AutoRenewalToggle } from './AutoRenewalToggle';
+import { DownloadInvoiceButton } from './DownloadInvoiceButton';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Subscription Management' };
@@ -62,19 +64,49 @@ export default async function SubscriptionSettingsPage({
   const orgId = profile.default_organization_id;
 
   // 2. Fetch subscription and organization info
-  const [{ data: subData }, { data: org }] = await Promise.all([
+  const [{ data: subscription }, { data: org }, { data: subInvoices }, { data: waInvoices }] = await Promise.all([
     adminSupabase
       .from('organization_subscriptions')
-      .select('*, plan:subscription_plans(id, name, plan_code, max_staff, features, monthly_price, yearly_price)')
+      .select('*, plan:subscription_plans!organization_subscriptions_plan_id_fkey(id, name, plan_code, max_staff, features, monthly_price, yearly_price)')
       .eq('organization_id', orgId)
       .maybeSingle(),
-    supabase.from('organizations').select('created_at').eq('id', orgId).single()
+    supabase.from('organizations').select('created_at').eq('id', orgId).single(),
+    adminSupabase
+      .from('subscription_invoices')
+      .select('*')
+      .eq('organization_id', orgId),
+    adminSupabase
+      .from('whatsapp_credit_purchases')
+      .select('*')
+      .eq('organization_id', orgId)
   ]);
 
-  let subscription = subData;
   if (subscription && Array.isArray(subscription.plan)) {
     subscription.plan = subscription.plan[0];
   }
+
+  // Combine invoices and purchases for Feature 4
+  const combinedInvoices = [
+    ...(subInvoices || []).map(inv => ({ 
+      id: inv.id,
+      date: inv.payment_date,
+      name: inv.plan_name,
+      amount: inv.amount_paid,
+      status: inv.status,
+      type: 'Subscription',
+      order_id: inv.cashfree_order_id,
+      billing_cycle: inv.billing_cycle
+    })),
+    ...(waInvoices || []).map(inv => ({
+      id: inv.id,
+      date: inv.created_at,
+      name: `${inv.credits_added} WhatsApp Credits`,
+      amount: inv.amount_paid,
+      status: inv.payment_status,
+      type: 'WhatsApp Credits',
+      order_id: inv.cashfree_order_id
+    }))
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // 3. Status calculations (including virtual trial)
   const now = new Date();
@@ -321,10 +353,22 @@ export default async function SubscriptionSettingsPage({
                         </p>
                       </div>
                     </div>
-                    {!isTrial && !isCancelled && (
-                      <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200">
-                        Auto-renewal ON
-                      </Badge>
+                    {!isTrial && !isCancelled && subscription && (
+                      <div className="flex flex-col items-end gap-2">
+                        <AutoRenewalToggle 
+                          subscriptionId={subscription.id} 
+                          initialEnabled={subscription.auto_renewal_enabled !== false} 
+                        />
+                        {subscription.auto_renewal_enabled !== false ? (
+                           <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200">
+                             Your plan will automatically renew on {subscription.current_period_end ? format(new Date(subscription.current_period_end), 'MMM dd, yyyy') : 'N/A'}
+                           </Badge>
+                        ) : (
+                           <Badge variant="outline" className="text-amber-700 bg-amber-50 border-amber-200">
+                             Plan will not renew. You will lose access on {subscription.current_period_end ? format(new Date(subscription.current_period_end), 'MMM dd, yyyy') : 'N/A'}
+                           </Badge>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -408,42 +452,38 @@ export default async function SubscriptionSettingsPage({
                     <thead className="bg-muted/50 border-b text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                       <tr>
                         <th className="px-4 py-3">Date</th>
-                        <th className="px-4 py-3">Plan</th>
+                        <th className="px-4 py-3">Item</th>
+                        <th className="px-4 py-3">Type</th>
                         <th className="px-4 py-3">Amount</th>
                         <th className="px-4 py-3">Status</th>
                         <th className="px-4 py-3 text-right">Invoice</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {subscription?.price_paid && Number(subscription.price_paid) > 0 ? (
-                        <tr>
-                          <td className="px-4 py-4 font-medium">
-                            {format(
-                              new Date(subscription.updated_at || subscription.created_at),
-                              'MMM dd, yyyy'
-                            )}
-                          </td>
-                          <td className="px-4 py-4">{plan.name}</td>
-                          <td className="px-4 py-4 font-bold">₹{subscription!.price_paid}</td>
-                          <td className="px-4 py-4">
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-50 text-emerald-700 border-emerald-100 uppercase text-[10px]"
-                            >
-                              Paid
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              disabled
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </td>
-                        </tr>
+                      {combinedInvoices.length > 0 ? (
+                        combinedInvoices.map((invoice) => (
+                          <tr key={invoice.id}>
+                            <td className="px-4 py-4 font-medium">
+                              {format(new Date(invoice.date), 'MMM dd, yyyy')}
+                            </td>
+                            <td className="px-4 py-4">{invoice.name}</td>
+                            <td className="px-4 py-4">
+                              <Badge variant="secondary" className="text-[10px] uppercase">{invoice.type}</Badge>
+                            </td>
+                            <td className="px-4 py-4 font-bold">₹{invoice.amount}</td>
+                            <td className="px-4 py-4 uppercase text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="bg-emerald-50 text-emerald-700 border-emerald-100"
+                              >
+                                {invoice.status}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-4 text-right">
+                              <DownloadInvoiceButton invoice={invoice} orgId={orgId} />
+                            </td>
+                          </tr>
+                        ))
                       ) : (
                         <tr>
                           <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground italic">

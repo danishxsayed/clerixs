@@ -199,14 +199,15 @@ export async function updateAppointment(appointmentId: string, formData: Partial
 
   const { error: updateError } = await supabase
     .from('appointments')
-    .update({
-      patient_id: formData.patient_id,
-      appointment_date: formData.appointment_date,
-      start_time: formData.start_time,
-      chief_complaint: formData.treatment,
-      doctor_membership_id: formData.provider_id || null,
-      status: formData.status !== undefined ? formData.status : undefined,
-    })
+     .update({
+       patient_id: formData.patient_id,
+       appointment_date: formData.appointment_date,
+       start_time: formData.start_time,
+       chief_complaint: formData.treatment,
+       notes: (formData as any).notes,
+       doctor_membership_id: formData.provider_id || null,
+       status: formData.status !== undefined ? formData.status : undefined,
+     })
     .eq('id', appointmentId)
     .eq('organization_id', membership.organization_id);
 

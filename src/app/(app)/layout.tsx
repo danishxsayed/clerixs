@@ -13,6 +13,7 @@ import { Suspense } from 'react';
 import { SidebarSkeleton } from '@/components/layout/sidebar-skeleton';
 import { TopbarSkeleton } from '@/components/layout/topbar-skeleton';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { GlobalVoicePTT } from '@/components/ui/global-voice-ptt';
 
 
 async function SidebarDataFetcher({ userId }: { userId: string }) {
@@ -75,7 +76,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [{ data: org }, { data: membership }, { data: subData }] = await Promise.all([
     supabase.from('organizations').select('onboarding_completed, created_at').eq('id', profile.default_organization_id).single(),
     supabase.from('organization_memberships').select('status').eq('organization_id', profile.default_organization_id).eq('profile_id', user.id).single(),
-    adminSupabase.from('organization_subscriptions').select('status, trial_ends_at, current_period_end, plan:subscription_plans(name, plan_code, max_staff, features)').eq('organization_id', profile.default_organization_id).maybeSingle()
+    adminSupabase.from('organization_subscriptions').select('status, trial_ends_at, current_period_end, plan:subscription_plans!organization_subscriptions_plan_id_fkey(name, plan_code, max_staff, features)').eq('organization_id', profile.default_organization_id).maybeSingle()
   ]);
 
   if (!membership || membership.status === 'disabled') {
@@ -130,6 +131,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
           </div>
           <Toaster />
+          <GlobalVoicePTT />
         </div>
       </LockScreen>
     </SubscriptionProvider>

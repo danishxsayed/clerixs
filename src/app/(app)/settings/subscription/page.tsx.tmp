@@ -1,0 +1,5 @@
+'use client';
+// This file was converted to a server component earlier but wait!
+// The previous view_file showed it as a server component (it had await Promise.all at function level).
+// BUT! I see 'use client' might have been at the top in some version?
+// No, line 1 of recent view_file is 'import * as React from 'react';'

@@ -28,155 +28,233 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Payment gateway not configured' }, { status: 500 });
   }
 
-  try {
-    // Fetch order from Cashfree
-    const cashfreeRes = await fetch(`${cashfreeBase}/orders/${orderId}`, {
-      method: 'GET',
-      headers: {
-        'x-client-id': appId,
-        'x-client-secret': secretKey,
-        'x-api-version': '2023-08-01',
-        'Content-Type': 'application/json',
-      },
-    });
+   try {
+     console.log('[Verify Payment] Step 1: Received request for orderId:', orderId);
+     
+     // Determine Cashfree base URL from env
+     const cashfreeEnv = process.env.CASHFREE_ENV || 'sandbox';
+     const cashfreeBase =
+       cashfreeEnv === 'production'
+         ? 'https://api.cashfree.com/pg'
+         : 'https://sandbox.cashfree.com/pg';
+ 
+     const appId = process.env.CASHFREE_APP_ID;
+     const secretKey = process.env.CASHFREE_SECRET_KEY;
+ 
+     if (!appId || !secretKey) {
+       console.error('[Verify Payment] ERROR: gateway credentials missing');
+       return NextResponse.json({ success: false, error: 'Payment gateway not configured' }, { status: 500 });
+     }
+ 
+     // Fetch order from Cashfree
+     console.log('[Verify Payment] Step 2: Fetching order status from Cashfree API...');
+     const cashfreeRes = await fetch(`${cashfreeBase}/orders/${orderId}`, {
+       method: 'GET',
+       headers: {
+         'x-client-id': appId,
+         'x-client-secret': secretKey,
+         'x-api-version': '2023-08-01',
+         'Content-Type': 'application/json',
+       },
+     });
+ 
+     if (!cashfreeRes.ok) {
+       const errText = await cashfreeRes.text();
+       console.error('[Verify Payment] Cashfree API error:', errText);
+       return NextResponse.json({ success: false, error: 'Failed to fetch order from Cashfree' }, { status: 502 });
+     }
+ 
+     const order = await cashfreeRes.json();
+     console.log('[Verify Payment] Step 3: Raw order response:', JSON.stringify(order, null, 2));
+ 
+     if (order.order_status !== 'PAID') {
+       console.warn('[Verify Payment] Order status is not PAID:', order.order_status);
+       return NextResponse.json({
+         success: false,
+         error: 'Payment not completed',
+         status: order.order_status,
+       }, { status: 402 });
+     }
+ 
+     // Step 3: Lookup metadata from pending_orders (Fallback for missing tags)
+     const adminSupabase = createAdminClient();
+     const supabase = await createClient();
+ 
+     console.log('[Verify Payment] Step 4: Looking up pending_orders details...');
+     const { data: pending, error: pendingError } = await adminSupabase
+       .from('pending_orders')
+       .select('*')
+       .eq('order_id', orderId)
+       .maybeSingle();
+ 
+     if (pendingError) {
+       console.error('[Verify Payment] Pending order lookup error:', pendingError);
+     }
+ 
+     // Extract info from order_tags (fallback) OR pending table
+     const tags = order.order_tags || {};
+     const planId = pending?.plan_id || tags.plan_id;
+     const whatsappPackId = pending?.whatsapp_credit_pack_id || tags.whatsapp_credit_pack_id;
+     const organizationId = pending?.organization_id || tags.organization_id;
+     const interval = pending?.interval || tags.interval || 'monthly';
+ 
+     console.log('[Verify Payment] Step 5: Resolved metadata:', { planId, organizationId, interval });
+ 
+     if (!organizationId) {
+       console.error('[Verify Payment] CRITICAL: Missing organization_id');
+       return NextResponse.json({ success: false, error: 'Missing organization_id in session tracking' }, { status: 400 });
+     }
+ 
+     // ── CASE 1: SUBSCRIPTION PLAN ───────────────────────────────────────────
+     if (planId) {
+       console.log('[Verify Payment] Step 6: Processing Subscription Plan update...');
+       const { data: plan } = await adminSupabase
+         .from('subscription_plans')
+         .select('id, name, plan_code, monthly_price, yearly_price')
+         .eq('id', planId)
+         .single();
+ 
+       if (!plan) {
+         console.error('[Verify Payment] Plan not found for ID:', planId);
+         return NextResponse.json({ success: false, error: 'Plan not found' }, { status: 404 });
+       }
+ 
+       const now = new Date();
+       const periodEnd = new Date(now);
+       if (interval === 'yearly') {
+         periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+       } else {
+         periodEnd.setDate(periodEnd.getDate() + 30);
+       }
+ 
+       const amountPaid = order.order_amount;
+ 
+       // Check for resubscription status
+       const { data: existingSub } = await adminSupabase
+         .from('organization_subscriptions')
+         .select('status')
+         .eq('organization_id', organizationId)
+         .maybeSingle();
+       
+       const isResubscription = existingSub?.status === 'cancelled';
 
-    if (!cashfreeRes.ok) {
-      const errText = await cashfreeRes.text();
-      console.error('Cashfree API error:', errText);
-      return NextResponse.json({ success: false, error: 'Failed to fetch order from Cashfree' }, { status: 502 });
-    }
-
-    const order = await cashfreeRes.json();
-
-    if (order.order_status !== 'PAID') {
-      return NextResponse.json({
-        success: false,
-        error: 'Payment not completed',
-        status: order.order_status,
-      }, { status: 402 });
-    }
-
-    // Extract info from order_tags
-    const tags = order.order_tags || {};
-    const planId = tags.plan_id;
-    const whatsappPackId = tags.whatsapp_credit_pack_id;
-    const organizationId = tags.organization_id;
-
-    if (!organizationId) {
-      return NextResponse.json({ success: false, error: 'Missing organization_id in order tags' }, { status: 400 });
-    }
-
-    const supabase = await createClient();
-    const adminSupabase = createAdminClient();
-
-    // ── CASE 1: SUBSCRIPTION PLAN ───────────────────────────────────────────
-    if (planId) {
-      const interval = tags.interval || 'monthly';
-      
-      const { data: plan } = await supabase
-        .from('subscription_plans')
-        .select('id, name, plan_code, monthly_price, yearly_price')
-        .eq('id', planId)
-        .single();
-
-      if (!plan) return NextResponse.json({ success: false, error: 'Plan not found' }, { status: 404 });
-
-      const now = new Date();
-      const periodEnd = new Date(now);
-      if (interval === 'yearly') {
-        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      } else {
-        periodEnd.setDate(periodEnd.getDate() + 30);
-      }
-
-      const amountPaid = order.order_amount;
-
-      // Upsert subscription
-      const { error: upsertError } = await adminSupabase
-        .from('organization_subscriptions')
-        .upsert({
-            organization_id: organizationId,
-            plan_id: planId,
-            status: 'active',
-            billing_cycle: interval,
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            cancelled_at: null,
-            trial_ends_at: null,
-            price_paid: amountPaid,
-            updated_at: now.toISOString(),
-        }, { onConflict: 'organization_id' });
-
-      if (upsertError) throw upsertError;
-
-      // Update auth metadata
-      await supabase.auth.updateUser({
-        data: { sub_status: 'active', sub_expires: periodEnd.toISOString() },
-      });
-
-      revalidatePath('/', 'layout');
-      revalidatePath('/settings/subscription');
-
-      // Send email logic...
-      await sendSubscriptionEmail(adminSupabase, organizationId, plan, amountPaid, interval, periodEnd);
-
-      return NextResponse.json({
-        success: true,
-        type: 'subscription',
-        plan: {
-          name: plan.name,
-          current_period_end: periodEnd.toISOString(),
-        },
-      });
-    } 
-    
-    // ── CASE 2: WHATSAPP CREDIT PACK ────────────────────────────────────────
-    else if (whatsappPackId) {
-      const credits = Number(tags.credits);
-      const amountPaid = order.order_amount;
-
-      // 1. Provision credits atomically
-      const { error: rpcError } = await adminSupabase.rpc('provision_whatsapp_credits', {
-        target_org_id: organizationId,
-        credits_to_add: credits
-      });
-
-      if (rpcError) throw rpcError;
-
-      // 2. Record purchase history
-      await adminSupabase.from('whatsapp_credit_purchases').insert({
-        organization_id: organizationId,
-        pack_id: whatsappPackId,
-        amount_paid: amountPaid,
-        credits_added: credits,
-        payment_status: 'paid',
-        cashfree_order_id: orderId
-      });
-
-      revalidatePath('/whatsapp');
-
-      // 3. Send WhatsApp pack confirmation email
-      await sendWhatsAppPackEmail(adminSupabase, organizationId, credits, amountPaid);
-
-      return NextResponse.json({
-        success: true,
-        type: 'whatsapp_pack',
-        credits_added: credits,
-        total_paid: amountPaid
-      });
-    }
-
-    return NextResponse.json({ success: false, error: 'No valid purchase type found in tags' }, { status: 400 });
-
-  } catch (error) {
-    console.error('verify-payment fatal error:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
-  }
+       // Step 2: Exact upsert logic as requested
+       console.log('[Verify Payment] Step 7: Performing organization_subscriptions upsert...');
+       const { data: upsertData, error: upsertError } = await adminSupabase
+         .from('organization_subscriptions')
+         .upsert({
+             organization_id: organizationId,
+             plan_id: planId,
+             status: 'active',
+             billing_cycle: interval,
+             current_period_start: now.toISOString(),
+             current_period_end: periodEnd.toISOString(),
+             trial_ends_at: null,
+             cancelled_at: null,
+             price_paid: amountPaid,
+             updated_at: now.toISOString(),
+         }, { onConflict: 'organization_id' });
+ 
+       console.log('[Verify Payment] Upsert result:', upsertData, 'Upsert error:', upsertError);
+       if (upsertError) throw upsertError;
+ 
+       // Also update the main organizations table status
+       await adminSupabase
+         .from('organizations')
+         .update({ 
+           subscription_status: 'active',
+           plan_code: plan.plan_code 
+         })
+         .eq('id', organizationId);
+ 
+       // Step 4: Add Billing History Record
+       console.log('[Verify Payment] Step 8: Adding Billing History record...');
+       await adminSupabase.from('subscription_invoices').insert({
+         organization_id: organizationId,
+         plan_name: plan.name,
+         amount_paid: amountPaid,
+         billing_cycle: interval,
+         payment_date: now.toISOString(),
+         next_renewal_date: periodEnd.toISOString(),
+         cashfree_order_id: orderId,
+         status: 'paid'
+       });
+ 
+       // Update auth metadata
+       try {
+         await supabase.auth.updateUser({
+           data: { sub_status: 'active', sub_expires: periodEnd.toISOString() },
+         });
+       } catch (e) {
+         console.warn('[Verify Payment] Auth metadata sync failed (likely background job):', e);
+       }
+ 
+       // Revalidate caches
+       revalidatePath('/', 'layout');
+       revalidatePath('/settings/subscription', 'page');
+ 
+       // Step 3 (Cleanup): Delete pending order record
+       await adminSupabase.from('pending_orders').delete().eq('order_id', orderId);
+ 
+       console.log('[Verify Payment] SUCCESS: Subscription fulfilled for org:', organizationId);
+       
+       sendSubscriptionEmail(adminSupabase, organizationId, plan, amountPaid, interval, periodEnd, isResubscription).catch(e => {
+         console.error('[Verify Payment] Email job failed:', e);
+       });
+ 
+       return NextResponse.json({
+         success: true,
+         type: 'subscription',
+         plan: { name: plan.name, current_period_end: periodEnd.toISOString() },
+       });
+     } 
+     
+     // ── CASE 2: WHATSAPP CREDIT PACK (Fallback to original logic) ───────────
+     else if (whatsappPackId) {
+       console.log('[Verify Payment] Step 6: Processing WhatsApp Pack purchase...');
+       const credits = Number(tags.credits) || 0;
+       const amountPaid = order.order_amount;
+ 
+       const { error: rpcError } = await adminSupabase.rpc('provision_whatsapp_credits', {
+         target_org_id: organizationId,
+         credits_to_add: credits
+       });
+       if (rpcError) throw rpcError;
+ 
+       await adminSupabase.from('whatsapp_credit_purchases').insert({
+         organization_id: organizationId,
+         pack_id: whatsappPackId,
+         amount_paid: amountPaid,
+         credits_added: credits,
+         payment_status: 'paid',
+         cashfree_order_id: orderId
+       });
+ 
+       revalidatePath('/whatsapp');
+       await adminSupabase.from('pending_orders').delete().eq('order_id', orderId);
+       
+       return NextResponse.json({ success: true, type: 'whatsapp_pack', credits_added: credits });
+     }
+ 
+     return NextResponse.json({ success: false, error: 'No valid purchase type detected' }, { status: 400 });
+ 
+   } catch (error) {
+     console.error('[Verify Payment] FATAL ERROR:', error);
+     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+   }
 }
 
 // ── Helper Functions ────────────────────────────────────────────────────────
 
-async function sendSubscriptionEmail(adminSupabase: any, organizationId: string, plan: any, amountPaid: number, interval: string, periodEnd: Date) {
+async function sendSubscriptionEmail(
+  adminSupabase: any, 
+  organizationId: string, 
+  plan: any, 
+  amountPaid: number, 
+  interval: string, 
+  periodEnd: Date,
+  isResubscription: boolean = false
+) {
     const { data: orgMember } = await adminSupabase
       .from('organization_memberships')
       .select('profile_id, profiles(full_name)')
@@ -192,10 +270,18 @@ async function sendSubscriptionEmail(adminSupabase: any, organizationId: string,
       const ownerName = (orgMember.profiles as any)?.full_name || 'Clinic Owner';
       const renewalDateStr = periodEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
+      const subject = isResubscription 
+        ? 'Welcome Back to Clerixs! Your Subscription is Active.'
+        : 'Payment Confirmed — Your Clerixs Subscription is Active';
+      
+      const welcomeLine = isResubscription
+        ? "We're glad to have you back."
+        : `your payment was successful and your <strong>${plan.name}</strong> plan is now active. You have full access to all features in your clinic.`;
+
       await resend.emails.send({
         from: 'Clerixs <noreply@clerixs.com>',
         to: [ownerEmail],
-        subject: 'Payment Confirmed — Your Clerixs Subscription is Active',
+        subject: subject,
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #1e293b; background-color: #f8fafc;">
             <div style="background-color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
@@ -203,8 +289,9 @@ async function sendSubscriptionEmail(adminSupabase: any, organizationId: string,
                 <h1 style="color: #2563eb; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">CLERIXS</h1>
               </div>
               
-              <h2 style="margin-top: 0; margin-bottom: 16px; color: #0f172a; font-size: 20px; font-weight: 700;">Subscription Active ✓</h2>
-              <p style="margin-bottom: 24px; line-height: 1.6; color: #475569;">Hi ${ownerName}, your payment was successful and your <strong>${plan.name}</strong> plan is now active. You have full access to all features in your clinic.</p>
+              <h2 style="margin-top: 0; margin-bottom: 16px; color: #0f172a; font-size: 20px; font-weight: 700;">${isResubscription ? 'Resubscription Active ✓' : 'Subscription Active ✓'}</h2>
+              <p style="margin-bottom: 24px; line-height: 1.6; color: #475569;">Hi ${ownerName}, ${welcomeLine}</p>
+              ${isResubscription ? `<p style="margin-bottom: 24px; line-height: 1.6; color: #475569;">Your <strong>${plan.name}</strong> plan has being reactivated. You have full access to all features in your clinic.</p>` : ''}
               
               <div style="background-color: #f1f5f9; padding: 24px; border-radius: 12px; margin-bottom: 32px;">
                 <table style="width: 100%; border-collapse: collapse;">

@@ -37,7 +37,7 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
     const [subRes, membersRes, invitesRes] = await Promise.all([
       supabase
         .from('organization_subscriptions')
-        .select('status, subscription_plans(max_staff)')
+        .select('status, subscription_plans!organization_subscriptions_plan_id_fkey(max_staff)')
         .eq('organization_id', orgId)
         .in('status', ['active', 'trialing'])
         .single(),

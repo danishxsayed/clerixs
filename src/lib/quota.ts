@@ -12,7 +12,7 @@ export async function ensureStorageQuota(supabase: SupabaseClient, organizationI
   // We use maybeSingle because it's possible a trial has no record yet (handled by 5GB default)
   const { data: subscription } = await supabase
     .from('organization_subscriptions')
-    .select('status, plan:subscription_plans(plan_code)')
+    .select('status, plan:subscription_plans!organization_subscriptions_plan_id_fkey(plan_code)')
     .eq('organization_id', organizationId)
     .maybeSingle();
 
