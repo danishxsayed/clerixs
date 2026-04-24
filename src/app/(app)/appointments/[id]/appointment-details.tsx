@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { FeatureLock } from '@/components/subscription/FeatureLock';
 import { ClinicalNotesEditor } from './clinical-notes-editor';
+import { DoctorQueueWidget } from '@/components/queue/doctor-queue-widget';
 
 interface AppointmentDetailsProps {
   id: string;
@@ -81,6 +82,14 @@ export async function AppointmentDetails({ id }: AppointmentDetailsProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Queue Widget for Doctor */}
+          {appointment.doctor_membership_id && (
+            <DoctorQueueWidget 
+              doctorMembershipId={appointment.doctor_membership_id}
+              organizationId={profile?.default_organization_id || ''}
+            />
+          )}
 
           {/* Financial/Billing Card */}
           <Card className="border border-border shadow-sm">

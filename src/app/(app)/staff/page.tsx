@@ -69,7 +69,13 @@ export default async function StaffPage() {
         
         {isOwner && (
           <Dialog>
-            <DialogTrigger render={<Button className="rounded-full shadow-sm" />}>
+            <DialogTrigger render={
+              <Button 
+                data-shortcut="new"
+                title="Invite Member (⌘N)"
+                className="rounded-full shadow-sm" 
+              />
+            }>
                 <MailPlus className="mr-2 h-4 w-4" />
                 Invite Member
             </DialogTrigger>

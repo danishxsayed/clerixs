@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, LogIn } from 'lucide-react';
 import { updateAppointment } from './actions';
+import { checkInToQueue } from '@/app/(app)/queue/actions';
 import { toast } from 'sonner';
 
 interface AppointmentActionButtonsProps {
@@ -23,7 +24,19 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
         toast.error(result.error);
       } else {
         toast.success(`Appointment marked as ${newStatus}.`);
-        router.refresh(); // Refresh the server component to pull new status badge
+        router.refresh(); 
+      }
+    });
+  };
+
+  const handleCheckIn = () => {
+    startTransition(async () => {
+      const result = await checkInToQueue(appointmentId);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Patient checked in to queue.`);
+        router.refresh();
       }
     });
   };
@@ -34,8 +47,19 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
 
   return (
     <div className="flex items-center gap-2">
-       {/* If it's just 'scheduled', we might want to mark it as 'completed' directly for now, 
-           or you could add 'checked_in' and 'in_progress' states later */}
+       {currentStatus === 'scheduled' && (
+         <Button 
+           variant="outline" 
+           className="border-primary text-primary hover:bg-primary/5"
+           onClick={handleCheckIn}
+           disabled={isPending}
+         >
+           <LogIn className="mr-2 h-4 w-4" /> 
+           {isPending ? 'Checking In...' : 'Check In'}
+         </Button>
+       )}
+
+       {/* If it's just 'scheduled', we might want to mark it as 'completed' directly for now */}
        <Button 
          variant="default" 
          className="bg-green-600 hover:bg-green-700"

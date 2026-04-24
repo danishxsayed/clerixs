@@ -14,6 +14,7 @@ import { SidebarSkeleton } from '@/components/layout/sidebar-skeleton';
 import { TopbarSkeleton } from '@/components/layout/topbar-skeleton';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { GlobalVoicePTT } from '@/components/ui/global-voice-ptt';
+import { KeyboardShortcutsManager } from '@/components/layout/keyboard-shortcuts-manager';
 
 
 async function SidebarDataFetcher({ userId }: { userId: string }) {
@@ -132,6 +133,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
           <Toaster />
           <GlobalVoicePTT />
+          <KeyboardShortcutsManager />
         </div>
       </LockScreen>
     </SubscriptionProvider>

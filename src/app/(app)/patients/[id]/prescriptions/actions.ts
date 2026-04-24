@@ -90,8 +90,34 @@ export async function createPrescription(data: {
     }
   }
 
+  // 5. QUEUE SYNC: Automatically mark patient as completed in queue
+  try {
+    const { data: queueEntry } = await supabase
+      .from('queue_entries')
+      .select('id')
+      .eq('organization_id', orgId)
+      .eq('patient_id', data.patientId)
+      .eq('status', 'in_consultation')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (queueEntry) {
+      await supabase
+        .from('queue_entries')
+        .update({ 
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', queueEntry.id);
+    }
+  } catch (err) {
+    console.error('Queue Sync Error:', err);
+  }
+
   // Clear dashboard caches
   revalidatePath(`/patients/${data.patientId}`);
+  revalidatePath('/queue');
   return { success: true, prescriptionId: prescription.id };
 }
 

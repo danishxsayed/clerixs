@@ -21,6 +21,8 @@ import {
   BarChart3,
   MessageSquare,
   Zap,
+  Activity,
+  Keyboard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +36,7 @@ const SIDEBAR_ITEMS = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['org_owner', 'doctor', 'receptionist'] },
   { name: 'Patients', href: '/patients', icon: Users, roles: ['org_owner', 'doctor', 'receptionist'] },
   { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['org_owner', 'doctor', 'receptionist'] },
+  { name: 'Queue', href: '/queue', icon: Activity, roles: ['org_owner', 'doctor', 'receptionist'], pulsing: true },
   { name: 'Treatments', href: '/treatments', icon: Stethoscope, roles: ['org_owner', 'doctor'] },
   { name: 'Lab Dashboard', href: '/lab', icon: FlaskConical, roles: ['org_owner', 'doctor', 'laboratory'] },
   { name: 'Billing', href: '/billing', icon: Receipt, roles: ['org_owner', 'receptionist'] },
@@ -137,7 +140,7 @@ export function Sidebar({
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'group flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
+                    'group relative flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
                     isActive
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -147,6 +150,14 @@ export function Sidebar({
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
                   {!isCollapsed && <span>{item.name}</span>}
+                  {(item as any).pulsing && (
+                    <span className={cn(
+                      "relative flex h-2 w-2 rounded-full bg-emerald-500",
+                      isCollapsed ? "absolute top-1.5 right-1.5" : "ml-auto"
+                    )}>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -210,17 +221,30 @@ export function Sidebar({
         <ThemeToggle isCollapsed={isCollapsed} />
         
         {!isCollapsed && (
-          <div className="flex items-center gap-3 rounded-xl border p-3 bg-muted/30">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 text-primary">
-              <Hospital className="h-5 w-5" />
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium truncate" title={clinicName}>
-                {clinicName}
-              </span>
-              <span className="text-xs text-muted-foreground capitalize">
-                {userRole.replace('org_', '')}
-              </span>
+          <div className="space-y-3">
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-shortcuts-help'))}
+              className="flex w-full items-center gap-3 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+            >
+              <Keyboard className="h-4 w-4 transition-transform group-hover:scale-110" />
+              <span>⌨️ Shortcuts</span>
+              <kbd className="ml-auto pointer-events-none h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 flex">
+                <span className="text-xs">⌘</span>/
+              </kbd>
+            </button>
+
+            <div className="flex items-center gap-3 rounded-xl border p-3 bg-muted/30">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 text-primary">
+                <Hospital className="h-5 w-5" />
+              </div>
+              <div className="flex flex-col overflow-hidden">
+                <span className="text-sm font-medium truncate" title={clinicName}>
+                  {clinicName}
+                </span>
+                <span className="text-xs text-muted-foreground capitalize">
+                  {userRole.replace('org_', '')}
+                </span>
+              </div>
             </div>
           </div>
         )}

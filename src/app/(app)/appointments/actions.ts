@@ -216,7 +216,32 @@ export async function updateAppointment(appointmentId: string, formData: Partial
     return { error: 'Database error: Could not update the appointment.' };
   }
 
+  // QUEUE SYNC
+  if (formData.status === 'completed' || formData.status === 'checked_in') {
+    try {
+      const { data: queueEntry } = await supabase
+        .from('queue_entries')
+        .select('id')
+        .eq('appointment_id', appointmentId)
+        .maybeSingle();
+
+      if (queueEntry) {
+        const queueStatus = formData.status === 'completed' ? 'completed' : 'waiting';
+        await supabase
+          .from('queue_entries')
+          .update({ 
+            status: queueStatus,
+            completed_at: formData.status === 'completed' ? new Date().toISOString() : null
+          })
+          .eq('id', queueEntry.id);
+      }
+    } catch (err) {
+      console.error('Queue Status Sync Error:', err);
+    }
+  }
+
   revalidatePath('/appointments');
+  revalidatePath('/queue');
   revalidatePath(`/appointments/${appointmentId}/edit`);
   
   return { success: true };
