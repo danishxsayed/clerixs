@@ -101,11 +101,7 @@ export function DashboardCheckout() {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent 
-         className="sm:max-w-[425px] [&>button]:hidden" 
-         onInteractOutside={(e) => e.preventDefault()} 
-         onEscapeKeyDown={(e) => e.preventDefault()}
-      >
+      <DialogContent className="sm:max-w-[425px] [&>button]:hidden">
         <DialogHeader>
           <div className="mx-auto w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 border border-blue-100 shadow-inner">
             <CreditCard className="w-7 h-7" />

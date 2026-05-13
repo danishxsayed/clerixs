@@ -126,7 +126,7 @@ export function DownloadInvoiceButton({ invoice, orgId }: DownloadInvoiceButtonP
         </div>
       `;
 
-      const options = {
+      const options: any = {
         margin: [10, 10, 10, 10], 
         filename: `Clerixs-Invoice-${new Date(invoice.date).toISOString().split('T')[0]}-${invoice.order_id || 'manual'}.pdf`,
         image: { type: 'jpeg', quality: 1.0 },

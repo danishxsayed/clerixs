@@ -19,9 +19,20 @@
 - Implemented 7-day automated trial period activation and expiry checking.
 - Automated email reminders for trial expiry.
 
+### 🔄 Live Queue Management
+- Implemented real-time clinic-wide waiting room system.
+- Integrated "Check-In" flow from appointments and "Auto-Complete" on prescription generation.
+- Created multi-column doctor-specific queue dashboards with drag-and-drop reordering.
+
+### ⌨️ Global Power-User Shortcuts
+- Implemented app-wide keyboard shortcut system (⌘N, ⌘S, ⌘P, ⌘K).
+- Added contextual help guide and button hints.
+- Resolved Base UI hydration issues with custom trigger rendering.
+
 ## Active Technical Debt / Known Issues
 - **Performance**: High-volume clinics may experience slight lag in on-demand storage calculation.
     - *Candidate Fix*: Move to a trigger-updated `storage_stats` cache table.
+- **Queue Archive**: `pg_cron` needs to be enabled in Supabase dashboard for the daily reset migration to function automatically.
 - **Verification**: Basic payment verification logic is implemented but needs production-level stress testing.
 
 ## Next Steps

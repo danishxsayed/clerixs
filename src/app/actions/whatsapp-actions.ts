@@ -55,7 +55,7 @@ export async function sendWhatsAppPrescriptionAction(params: {
 
     const { data: credits } = await supabase
       .from('whatsapp_credits')
-      .select('balance')
+      .select('balance, total_used')
       .eq('organization_id', orgId)
       .single();
 

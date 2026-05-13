@@ -215,7 +215,7 @@ export function TemplatesTab() {
                          {Array.isArray(template.medicines) ? template.medicines.length : 0} Meds
                        </span>
                        <div className="flex -space-x-1">
-                         {Array.isArray(template.medicines) && template.medicines.slice(0, 2).map((_, i) => (
+                         {Array.isArray(template.medicines) && template.medicines.slice(0, 2).map((_: any, i: number) => (
                            <div key={i} className="h-4 w-4 rounded-full border-2 border-white bg-primary/20" />
                          ))}
                        </div>
@@ -239,6 +239,7 @@ export function TemplatesTab() {
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
+                      {/* @ts-expect-error - asChild type issue with DropdownMenuTrigger */}
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                           <MoreVertical className="h-4 w-4" />

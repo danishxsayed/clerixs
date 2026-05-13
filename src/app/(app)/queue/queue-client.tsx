@@ -84,7 +84,7 @@ export function QueueClient({
             .filter(e => e.doctor_membership_id === doctor.id)
             .sort((a, b) => {
               // Priority: 1. Status (in_consultation first), 2. Position
-              const statusOrder = { 'in_consultation': 0, 'waiting': 1, 'skipped': 2, 'completed': 3 };
+              const statusOrder: Record<string, number> = { 'in_consultation': 0, 'waiting': 1, 'skipped': 2, 'completed': 3 };
               if (statusOrder[a.status] !== statusOrder[b.status]) return statusOrder[a.status] - statusOrder[b.status];
               return a.queue_position - b.queue_position;
             });
