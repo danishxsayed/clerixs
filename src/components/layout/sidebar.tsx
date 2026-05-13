@@ -88,6 +88,9 @@ export function Sidebar({
       
       if (data) {
         setCredits(data);
+      } else {
+        // Set mock credits for demo/new accounts
+        setCredits({ balance: 100, total_used: 0 });
       }
     }
   }, []);

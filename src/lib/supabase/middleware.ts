@@ -24,6 +24,8 @@ const SUBSCRIPTION_EXEMPT_PATHS = [
   '/login',
   '/signup',
   '/onboarding',
+  '/forgot-password',
+  '/reset-password',
 ];
 
 function isProtectedPath(pathname: string): boolean {

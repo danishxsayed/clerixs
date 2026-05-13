@@ -78,67 +78,129 @@ export function LandingClient() {
                 </Button>
               </motion.div>
 
-              <motion.div variants={fadeInUp} className="flex items-center gap-4 pt-4 text-sm font-medium text-slate-500">
+              <motion.div variants={fadeInUp} className="flex items-center gap-4 pt-4 text-sm font-medium text-slate-500 mx-auto lg:mx-0">
                 <div className="flex -space-x-3">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200" />
+                    <div key={i} className="w-8 h-8 rounded-[10px] border-2 border-white bg-slate-200 overflow-hidden relative">
+                      <Image src="/assets/logo.jpg" alt="User" fill className="object-cover opacity-50" />
+                    </div>
                   ))}
                 </div>
                 <div>Trusted by <span className="text-slate-900 font-bold">500+</span> healthcare professionals</div>
               </motion.div>
             </motion.div>
 
-            {/* Hero Interactive Floating UI */}
+            {/* Hero Dashboard Mockup - Realistic 3D Frame */}
             <motion.div
-              className="relative hidden lg:block h-[600px] w-full"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              className="relative w-full max-w-[600px] lg:max-w-none mx-auto lg:mx-0 mt-12 lg:mt-0 lg:pl-10"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              {/* Central Main Dashboard Image */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-auto rounded-xl shadow-2xl border border-slate-200/50 overflow-hidden bg-white z-10"
-                style={{ y: y1 }}
-              >
-                <Image src="/assets/logo.jpg" alt="Dashboard" width={800} height={500} className="w-full h-auto opacity-50 grayscale" />
-              </motion.div>
+              <div className="relative group perspective-[1500px]">
+                {/* Dashboard Mockup - Responsive */}
+                <motion.div 
+                  className="relative z-10 w-full lg:scale-110 lg:origin-left rounded-xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-200/50 overflow-hidden bg-slate-950"
+                  style={{ transform: 'rotateY(-5deg) rotateX(2deg)' }}
+                >
+                  {/* Mac Browser Frame */}
+                  <div className="h-8 md:h-10 bg-[#2d2d2d] border-b border-slate-800 flex items-center px-4 gap-4">
+                    <div className="flex gap-1.5 md:gap-2 shrink-0">
+                      <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#ff5f56]" />
+                      <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#ffbd2e]" />
+                      <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#27c93f]" />
+                    </div>
+                    <div className="flex-1 max-w-md mx-auto">
+                      <div className="bg-[#1a1a1a] rounded-md h-5 md:h-6 flex items-center justify-center px-3 text-[8px] md:text-[10px] text-slate-500 font-mono truncate">
+                        app.clerixs.com/dashboard
+                      </div>
+                    </div>
+                    <div className="w-8 md:w-12 shrink-0" />
+                  </div>
 
-              {/* Floating Widget 1 - Revenue */}
-              <motion.div
-                className="absolute -right-12 top-20 z-20 bg-white/80 backdrop-blur-xl p-4 rounded-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-white/50 w-64"
-                animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <LineChart className="h-5 w-5 text-emerald-600" />
+                  {/* Dashboard Image - Preserve Aspect Ratio */}
+                  <div className="relative bg-slate-900">
+                    <Image 
+                      src="/assets/Mock-dash.png" 
+                      alt="Clerixs Dashboard Mockup" 
+                      width={1200}
+                      height={750}
+                      className="w-full h-auto"
+                      priority
+                    />
                   </div>
-                  <div>
-                    <div className="text-sm font-semibold">Today's Revenue</div>
-                    <div className="text-[10px] text-emerald-600 font-medium">+14% vs yesterday</div>
-                  </div>
-                </div>
-                <div className="text-2xl font-bold tracking-tight">₹42,500</div>
-              </motion.div>
+                </motion.div>
 
-              {/* Floating Widget 2 - Next Patient */}
-              <motion.div
-                className="absolute -left-12 bottom-32 z-20 bg-white/80 backdrop-blur-xl p-4 rounded-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-white/50 w-72"
-                animate={{ y: [0, 15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md">11:30 AM</div>
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                {/* Mobile Proof Cards (Visible only on small screens) */}
+                <div className="md:hidden flex flex-col gap-4 w-full">
+                   {[
+                    { icon: CheckCircle2, text: '✅ Prescription sent via WhatsApp', color: 'emerald', sub: 'Patient: Rahul Mehta' },
+                    { icon: FileText, text: '🧪 Lab report ready — Priya Shah', color: 'indigo', sub: 'Status: Verified by Lab Head' },
+                    { icon: Receipt, text: '₹2,500 payment received', color: 'blue', sub: 'Invoice #4829 • Priya Shah' }
+                  ].map((card, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + (i * 0.1) }}
+                      className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-4"
+                    >
+                      <div className={`w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0`}>
+                        {i === 2 ? <span className="text-blue-600 font-bold text-lg">₹</span> : <card.icon className={`h-5 w-5 text-${card.color}-600`} />}
+                      </div>
+                      <div className="text-left">
+                        <div className="text-sm font-bold text-slate-900">{card.text}</div>
+                        <div className="text-[10px] text-slate-500">{card.sub}</div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-200" />
-                  <div>
-                    <div className="text-sm font-bold">Sarah Jenkins</div>
-                    <div className="text-xs text-slate-500">Root Canal Consultation</div>
-                  </div>
+
+                {/* Floating Notification Cards (Desktop/Tablet only) */}
+                <div className="hidden md:block">
+                  <motion.div
+                    className="absolute -top-6 -right-12 z-30 bg-white p-3 rounded-xl shadow-xl border border-slate-100 flex items-center gap-3 w-64"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold text-slate-900">✅ Prescription sent via WhatsApp</div>
+                      <div className="text-[8px] text-slate-500">Patient: Rahul Mehta</div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute top-1/2 -right-16 z-30 bg-white p-3 rounded-xl shadow-xl border border-slate-100 flex items-center gap-3 w-56"
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-600 font-bold text-sm">
+                      ₹
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold text-slate-900">₹2,500 payment received</div>
+                      <div className="text-[8px] text-slate-500">Invoice #4829 • Priya Shah</div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute bottom-10 -left-16 z-30 bg-white p-3 rounded-xl shadow-xl border border-slate-100 flex items-center gap-3 w-60"
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                      <FileText className="h-4 w-4 text-indigo-600" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold text-slate-900">🧪 Lab report ready — Priya Shah</div>
+                      <div className="text-[8px] text-slate-500">Status: Verified by Lab Head</div>
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
 
           </div>

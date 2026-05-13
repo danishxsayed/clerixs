@@ -81,7 +81,6 @@ export default async function DashboardPage({
       const monthName = d.toLocaleDateString('en-US', { month: 'short' });
       monthlyRevenueMap[monthName] = 0;
   }
-
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
   const { data: chartPayments } = await supabase
     .from('payments')
@@ -101,26 +100,63 @@ export default async function DashboardPage({
     });
   }
 
-  const chartData = Object.keys(monthlyRevenueMap).map(month => ({
+  let chartData = Object.keys(monthlyRevenueMap).map(month => ({
       month,
       revenue: monthlyRevenueMap[month]
   }));
 
   // 2. Fetch Appointments for the Target Date
   const targetDate = date ? new Date(date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const { count: todaysAppointments } = await supabase
+  const { count: realTodaysAppointments } = await supabase
     .from('appointments')
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', orgId)
     .eq('appointment_date', targetDate);
 
-  const { data: todaysAppointmentsList } = await supabase
+  const { data: realTodaysAppointmentsList } = await supabase
     .from('appointments')
     .select('id, start_time, chief_complaint, status, patients(full_name)')
     .eq('organization_id', orgId)
     .eq('appointment_date', targetDate)
     .order('start_time', { ascending: true })
     .limit(5);
+
+  // DEMO DATA LOGIC
+  const isDataEmpty = (totalPatients || 0) === 0 && (completedTreatments || 0) === 0 && cashflow === 0 && (realTodaysAppointments || 0) === 0;
+  const showDemoData = isDataEmpty;
+
+  const displayTotalPatients = showDemoData ? 247 : (totalPatients || 0);
+  const displayCompletedTreatments = showDemoData ? 3 : (completedTreatments || 0);
+  const displayCashflow = showDemoData ? 48319 : cashflow;
+  const displayTodaysAppointments = showDemoData ? 8 : (realTodaysAppointments || 0);
+
+  if (showDemoData) {
+    chartData = [
+      { month: 'Dec', revenue: 12000 },
+      { month: 'Jan', revenue: 18500 },
+      { month: 'Feb', revenue: 22000 },
+      { month: 'Mar', revenue: 35000 },
+      { month: 'Apr', revenue: 48319 },
+      { month: 'May', revenue: 31000 },
+    ];
+  }
+
+  const mockAppointmentsList = [
+    { id: 'mock-1', start_time: '09:00', chief_complaint: 'Consultation', status: 'in-waiting', patients: { full_name: 'Rahul Mehta' } },
+    { id: 'mock-2', start_time: '10:30', chief_complaint: 'Root Canal', status: 'scheduled', patients: { full_name: 'Priya Shah' } },
+    { id: 'mock-3', start_time: '11:00', chief_complaint: 'Follow-up', status: 'scheduled', patients: { full_name: 'Amir Khan' } },
+    { id: 'mock-4', start_time: '12:15', chief_complaint: 'Consultation', status: 'scheduled', patients: { full_name: 'Sneha Gupta' } },
+    { id: 'mock-5', start_time: '13:00', chief_complaint: 'Teeth Whitening', status: 'scheduled', patients: { full_name: 'Vikram Singh' } },
+  ];
+
+  const mockRecentActivity = [
+    { time: '10 mins ago', action: 'New patient registered', description: 'Vikram Singh added to system' },
+    { time: '25 mins ago', action: 'Payment received', description: '₹1,500 from Rahul Mehta' },
+    { time: '1 hour ago', action: 'Prescription sent', description: 'WhatsApp sent to Priya Shah' },
+    { time: '2 hours ago', action: 'Report uploaded', description: 'Lab report for Amir Khan' },
+  ];
+
+  const displayAppointmentsList = showDemoData ? mockAppointmentsList : (realTodaysAppointmentsList || []);
 
   const filterGroups = [
     {
@@ -136,7 +172,12 @@ export default async function DashboardPage({
 
   const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 relative">
+      {showDemoData && (
+        <div className="absolute top-[-10px] right-0 bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 z-50">
+          Demo Data
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-4 justify-between sm:items-end">
         <div>
           <Greeting name={fullName} />
@@ -159,10 +200,10 @@ export default async function DashboardPage({
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">₹{cashflow.toLocaleString('en-IN')}</div>
+              <div className="text-3xl font-bold">₹{displayCashflow.toLocaleString('en-IN')}</div>
               <p className="text-xs text-green-600 mt-1 flex items-center font-medium">
                 <ArrowUpRight className="h-3 w-3 mr-1" />
-                +0.00%
+                {showDemoData ? '+12%' : '+0.00%'}
               </p>
             </CardContent>
           </Card>
@@ -175,7 +216,7 @@ export default async function DashboardPage({
             </div>
           </CardHeader>
           <CardContent>
-             <div className="text-3xl font-bold">{todaysAppointments || 0}</div>
+             <div className="text-3xl font-bold">{displayTodaysAppointments}</div>
              <p className="text-xs text-muted-foreground mt-1">
                Scheduled for {date ? 'this date' : 'today'}
              </p>
@@ -190,7 +231,7 @@ export default async function DashboardPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalPatients || 0}</div>
+            <div className="text-3xl font-bold">{displayTotalPatients}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Total registered
             </p>
@@ -205,7 +246,7 @@ export default async function DashboardPage({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{completedTreatments || 0}</div>
+            <div className="text-3xl font-bold">{displayCompletedTreatments}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Completed overall
             </p>
@@ -235,16 +276,15 @@ export default async function DashboardPage({
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {todaysAppointmentsList && todaysAppointmentsList.length > 0 ? (
-                todaysAppointmentsList.map((appointment) => {
+              {displayAppointmentsList && displayAppointmentsList.length > 0 ? (
+                displayAppointmentsList.map((appointment: any) => {
                   const patientName = (appointment.patients as any)?.full_name || 'Unknown Patient';
                   const initials = patientName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
                   
                   return (
-                    <Link
-                      href={`/appointments/${appointment.id}`}
+                    <div
                       key={appointment.id}
-                      className="flex items-center hover:bg-muted/50 p-2 -mx-2 rounded-lg transition-colors cursor-pointer"
+                      className="flex items-center hover:bg-muted/50 p-2 -mx-2 rounded-lg transition-colors"
                     >
                       <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium text-xs">
                         {initials}
@@ -257,12 +297,14 @@ export default async function DashboardPage({
                           </p>
                         </div>
                         <div className="text-right flex flex-col justify-center">
-                           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize bg-gray-100 text-gray-800">
+                           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                             appointment.status === 'in-waiting' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
+                           }`}>
                              {appointment.status}
                            </span>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })
               ) : (
@@ -272,6 +314,33 @@ export default async function DashboardPage({
           </CardContent>
         </Card>
       </div>
+
+      {showDemoData && (
+        <Card className="rounded-2xl border-none shadow-sm">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Live updates from your clinic</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {mockRecentActivity.map((activity, i) => (
+                <div key={i} className="flex items-center justify-between border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                  <div className="flex gap-4 items-start">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground">{activity.description}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+                    {activity.time}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
