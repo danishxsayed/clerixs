@@ -32,9 +32,10 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Features', href: '/#features' },
-    { name: 'How It Works', href: '/#how-it-works' },
+    { name: 'About', href: '/about' },
     { name: 'Pricing', href: '/pricing' },
-    { name: 'Testimonials', href: '/#testimonials' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (

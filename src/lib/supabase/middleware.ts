@@ -19,6 +19,10 @@ const SUBSCRIPTION_EXEMPT_PATHS = [
   '/',
   '/settings',
   '/pricing',
+  '/about',
+  '/blog',
+  '/careers',
+  '/contact',
   '/api',
   '/auth',
   '/login',
@@ -26,6 +30,9 @@ const SUBSCRIPTION_EXEMPT_PATHS = [
   '/onboarding',
   '/forgot-password',
   '/reset-password',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/cookie-policy',
 ];
 
 function isProtectedPath(pathname: string): boolean {

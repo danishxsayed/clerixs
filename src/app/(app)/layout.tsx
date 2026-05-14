@@ -5,7 +5,7 @@ import { WorkspacePoller } from '@/components/layout/workspace-poller';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { signout } from '@/app/(auth)/actions';
+import { signout } from '@/app/(marketing)/(auth)/actions';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { TrialBanner } from '@/components/subscription/TrialBanner';
 import { LockScreen } from '@/components/subscription/LockScreen';
@@ -42,6 +42,7 @@ async function TopbarDataFetcher({ userId, userEmail }: { userId: string, userEm
 
   return <Topbar userFullName={profile?.full_name || "User"} userEmail={userEmail} userAvatar={profile?.avatar_url} userRole={userRole} />;
 }
+import { ThemeProvider } from '@/components/theme-provider';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -110,32 +111,39 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <SubscriptionProvider subscription={formattedSubData} orgCreatedAt={org?.created_at}>
-      <LockScreen>
-        <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
-          <TrialBanner />
-          <div className="flex flex-1 overflow-hidden">
-            <div className="print:hidden h-full">
-              <Suspense fallback={<SidebarSkeleton />}>
-                <SidebarDataFetcher userId={user.id} />
-              </Suspense>
-            </div>
-            <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible">
-              <div className="print:hidden">
-                <Suspense fallback={<TopbarSkeleton />}>
-                  <TopbarDataFetcher userId={user.id} userEmail={user.email || ''} />
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <SubscriptionProvider subscription={formattedSubData} orgCreatedAt={org?.created_at}>
+        <LockScreen>
+          <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
+            <TrialBanner />
+            <div className="flex flex-1 overflow-hidden">
+              <div className="print:hidden h-full">
+                <Suspense fallback={<SidebarSkeleton />}>
+                  <SidebarDataFetcher userId={user.id} />
                 </Suspense>
               </div>
-              <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-6 print:p-0">
-                {children}
-              </main>
+              <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible">
+                <div className="print:hidden">
+                  <Suspense fallback={<TopbarSkeleton />}>
+                    <TopbarDataFetcher userId={user.id} userEmail={user.email || ''} />
+                  </Suspense>
+                </div>
+                <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-6 print:p-0">
+                  {children}
+                </main>
+              </div>
             </div>
+            <Toaster />
+            <GlobalVoicePTT />
+            <KeyboardShortcutsManager />
           </div>
-          <Toaster />
-          <GlobalVoicePTT />
-          <KeyboardShortcutsManager />
-        </div>
-      </LockScreen>
-    </SubscriptionProvider>
+        </LockScreen>
+      </SubscriptionProvider>
+    </ThemeProvider>
   );
 }
