@@ -192,16 +192,18 @@ export async function GET(request: NextRequest) {
        // Revalidate caches
        revalidatePath('/', 'layout');
        revalidatePath('/settings/subscription', 'page');
- 
+
        // Step 3 (Cleanup): Delete pending order record
        await adminSupabase.from('pending_orders').delete().eq('order_id', orderId);
- 
+
        console.log('[Verify Payment] SUCCESS: Subscription fulfilled for org:', organizationId);
        
-       sendSubscriptionEmail(adminSupabase, organizationId, plan, amountPaid, interval, periodEnd, isResubscription).catch(e => {
+       try {
+         await sendSubscriptionEmail(adminSupabase, organizationId, plan, amountPaid, interval, periodEnd, isResubscription);
+       } catch (e) {
          console.error('[Verify Payment] Email job failed:', e);
-       });
- 
+       }
+
        return NextResponse.json({
          success: true,
          type: 'subscription',
@@ -232,6 +234,12 @@ export async function GET(request: NextRequest) {
  
        revalidatePath('/whatsapp');
        await adminSupabase.from('pending_orders').delete().eq('order_id', orderId);
+       
+       try {
+         await sendWhatsAppPackEmail(adminSupabase, organizationId, credits, amountPaid);
+       } catch (e) {
+         console.error('[Verify Payment] WhatsApp Email job failed:', e);
+       }
        
        return NextResponse.json({ success: true, type: 'whatsapp_pack', credits_added: credits });
      }
@@ -278,7 +286,7 @@ async function sendSubscriptionEmail(
         ? "We're glad to have you back."
         : `your payment was successful and your <strong>${plan.name}</strong> plan is now active. You have full access to all features in your clinic.`;
 
-      await resend.emails.send({
+      const { data, error: emailError } = await resend.emails.send({
         from: 'Clerixs <noreply@clerixs.com>',
         to: [ownerEmail],
         subject: subject,
@@ -323,6 +331,13 @@ async function sendSubscriptionEmail(
           </div>
         `
       });
+
+      if (emailError) {
+        console.error('[Verify Payment] Resend failed to send subscription email:', emailError);
+        throw new Error(emailError.message);
+      } else {
+        console.log('[Verify Payment] Resend successfully sent subscription email:', data);
+      }
     }
 }
 
@@ -341,7 +356,7 @@ async function sendWhatsAppPackEmail(adminSupabase: any, organizationId: string,
 
       const ownerName = (orgMember.profiles as any)?.full_name || 'Clinic Owner';
 
-      await resend.emails.send({
+      const { data, error: emailError } = await resend.emails.send({
         from: 'Clerixs <noreply@clerixs.com>',
         to: [ownerEmail],
         subject: 'WhatsApp Credits Added ✓',
@@ -381,5 +396,12 @@ async function sendWhatsAppPackEmail(adminSupabase: any, organizationId: string,
           </div>
         `
       });
+
+      if (emailError) {
+        console.error('[Verify Payment] Resend failed to send WhatsApp pack email:', emailError);
+        throw new Error(emailError.message);
+      } else {
+        console.log('[Verify Payment] Resend successfully sent WhatsApp pack email:', data);
+      }
     }
 }

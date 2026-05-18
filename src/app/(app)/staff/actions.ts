@@ -4,6 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import crypto from 'crypto';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,11 +23,18 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('default_organization_id')
+      .select('default_organization_id, full_name')
       .eq('id', userData.user.id)
       .single();
 
     if (!profile?.default_organization_id) return { error: 'No active organization found' };
+
+    // Fetch clinic organization name
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', profile.default_organization_id)
+      .single();
 
     // 2. Validate payload
     const validatedData = inviteSchema.parse(data);
@@ -70,9 +80,6 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
       return { error: `Staff limit reached. Your plan allows up to ${maxStaff} staff members (including pending invites). Upgrade to Pro for more.` };
     }
 
-    // 3. Optional: check if they are already in the organization
-    // ...
-
     // 4. Generate token
     const token = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -102,8 +109,58 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
       return { error: insertError.message };
     }
 
-    // TODO: In a real app, you would dispatch an email here containing the cleartext `token` link.
-    // e.g. sendEmail(email, `https://clerixs.com/invite?token=${token}`)
+    // 6. Send Invitation Email using Resend
+    const inviterName = profile?.full_name || 'A clinic administrator';
+    const clinicName = org?.name || 'their clinic';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const inviteUrl = `${siteUrl}/invite?token=${token}`;
+
+    const { error: emailError } = await resend.emails.send({
+      from: 'Clerixs <noreply@clerixs.com>',
+      to: [validatedData.email.toLowerCase()],
+      subject: `Invitation to join ${clinicName} on Clerixs`,
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #1e293b; background-color: #f8fafc;">
+          <div style="background-color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+            <div style="margin-bottom: 32px; text-align: center;">
+              <h1 style="color: #2563eb; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">CLERIXS</h1>
+            </div>
+            
+            <h2 style="margin-top: 0; margin-bottom: 16px; color: #0f172a; font-size: 20px; font-weight: 700; text-align: center;">Join the Clinic Workspace</h2>
+            <p style="margin-bottom: 24px; line-height: 1.6; color: #475569; text-align: center;">
+              <strong>${inviterName}</strong> has invited you to join the clinic <strong>${clinicName}</strong> on Clerixs as a <strong>${validatedData.role}</strong>.
+            </p>
+            
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${inviteUrl}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                Accept Invitation
+              </a>
+            </div>
+            
+            <p style="margin-bottom: 24px; line-height: 1.6; color: #475569; font-size: 13px; text-align: center;">
+              If the button above does not work, copy and paste this URL into your browser:<br />
+              <a href="${inviteUrl}" style="color: #2563eb; word-break: break-all;">${inviteUrl}</a>
+            </p>
+            
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+            <p style="margin-bottom: 0; font-size: 13px; color: #94a3b8; text-align: center;">
+              This invitation was sent by Clerixs on behalf of ${clinicName}. If you were not expecting this invite, you can safely ignore this email.
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 32px;">
+            <p style="font-size: 12px; color: #94a3b8; margin: 0;">&copy; ${new Date().getFullYear()} Clerixs — The Smart Clinic Management Platform.</p>
+          </div>
+        </div>
+      `
+    });
+
+    if (emailError) {
+      console.error('[Invite Staff] Resend email delivery failed:', emailError);
+      revalidatePath('/staff');
+      // Return success with emailError indicator so UI can adapt
+      return { success: true, token, emailError: emailError.message };
+    }
 
     revalidatePath('/staff');
     return { success: true, token };

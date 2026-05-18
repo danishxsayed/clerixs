@@ -181,7 +181,7 @@ export async function acceptInvite(formData: FormData) {
     // Check if they already have a membership from the backend trigger!
     const { data: existingMembership } = await supabase
       .from('organization_memberships')
-      .select('id')
+      .select('id, role')
       .eq('organization_id', invite.organization_id)
       .eq('profile_id', userId)
       .maybeSingle();
@@ -196,6 +196,17 @@ export async function acceptInvite(formData: FormData) {
       if (processError) {
         console.error('Invite processing error:', processError);
         return redirect(`/invite?token=${token}&message=Failed to attach you to the clinic.`)
+      }
+    } else {
+      // If they already have a membership, just neutralize the invite record without modifying their role!
+      const { error: updateError } = await supabase
+        .from('staff_invites')
+        .update({ accepted_at: new Date().toISOString() })
+        .eq('id', invite.id);
+
+      if (updateError) {
+        console.error('Failed to mark existing membership invite as accepted:', updateError);
+        return redirect(`/invite?token=${token}&message=Failed to complete invitation processing.`);
       }
     }
   }

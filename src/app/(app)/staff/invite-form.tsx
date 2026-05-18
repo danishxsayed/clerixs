@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Check, Copy } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   Form,
   FormControl,
@@ -35,6 +36,7 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [inviteLink, setInviteLink] = React.useState<string | null>(null);
+  const [emailError, setEmailError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   const form = useForm<z.infer<typeof inviteSchema>>({
@@ -53,7 +55,14 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
         return;
       }
       
-      toast.success('Invitation created successfully!');
+      if (result.emailError) {
+        toast.warning('Invitation created, but failed to send email.');
+        setEmailError(result.emailError);
+      } else {
+        toast.success('Invitation sent successfully via email!');
+        setEmailError(null);
+      }
+
       if (result.token) {
         setInviteLink(`${window.location.origin}/invite?token=${result.token}`);
       }
@@ -89,10 +98,22 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
   if (inviteLink) {
     return (
       <div className="space-y-4 pt-2">
-        <div className="rounded-md bg-emerald-50 p-4 border border-emerald-200">
-          <h3 className="text-sm font-medium text-emerald-800 mb-1">Invitation Ready</h3>
-          <p className="text-sm text-emerald-600">
-            Email services are currently inactive. Please copy this secure invite link and send it directly to the staff member.
+        <div className={cn(
+          "rounded-md p-4 border",
+          emailError 
+            ? "bg-amber-50 border-amber-200 text-amber-800" 
+            : "bg-emerald-50 border-emerald-200 text-emerald-800"
+        )}>
+          <h3 className="text-sm font-medium mb-1">
+            {emailError ? 'Invitation Ready (Email Delivery Failed)' : 'Invitation Sent ✓'}
+          </h3>
+          <p className={cn(
+            "text-sm",
+            emailError ? "text-amber-600" : "text-emerald-600"
+          )}>
+            {emailError 
+              ? `The invitation is created, but we couldn't send the invite email automatically: ${emailError}. Please copy the secure link below and send it directly.`
+              : "We have sent a secure invitation email to your colleague. You can also copy the secure invite link below to send to them directly."}
           </p>
         </div>
         <div className="flex items-center gap-2">
