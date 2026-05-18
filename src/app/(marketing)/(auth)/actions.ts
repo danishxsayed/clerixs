@@ -55,7 +55,10 @@ export async function signup(formData: FormData) {
       options: {
           data: {
               full_name: fullName
-          }
+          },
+          emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') 
+            ? 'http://localhost:3000' 
+            : 'https://clerixs.vercel.app'
       }
     })
     authError = error;
@@ -148,7 +151,10 @@ export async function acceptInvite(formData: FormData) {
             data: {
                 full_name: fullName,
                 is_staff_invite: 'true'
-            }
+            },
+            emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') 
+              ? 'http://localhost:3000' 
+              : 'https://clerixs.vercel.app'
         }
       })
       signUpDataResult = signUpData;
@@ -213,7 +219,7 @@ export async function requestPasswordReset(formData: FormData) {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') ? 'http://localhost:3000' : 'https://clerixs.vercel.app'}/reset-password`,
   });
 
   if (error) {
