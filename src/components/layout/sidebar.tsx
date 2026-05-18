@@ -128,7 +128,7 @@ export function Sidebar({
         </Link>
       </div>
 
-      <div className="mt-4 flex-1 px-3">
+      <div className="mt-4 flex-1 px-3 min-h-0">
         <ScrollArea className="h-full">
           <div className="space-y-1">
             {clinicItems.length > 0 && (

@@ -78,7 +78,7 @@ export function QueueClient({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 items-start">
         {initialDoctors.map((doctor, index) => {
           const doctorQueue = entries
             .filter(e => e.doctor_membership_id === doctor.id)
@@ -90,22 +90,22 @@ export function QueueClient({
             });
 
           return (
-            <div key={doctor.id} className="flex flex-col h-[calc(100vh-250px)]">
+            <div key={doctor.id} className="flex flex-col h-[60vh] min-h-[400px] md:h-[calc(100vh-250px)] min-w-0">
               <Card className={cn(
-                "border-t-4 shadow-sm h-full flex flex-col",
+                "border-t-4 shadow-sm h-full flex flex-col min-w-0",
                 doctorColors[index % doctorColors.length]
               )}>
                 <CardHeader className="py-4 px-5 border-b bg-white/50">
-                  <CardTitle className="text-lg flex items-center justify-between">
-                    <span className="truncate">Dr. {doctor.profiles.full_name}</span>
-                    <span className="text-xs bg-muted px-2 py-1 rounded-full font-normal">
+                  <CardTitle className="text-lg flex items-center justify-between min-w-0 gap-2">
+                    <span className="truncate flex-1">Dr. {doctor.profiles.full_name}</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full font-normal shrink-0">
                       {doctorQueue.filter(e => e.status !== 'completed').length} Waiting
                     </span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 flex-1 overflow-hidden">
-                  <ScrollArea className="h-full px-4 py-4">
-                    <div className="space-y-3">
+                  <ScrollArea className="h-full">
+                    <div className="space-y-3 p-2 sm:p-4">
                       {doctorQueue.length > 0 ? (
                         doctorQueue.map((entry, idx) => (
                           <PatientQueueCard 

@@ -239,11 +239,8 @@ export function TemplatesTab() {
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
-                      {/* @ts-expect-error - asChild type issue with DropdownMenuTrigger */}
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+                        <MoreVertical className="h-4 w-4 text-slate-700" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => startEdit(template)} className="cursor-pointer">

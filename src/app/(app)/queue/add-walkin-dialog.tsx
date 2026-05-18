@@ -385,7 +385,12 @@ export function AddWalkinDialog({
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a doctor" />
+                          <SelectValue placeholder="Select a doctor">
+                            {() => {
+                              const selectedDoctor = doctors.find((d) => d.id === field.value);
+                              return selectedDoctor ? `Dr. ${selectedDoctor.profiles.full_name}` : undefined;
+                            }}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

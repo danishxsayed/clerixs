@@ -127,13 +127,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   <SidebarDataFetcher userId={user.id} />
                 </Suspense>
               </div>
-              <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible">
+              <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible min-w-0">
                 <div className="print:hidden">
                   <Suspense fallback={<TopbarSkeleton />}>
                     <TopbarDataFetcher userId={user.id} userEmail={user.email || ''} />
                   </Suspense>
                 </div>
-                <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-6 print:p-0">
+                <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-3 sm:p-6 print:p-0">
                   {children}
                 </main>
               </div>
