@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { createPatient } from '../actions';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useBranch } from '@/contexts/BranchContext';
 
 const patientSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -22,6 +23,7 @@ const patientSchema = z.object({
   emergency_contact: z.string().regex(/^\d{10}$/, 'Must be exactly 10 digits').optional().or(z.literal('')),
   gender: z.enum(['male', 'female', 'other', 'prefer_not_to_say']).optional(),
   address: z.string().optional(),
+  branch_id: z.string().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientSchema>;
@@ -29,6 +31,7 @@ type PatientFormValues = z.infer<typeof patientSchema>;
 export default function NewPatientPage() {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
+  const { currentBranch, isAllBranches, branches } = useBranch();
 
   const {
     register,
@@ -48,6 +51,7 @@ export default function NewPatientPage() {
       emergency_contact: '',
       gender: 'prefer_not_to_say',
       address: '',
+      branch_id: '',
     },
   });
 
@@ -70,7 +74,7 @@ export default function NewPatientPage() {
           phone: data.phone ? `+91${data.phone}` : '',
           emergency_contact: data.emergency_contact ? `+91${data.emergency_contact}` : '',
         };
-        const result = await createPatient(payload);
+        const result = await createPatient(payload, data.branch_id || currentBranch?.id || undefined);
         if (result?.error) {
           toast.error(result.error);
         } else {
@@ -95,6 +99,23 @@ export default function NewPatientPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             
+            {isAllBranches && (
+              <div className="space-y-2">
+                <Label htmlFor="branch_id">Branch <span className="text-destructive">*</span></Label>
+                <select 
+                  id="branch_id" 
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  {...register('branch_id', { required: isAllBranches ? "Branch is required" : false })}
+                >
+                  <option value="">Select a branch</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+                {errors.branch_id && <p className="text-xs text-destructive">{errors.branch_id.message}</p>}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="full_name">Full Name <span className="text-destructive">*</span></Label>

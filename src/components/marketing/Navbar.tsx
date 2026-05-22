@@ -12,9 +12,22 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [user, setUser] = React.useState<any>(null);
+  const [mounted, setMounted] = React.useState(false);
   const supabase = createClient();
 
+  const getAppUrl = (path: string) => {
+    if (!mounted) {
+      return process.env.NODE_ENV === 'development' ? path : `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.clerixs.com'}${path}`;
+    }
+    if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+      return path;
+    }
+    const appBase = process.env.NEXT_PUBLIC_APP_URL || 'https://app.clerixs.com';
+    return `${appBase}${path}`;
+  };
+
   React.useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -78,7 +91,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <Button asChild className="rounded-full px-6 font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
-              <Link href="/dashboard" className="flex items-center gap-2">
+              <Link href={getAppUrl('/dashboard')} className="flex items-center gap-2">
                 Dashboard
                 <ArrowRight size={16} />
               </Link>
@@ -86,10 +99,10 @@ export function Navbar() {
           ) : (
             <>
               <Button asChild variant="ghost" className="rounded-full px-6 font-bold text-slate-600 hover:text-primary">
-                <Link href="/login">Sign In</Link>
+                <Link href={getAppUrl('/auth/login')}>Sign In</Link>
               </Button>
               <Button asChild className="rounded-full px-6 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95">
-                <Link href="/signup" className="flex items-center gap-2">
+                <Link href={getAppUrl('/auth/signup')} className="flex items-center gap-2">
                   Get Started
                   <ArrowRight size={16} />
                 </Link>
@@ -133,15 +146,15 @@ export function Navbar() {
               <div className="flex flex-col gap-4 pt-6">
                 {user ? (
                   <Button asChild size="lg" className="rounded-2xl font-bold bg-primary w-full h-14">
-                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Go to Dashboard</Link>
+                    <Link href={getAppUrl('/dashboard')} onClick={() => setIsMobileMenuOpen(false)}>Go to Dashboard</Link>
                   </Button>
                 ) : (
                   <>
                     <Button asChild variant="outline" size="lg" className="rounded-2xl font-bold text-slate-900 border-slate-200 w-full h-14">
-                      <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
+                      <Link href={getAppUrl('/auth/login')} onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
                     </Button>
                     <Button asChild size="lg" className="rounded-2xl font-bold bg-primary w-full h-14">
-                      <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
+                      <Link href={getAppUrl('/auth/signup')} onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
                     </Button>
                   </>
                 )}

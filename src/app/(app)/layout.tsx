@@ -5,8 +5,9 @@ import { WorkspacePoller } from '@/components/layout/workspace-poller';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { signout } from '@/app/(marketing)/(auth)/actions';
+import { signout } from '@/app/auth/actions';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import { BranchProvider } from '@/contexts/BranchContext';
 import { TrialBanner } from '@/components/subscription/TrialBanner';
 import { LockScreen } from '@/components/subscription/LockScreen';
 import { Suspense } from 'react';
@@ -49,7 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   
   // 1. Critical Auth Path
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
 
   // 2. Fetch User Profile
   const { data: profile } = await supabase
@@ -77,7 +78,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const adminSupabase = createAdminClient();
   const [{ data: org }, { data: membership }, { data: subData }] = await Promise.all([
     supabase.from('organizations').select('onboarding_completed, created_at').eq('id', profile.default_organization_id).single(),
-    supabase.from('organization_memberships').select('status').eq('organization_id', profile.default_organization_id).eq('profile_id', user.id).single(),
+    supabase.from('organization_memberships').select('status, role').eq('organization_id', profile.default_organization_id).eq('profile_id', user.id).single(),
     adminSupabase.from('organization_subscriptions').select('status, trial_ends_at, current_period_end, plan:subscription_plans!organization_subscriptions_plan_id_fkey(name, plan_code, max_staff, features)').eq('organization_id', profile.default_organization_id).maybeSingle()
   ]);
 
@@ -119,7 +120,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     >
       <SubscriptionProvider subscription={formattedSubData} orgCreatedAt={org?.created_at}>
         <LockScreen>
-          <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
+          <BranchProvider organizationId={profile.default_organization_id} userRole={membership?.role || 'admin'}>
+            <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
             <TrialBanner />
             <div className="flex flex-1 overflow-hidden">
               <div className="print:hidden h-full">
@@ -142,6 +144,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <GlobalVoicePTT />
             <KeyboardShortcutsManager />
           </div>
+          </BranchProvider>
         </LockScreen>
       </SubscriptionProvider>
     </ThemeProvider>

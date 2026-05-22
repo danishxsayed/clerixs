@@ -28,7 +28,7 @@ export default async function AppointmentsPage({
   const itemsPerPage = 50;
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
 
   const { data: profile } = await supabase.from('profiles').select('default_organization_id').eq('id', user.id).single();
   const orgId = profile?.default_organization_id;

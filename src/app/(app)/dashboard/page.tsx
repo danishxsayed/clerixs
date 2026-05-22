@@ -4,8 +4,10 @@ import { IndianRupee, Users, Stethoscope, ArrowUpRight, ArrowDownRight } from 'l
 import { createClient } from '@/lib/supabase/server';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { Greeting } from '@/components/dashboard/greeting';
+import { BranchBreakdown } from '@/components/dashboard/branch-breakdown';
 import Link from 'next/link';
 import { ListFilter } from '@/components/ui/list-filter';
+import { cookies } from 'next/headers';
 
 export default async function DashboardPage({
   searchParams,
@@ -15,6 +17,9 @@ export default async function DashboardPage({
   const { filter = 'month', date = '' } = await searchParams;
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
+
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -54,6 +59,7 @@ export default async function DashboardPage({
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', orgId)
     .eq('is_active', true);
+  if (selectedBranchId && selectedBranchId !== 'all') patientsQuery = patientsQuery.eq('branch_id', selectedBranchId);
   if (startDate) patientsQuery = patientsQuery.gte('created_at', startDate.toISOString());
   const { count: totalPatients } = await patientsQuery;
 
@@ -62,6 +68,7 @@ export default async function DashboardPage({
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', orgId)
     .eq('status', 'completed');
+  if (selectedBranchId && selectedBranchId !== 'all') treatmentsQuery = treatmentsQuery.eq('branch_id', selectedBranchId);
   if (startDate) treatmentsQuery = treatmentsQuery.gte('created_at', startDate.toISOString());
   const { count: completedTreatments } = await treatmentsQuery;
 
@@ -70,6 +77,7 @@ export default async function DashboardPage({
     .from('payments')
     .select('amount')
     .eq('organization_id', orgId);
+  if (selectedBranchId && selectedBranchId !== 'all') cashflowQuery = cashflowQuery.eq('branch_id', selectedBranchId);
   if (startDate) cashflowQuery = cashflowQuery.gte('payment_date', startDate.toISOString().split('T')[0]);
   const { data: cashflowPayments } = await cashflowQuery;
   const cashflow = cashflowPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
@@ -82,11 +90,14 @@ export default async function DashboardPage({
       monthlyRevenueMap[monthName] = 0;
   }
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
-  const { data: chartPayments } = await supabase
+  let chartPaymentsQuery = supabase
     .from('payments')
     .select('amount, payment_date')
     .eq('organization_id', orgId)
     .gte('payment_date', sixMonthsAgo.split('T')[0]);
+  if (selectedBranchId && selectedBranchId !== 'all') chartPaymentsQuery = chartPaymentsQuery.eq('branch_id', selectedBranchId);
+  
+  const { data: chartPayments } = await chartPaymentsQuery;
 
   if (chartPayments) {
     chartPayments.forEach((payment) => {
@@ -107,19 +118,23 @@ export default async function DashboardPage({
 
   // 2. Fetch Appointments for the Target Date
   const targetDate = date ? new Date(date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-  const { count: realTodaysAppointments } = await supabase
+  let realTodaysAppointmentsQuery = supabase
     .from('appointments')
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', orgId)
     .eq('appointment_date', targetDate);
+  if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsQuery = realTodaysAppointmentsQuery.eq('branch_id', selectedBranchId);
+  const { count: realTodaysAppointments } = await realTodaysAppointmentsQuery;
 
-  const { data: realTodaysAppointmentsList } = await supabase
+  let realTodaysAppointmentsListQuery = supabase
     .from('appointments')
     .select('id, start_time, chief_complaint, status, patients(full_name)')
     .eq('organization_id', orgId)
     .eq('appointment_date', targetDate)
     .order('start_time', { ascending: true })
     .limit(5);
+  if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsListQuery = realTodaysAppointmentsListQuery.eq('branch_id', selectedBranchId);
+  const { data: realTodaysAppointmentsList } = await realTodaysAppointmentsListQuery;
 
   // DEMO DATA LOGIC
   const isDataEmpty = (totalPatients || 0) === 0 && (completedTreatments || 0) === 0 && cashflow === 0 && (realTodaysAppointments || 0) === 0;
@@ -253,6 +268,12 @@ export default async function DashboardPage({
           </CardContent>
         </Card>
       </div>
+
+      {(!selectedBranchId || selectedBranchId === 'all') && (
+        <React.Suspense fallback={<div className="h-48 rounded-2xl border-none shadow-sm col-span-full mt-6 bg-muted animate-pulse" />}>
+          <BranchBreakdown orgId={orgId} startDate={startDate} />
+        </React.Suspense>
+      )}
 
       <div className="grid gap-6 md:grid-cols-7">
         {isOwner && (

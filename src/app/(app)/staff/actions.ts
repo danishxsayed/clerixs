@@ -11,6 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']), // Using 'admin' in UI mapped to 'org_owner' in DB
+  branch_id: z.string().min(1, 'Branch selection is required'),
 });
 
 export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
@@ -94,6 +95,7 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
         organization_id: profile.default_organization_id,
         email: validatedData.email.toLowerCase(),
         role: dbRole,
+        branch_ids: [validatedData.branch_id],
         invite_token_hash: tokenHash,
         expires_at: expiresAt.toISOString(),
         created_by: userData.user.id,

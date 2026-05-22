@@ -31,6 +31,14 @@ import { ThemeToggle } from './theme-toggle';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/client';
+import { useBranch } from '@/contexts/BranchContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const SIDEBAR_ITEMS = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['org_owner', 'doctor', 'receptionist'] },
@@ -66,6 +74,9 @@ export function Sidebar({
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const { subscription } = useSubscription();
   const [credits, setCredits] = React.useState<{ balance: number; total_used: number } | null>(null);
+  
+  const { branches, currentBranch, setCurrentBranch, setAllBranches, isAllBranches } = useBranch();
+  const showBranchSwitcher = userRole === 'org_owner' || userRole === 'admin';
 
   const fetchCredits = React.useCallback(async () => {
     const supabase = createClient();
@@ -127,6 +138,47 @@ export function Sidebar({
           {!isCollapsed && <span className="text-xl font-bold">Clerixs</span>}
         </Link>
       </div>
+
+      {showBranchSwitcher && !isCollapsed && branches.length > 0 && (
+        <div className="px-4 py-2">
+          <Select 
+            value={isAllBranches ? 'all' : (currentBranch?.id || '')} 
+            onValueChange={(val) => {
+              if (val === 'all') setAllBranches();
+              else if (val) setCurrentBranch(val as string);
+            }}
+          >
+            <SelectTrigger className="w-full bg-muted/50 border-none shadow-none h-9">
+              <SelectValue placeholder="Select Branch" />
+            </SelectTrigger>
+            <SelectContent>
+              {(userRole === 'org_owner') && (
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>All Branches</span>
+                  </div>
+                </SelectItem>
+              )}
+              {branches.map(b => (
+                <SelectItem key={b.id} value={b.id}>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate max-w-[140px]">{b.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      {showBranchSwitcher && isCollapsed && branches.length > 0 && (
+         <div className="px-2 py-2 flex justify-center">
+             <div className="h-9 w-9 flex items-center justify-center rounded-md bg-muted/50 text-muted-foreground" title={isAllBranches ? "All Branches" : currentBranch?.name}>
+                 <Building2 className="h-5 w-5" />
+             </div>
+         </div>
+      )}
 
       <div className="mt-4 flex-1 px-3 min-h-0">
         <ScrollArea className="h-full">

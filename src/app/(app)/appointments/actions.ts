@@ -13,7 +13,7 @@ const appointmentSchema = z.object({
   provider_id: z.string().optional(),
 });
 
-export async function createAppointment(formData: z.infer<typeof appointmentSchema>) {
+export async function createAppointment(formData: z.infer<typeof appointmentSchema>, branchIdOverride?: string) {
   const supabase = await createClient();
 
   // 1. Get current user
@@ -46,13 +46,15 @@ export async function createAppointment(formData: z.infer<typeof appointmentSche
   // Supabase returns joined tables as arrays (even with !inner and single())
   // The actual type structure looks like: branch_memberships: [{ branch_id: 'uuid' }]
   const branchMemberships = membershipData.branch_memberships as any;
-  const branchId = Array.isArray(branchMemberships) 
+  const derivedBranchId = Array.isArray(branchMemberships) 
     ? branchMemberships[0]?.branch_id 
     : branchMemberships?.branch_id;
 
+  const branchId = branchIdOverride || derivedBranchId;
+
   if (!branchId) {
      console.error("Failed to extract branch_id from:", branchMemberships);
-     return { error: 'Could not resolve your branch assignment.' };
+     return { error: 'Please select a branch to schedule the appointment in.' };
   }
 
   const organizationId = membershipData.organization_id;

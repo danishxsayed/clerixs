@@ -26,10 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useBranch } from '@/contexts/BranchContext';
 
 const inviteSchema = z.object({
   email: z.string().email('Invalid email address'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']),
+  branch_id: z.string().min(1, 'Branch selection is required'),
 });
 
 export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -44,8 +46,11 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
     defaultValues: {
       email: '',
       role: 'doctor',
+      branch_id: '',
     },
   });
+
+  const { branches } = useBranch();
 
   function onSubmit(values: z.infer<typeof inviteSchema>) {
     startTransition(async () => {
@@ -164,6 +169,28 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
                   <SelectItem value="doctor">Doctor</SelectItem>
                   <SelectItem value="receptionist">Receptionist</SelectItem>
                   <SelectItem value="laboratory">Laboratory Technician</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="branch_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Primary Branch</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a branch" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {branches.map(b => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -16,7 +16,7 @@ const patientSchema = z.object({
   address: z.string().optional(),
 });
 
-export async function createPatient(formData: z.infer<typeof patientSchema>) {
+export async function createPatient(formData: z.infer<typeof patientSchema>, branchIdOverride?: string) {
   const supabase = await createClient();
 
   // 1. Get current user
@@ -28,7 +28,7 @@ export async function createPatient(formData: z.infer<typeof patientSchema>) {
   // 2. Derive the organization_id from their active membership
   const { data: membership, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id')
+    .select('organization_id, branch_id')
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
@@ -39,7 +39,11 @@ export async function createPatient(formData: z.infer<typeof patientSchema>) {
   }
 
   const organizationId = membership.organization_id;
+  const branchId = branchIdOverride || membership.branch_id;
   
+  if (!branchId) {
+    return { error: 'Please select a branch to create the patient in.' };
+  }
   // 3. STORAGE QUOTA CHECK (Hard Blocking)
   try {
     const { ensureStorageQuota } = await import('@/lib/quota');
@@ -67,6 +71,7 @@ export async function createPatient(formData: z.infer<typeof patientSchema>) {
     .from('patients')
     .insert({
       organization_id: organizationId,
+      branch_id: branchId,
       patient_code: patientCode,
       full_name: formData.full_name,
       phone: formData.phone || null,
@@ -146,7 +151,7 @@ export async function updatePatient(patientId: string, formData: Partial<z.infer
   // 2. Derive the organization_id from their active membership
   const { data: membership, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id')
+    .select('organization_id, branch_id')
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
@@ -171,9 +176,11 @@ export async function updatePatient(patientId: string, formData: Partial<z.infer
       emergency_contact: formData.emergency_contact || null,
       gender: formData.gender || null,
       address: formData.address || null,
+      branch_id: membership.branch_id,
     })
     .eq('id', patientId)
-    .eq('organization_id', organizationId);
+    .eq('organization_id', organizationId)
+    .eq('branch_id', membership.branch_id);
 
   if (updateError) {
     console.error('Failed to update patient:', updateError);
@@ -199,7 +206,7 @@ export async function getPatientDashboard(patientId: string) {
   // 2. Derive the organization_id from their active membership
   const { data: membership, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id, role')
+    .select('organization_id, role, branch_id')
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
@@ -219,6 +226,7 @@ export async function getPatientDashboard(patientId: string) {
       .select('*')
       .eq('id', patientId)
       .eq('organization_id', organizationId)
+      .eq('branch_id', membership.branch_id)
       .single();
 
     if (patientError || !patient) throw new Error('Patient not found');
@@ -228,6 +236,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('appointments')
       .select('*')
       .eq('patient_id', patientId)
+      .eq('branch_id', membership.branch_id)
       .order('appointment_date', { ascending: false })
       .order('start_time', { ascending: false });
 
@@ -238,6 +247,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('invoices')
       .select('*, payments(*)')
       .eq('patient_id', patientId)
+      .eq('branch_id', membership.branch_id)
       .order('issue_date', { ascending: false });
 
     // 6. Fetch Patient Prescriptions
@@ -245,6 +255,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('prescriptions')
       .select('*, prescription_items(*), doctor_membership_id(profiles(full_name))')
       .eq('patient_id', patientId)
+      .eq('branch_id', membership.branch_id)
       .order('created_at', { ascending: false });
 
     if (prescriptionsError) throw new Error('Failed to fetch prescriptions');
@@ -254,6 +265,7 @@ export async function getPatientDashboard(patientId: string) {
        .from('lab_orders')
        .select('*, lab_order_items(lab_test_id, lab_tests(name), lab_package_id, lab_packages(name)), doctor_membership_id(profiles(full_name))')
        .eq('patient_id', patientId)
+       .eq('branch_id', membership.branch_id)
        .order('order_date', { ascending: false });
  
      // 8. Fetch Clinical Notes
@@ -261,6 +273,7 @@ export async function getPatientDashboard(patientId: string) {
        .from('clinical_notes')
        .select('*, author_membership_id(profile_id(full_name, avatar_url))')
        .eq('patient_id', patientId)
+       .eq('branch_id', membership.branch_id)
        .order('created_at', { ascending: false });
  
      return {

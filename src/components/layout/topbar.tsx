@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Search } from 'lucide-react';
-import { signout } from '@/app/(marketing)/(auth)/actions';
+import { signout } from '@/app/auth/actions';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';

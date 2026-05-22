@@ -59,6 +59,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
+  const isProd = process.env.NODE_ENV === 'production';
+
   const supabase = createServerClient(supabaseUrl!, supabaseAnonKey!, {
     cookies: {
       getAll() {
@@ -68,7 +70,10 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         supabaseResponse = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
+          supabaseResponse.cookies.set(name, value, {
+            ...options,
+            domain: isProd ? '.clerixs.com' : options.domain,
+          })
         );
       },
     },
@@ -83,14 +88,14 @@ export async function updateSession(request: NextRequest) {
   // Redirect unauthenticated users away from app routes
   if (!user && !isExemptPath(pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/auth/login';
     return NextResponse.redirect(url);
   }
 
   // Redirect authenticated users away from auth pages
   if (
     user &&
-    (pathname.startsWith('/login') || pathname.startsWith('/signup'))
+    (pathname.startsWith('/auth/login') || pathname.startsWith('/auth/signup') || pathname.startsWith('/login') || pathname.startsWith('/signup'))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';

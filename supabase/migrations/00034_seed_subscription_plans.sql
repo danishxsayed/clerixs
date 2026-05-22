@@ -39,8 +39,8 @@ INSERT INTO subscription_plans (
 (
   'pro',
   'Pro',
-  1599.00,
-  16999.00,
+  1999.00,
+  19999.00,
   3,
   5,
   -1,

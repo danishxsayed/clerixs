@@ -15,6 +15,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useBranch } from '@/contexts/BranchContext';
 
 const appointmentSchema = z.object({
   patient_id: z.string().min(1, 'Patient selection is required.'),
@@ -22,6 +23,7 @@ const appointmentSchema = z.object({
   start_time: z.string().min(1, 'Start time is required.'),
   treatment: z.string().optional(),
   provider_id: z.string().optional(),
+  branch_id: z.string().optional(),
 });
 
 type AppointmentFormValues = z.infer<typeof appointmentSchema>;
@@ -34,6 +36,7 @@ export default function NewAppointmentPage() {
   const [doctors, setDoctors] = React.useState<{ id: string; full_name: string }[]>([]);
   const [catalogItems, setCatalogItems] = React.useState<{ name: string; category: string }[]>([]);
   const [isLoadingPatients, setIsLoadingPatients] = React.useState(true);
+  const { currentBranch, isAllBranches, branches } = useBranch();
 
   // Fetch patients and doctors for the dropdown on mount
   React.useEffect(() => {
@@ -109,6 +112,7 @@ export default function NewAppointmentPage() {
       start_time: '09:00',
       treatment: 'Consultation',
       provider_id: '',
+      branch_id: '',
     },
   });
 
@@ -131,7 +135,7 @@ export default function NewAppointmentPage() {
           start_time: data.start_time.length === 5 ? `${data.start_time}:00` : data.start_time,
         };
 
-        const result = await createAppointment(formattedData);
+        const result = await createAppointment(formattedData, data.branch_id || currentBranch?.id || undefined);
         if (result?.error) {
           toast.error(result.error);
         } else {
@@ -156,6 +160,23 @@ export default function NewAppointmentPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             
+            {isAllBranches && (
+              <div className="space-y-2">
+                <Label htmlFor="branch_id">Branch <span className="text-destructive">*</span></Label>
+                <select 
+                  id="branch_id" 
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  {...register('branch_id', { required: isAllBranches ? "Branch is required" : false })}
+                >
+                  <option value="">Select a branch</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+                {errors.branch_id && <p className="text-xs text-destructive">{errors.branch_id.message}</p>}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="patient_id">Patient <span className="text-destructive">*</span></Label>
               <select 

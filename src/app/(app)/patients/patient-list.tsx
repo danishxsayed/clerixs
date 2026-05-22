@@ -4,6 +4,7 @@ import { PatientRowActions } from './patient-row-actions';
 import { ClickableTableRow } from '@/components/ui/clickable-table-row';
 import { ListPagination } from '@/components/ui/list-pagination';
 import { getDateRangeBounds } from '@/lib/utils';
+import { cookies } from 'next/headers';
 
 interface PatientListProps {
   query: string;
@@ -16,11 +17,18 @@ export async function PatientList({ query, statusFilter, dateFilter, page }: Pat
   const supabase = await createClient();
   const itemsPerPage = 50;
 
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
   let dbQuery = supabase
     .from('patients')
     .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range((page - 1) * itemsPerPage, page * itemsPerPage - 1);
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    dbQuery = dbQuery.eq('branch_id', selectedBranchId);
+  }
 
   if (query) {
     dbQuery = dbQuery.ilike('full_name', `%${query}%`);

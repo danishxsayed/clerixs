@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      { hostname: 'clerixs.com' },
+      { hostname: 'app.clerixs.com' },
+      { hostname: 'admin.clerixs.com' },
+    ],
+  },
 };
 
 export default nextConfig;

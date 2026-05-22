@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { QueueClient } from './queue-client';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export default async function QueuePage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -34,7 +35,10 @@ export default async function QueuePage() {
 
   // Fetch today's queue entries
   const today = new Date().toISOString().split('T')[0];
-  const { data: initialEntries } = await supabase
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
+  let queueQuery = supabase
     .from('queue_entries')
     .select(`
       *,
@@ -48,6 +52,12 @@ export default async function QueuePage() {
     .eq('organization_id', profile.default_organization_id)
     .gte('created_at', `${today}T00:00:00Z`)
     .order('queue_position', { ascending: true });
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    queueQuery = queueQuery.eq('branch_id', selectedBranchId);
+  }
+
+  const { data: initialEntries } = await queueQuery;
 
   return (
     <div className="space-y-6">

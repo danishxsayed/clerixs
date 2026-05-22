@@ -48,6 +48,11 @@ export async function StaffList() {
       profiles (
         id,
         full_name
+      ),
+      branch_memberships (
+        branches (
+          name
+        )
       )
     `)
     .eq('organization_id', profile.default_organization_id)
@@ -112,6 +117,7 @@ export async function StaffList() {
               <TableRow>
                 <TableHead>Member</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Branch</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead>Status</TableHead>
                 {isOwner && <TableHead className="text-right">Actions</TableHead>}
@@ -120,7 +126,7 @@ export async function StaffList() {
             <TableBody>
               {!memberships || memberships.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     No active team members found.
                   </TableCell>
                 </TableRow>
@@ -149,6 +155,9 @@ export async function StaffList() {
                       <div className="capitalize text-sm font-medium">
                           {membership.role === 'org_owner' ? 'Admin / Owner' : membership.role}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {membership.branch_memberships?.[0]?.branches?.name || 'All Branches'}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                         {new Date(membership.joined_at).toLocaleDateString()}

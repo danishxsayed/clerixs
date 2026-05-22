@@ -27,6 +27,18 @@ const staggerContainer: Variants = {
 export function LandingClient() {
   const { scrollYProgress } = useScroll();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  const getAppUrl = (path: string) => {
+    if (!mounted) {
+      return process.env.NODE_ENV === 'development' ? path : `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.clerixs.com'}${path}`;
+    }
+    if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+      return path;
+    }
+    const appBase = process.env.NEXT_PUBLIC_APP_URL || 'https://app.clerixs.com';
+    return `${appBase}${path}`;
+  };
 
   const testimonials = [
     {
@@ -56,6 +68,7 @@ export function LandingClient() {
   ];
 
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
@@ -105,7 +118,7 @@ export function LandingClient() {
 
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <Button asChild size="lg" className="h-14 px-8 rounded-full text-base font-semibold shadow-[0_8px_30px_rgb(37,99,235,0.2)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] transition-all hover:-translate-y-1">
-                  <Link href="/signup">
+                  <Link href={getAppUrl('/auth/signup')}>
                     Start 7-Day Free Trial
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -471,7 +484,7 @@ export function LandingClient() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Button asChild size="lg" className="h-14 px-10 rounded-full text-lg font-bold bg-white text-blue-600 hover:bg-slate-50 transition-transform hover:scale-105 shadow-xl shadow-black/10">
-                <Link href="/signup">Start Free Trial Now</Link>
+                <Link href={getAppUrl('/auth/signup')}>Start Free Trial Now</Link>
               </Button>
             </div>
             <p className="text-blue-200/60 text-sm mt-4">No credit card required. Cancel anytime.</p>

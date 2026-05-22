@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { InvoiceRowActions } from './invoice-row-actions';
 import { ListPagination } from '@/components/ui/list-pagination';
 import { getDateRangeBounds } from '@/lib/utils';
+import { cookies } from 'next/headers';
 
 interface InvoiceListProps {
   query: string;
@@ -24,6 +25,9 @@ export async function InvoiceList({
   const supabase = await createClient();
   const formatCurrency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format;
 
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
   let dbQuery = supabase
     .from('invoices')
     .select(`
@@ -33,6 +37,10 @@ export async function InvoiceList({
     .eq('organization_id', orgId)
     .order('created_at', { ascending: false })
     .range((page - 1) * itemsPerPage, page * itemsPerPage - 1);
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    dbQuery = dbQuery.eq('branch_id', selectedBranchId);
+  }
 
   if (statusFilter !== 'All') {
     dbQuery = dbQuery.eq('status', statusFilter.toLowerCase().replace(' ', '_'));

@@ -5,6 +5,7 @@ import { AppointmentRowActions } from './appointment-row-actions';
 import { AppointmentCalendar } from '@/components/appointments/appointment-calendar';
 import { ListPagination } from '@/components/ui/list-pagination';
 import { getDateRangeBounds } from '@/lib/utils';
+import { cookies } from 'next/headers';
 
 interface AppointmentListProps {
   view: string;
@@ -29,6 +30,9 @@ export async function AppointmentList({
 }: AppointmentListProps) {
   const supabase = await createClient();
 
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
   let dbQuery = supabase
     .from('appointments')
     .select(`
@@ -41,6 +45,10 @@ export async function AppointmentList({
     .eq('organization_id', orgId)
     .order('appointment_date', { ascending: true })
     .range((page - 1) * itemsPerPage, page * itemsPerPage - 1);
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    dbQuery = dbQuery.eq('branch_id', selectedBranchId);
+  }
 
   if (statusFilter !== 'All') {
     dbQuery = dbQuery.eq('status', statusFilter.toLowerCase());

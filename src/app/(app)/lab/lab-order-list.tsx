@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FlaskConical } from 'lucide-react';
+import { cookies } from 'next/headers';
 
 interface LabOrderListProps {
   orgId: string;
@@ -14,11 +15,18 @@ interface LabOrderListProps {
 export async function LabOrderList({ orgId }: LabOrderListProps) {
   const supabase = await createClient();
 
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
   let dbQuery = supabase
     .from('lab_orders')
     .select('*, patients(full_name, patient_code), lab_samples(status, sample_type), lab_order_items(lab_test_id, lab_tests(name))')
     .eq('organization_id', orgId)
     .order('order_date', { ascending: false });
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    dbQuery = dbQuery.eq('branch_id', selectedBranchId);
+  }
 
   const { data: labOrders, error } = await dbQuery;
 

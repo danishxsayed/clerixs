@@ -4,6 +4,7 @@ import { TreatmentRowActions } from './treatment-row-actions';
 import { ListPagination } from '@/components/ui/list-pagination';
 import { getDateRangeBounds } from '@/lib/utils';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 interface TreatmentListProps {
   query: string;
@@ -38,6 +39,9 @@ export async function TreatmentList({ query, statusFilter, dateFilter, page }: T
     }
   }
 
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
   let dbQuery = supabase
     .from('treatments')
     .select(`
@@ -46,6 +50,10 @@ export async function TreatmentList({ query, statusFilter, dateFilter, page }: T
     `, { count: 'exact' })
     .order('created_at', { ascending: false })
     .range((page - 1) * itemsPerPage, page * itemsPerPage - 1);
+
+  if (selectedBranchId && selectedBranchId !== 'all') {
+    dbQuery = dbQuery.eq('branch_id', selectedBranchId);
+  }
 
   if (statusFilter !== 'All') {
     dbQuery = dbQuery.eq('status', statusFilter.toLowerCase().replace(' ', '_'));
