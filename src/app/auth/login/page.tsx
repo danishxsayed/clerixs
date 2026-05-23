@@ -136,7 +136,7 @@ export default async function LoginPage({
 
              <div className="text-center text-sm text-slate-600 pt-4">
                Don&apos;t have an account?{' '}
-               <Link href="/signup" className="font-bold text-primary hover:underline">
+               <Link href="/auth/signup" className="font-bold text-primary hover:underline">
                  Sign up
                </Link>
              </div>
