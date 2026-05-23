@@ -138,14 +138,15 @@ export const BranchProvider = ({
               for (const mem of memberships) {
                 const bMems = Array.isArray(mem.branch_memberships) ? mem.branch_memberships : [mem.branch_memberships];
                 for (const bm of bMems) {
-                  if (bm && bm.branches) {
+                  const branchObj = (Array.isArray(bm.branches) ? bm.branches[0] : bm.branches) as any;
+                  if (bm && branchObj) {
                     list.push({
                       id: bm.branch_id,
-                      name: bm.branches.name,
-                      city: bm.branches.city || undefined,
-                      state: bm.branches.state || undefined,
-                      phone: bm.branches.phone || undefined,
-                      status: bm.branches.is_active ? 'active' : 'inactive',
+                      name: branchObj.name,
+                      city: branchObj.city || undefined,
+                      state: branchObj.state || undefined,
+                      phone: branchObj.phone || undefined,
+                      status: branchObj.is_active ? 'active' : 'inactive',
                     });
                   }
                 }
