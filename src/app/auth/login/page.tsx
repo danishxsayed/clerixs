@@ -2,6 +2,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
@@ -128,9 +129,9 @@ export default async function LoginPage({
                  </div>
                )}
                
-               <Button type="submit" className="w-full h-14 text-lg font-bold bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] rounded-xl">
+               <SubmitButton className="w-full h-14 text-lg font-bold bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] rounded-xl">
                  Login
-               </Button>
+               </SubmitButton>
              </form>
 
              <div className="text-center text-sm text-slate-600 pt-4">

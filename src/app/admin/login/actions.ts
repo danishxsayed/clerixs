@@ -31,7 +31,7 @@ export async function adminLogin(formData: FormData) {
     return redirect(`/admin/login?message=${authError?.message || 'Invalid credentials'}`)
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL || 'clerixsofficial@gmail.com'
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@clerixs.com'
 
   if (user.email !== adminEmail) {
     // If authenticated but email does not match administrative threshold, sign out immediately and deny access

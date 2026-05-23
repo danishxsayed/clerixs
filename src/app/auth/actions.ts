@@ -13,7 +13,7 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string
 
   if (!email || !password) {
-    return redirect('/login?message=Email and password are required')
+    return redirect('/auth/login?message=Email and password are required')
   }
 
   let authError;
@@ -29,7 +29,7 @@ export async function login(formData: FormData) {
   }
 
   if (authError) {
-    return redirect(`/login?message=${authError.message}`)
+    return redirect(`/auth/login?message=${authError.message}`)
   }
 
   revalidatePath('/', 'layout')
@@ -44,7 +44,7 @@ export async function signup(formData: FormData) {
   const fullName = formData.get('fullName') as string
 
   if (!email || !password || !fullName) {
-    return redirect('/signup?message=All fields are required')
+    return redirect('/auth/signup?message=All fields are required')
   }
 
   let authError;
@@ -68,7 +68,7 @@ export async function signup(formData: FormData) {
   }
 
   if (authError) {
-    return redirect(`/signup?message=${authError.message}`)
+    return redirect(`/auth/signup?message=${authError.message}`)
   }
 
   revalidatePath('/', 'layout')
@@ -80,7 +80,7 @@ export async function signout() {
   await supabase.auth.signOut()
   
   revalidatePath('/', 'layout')
-  redirect('/login')
+  redirect('/auth/login')
 }
 
 export async function acceptInvite(formData: FormData) {
@@ -92,7 +92,7 @@ export async function acceptInvite(formData: FormData) {
   const fullName = formData.get('fullName') as string
 
   if (!token || !email || !password || !fullName) {
-    return redirect(`/invite?token=${token}&message=All fields are required`)
+    return redirect(`/auth/invite?token=${token}&message=All fields are required`)
   }
 
   // 1. Hash securely to find invite
@@ -114,19 +114,19 @@ export async function acceptInvite(formData: FormData) {
   }
 
   if (inviteErrorObj || !inviteData) {
-    return redirect('/login?message=Invalid or expired invite link. Please ask your admin to re-send it.')
+    return redirect('/auth/login?message=Invalid or expired invite link. Please ask your admin to re-send it.')
   }
 
   const invite = inviteData;
 
   // Check Expiry
   if (new Date(invite.expires_at) < new Date()) {
-    return redirect('/login?message=This invite link has expired.')
+    return redirect('/auth/login?message=This invite link has expired.')
   }
 
   // Double check emails match
   if (invite.email.toLowerCase() !== email.toLowerCase()) {
-    return redirect(`/invite?token=${token}&message=This invite is strictly for ${invite.email}`)
+    return redirect(`/auth/invite?token=${token}&message=This invite is strictly for ${invite.email}`)
   }
 
   // 2. Try signing in first (for existing or zombie users)
@@ -166,13 +166,13 @@ export async function acceptInvite(formData: FormData) {
 
     if (signUpErrorObj) {
       if (signUpErrorObj.message.includes('already registered')) {
-        return redirect(`/invite?token=${token}&message=Account exists. Please use your exact existing password to accept the invite.`)
+        return redirect(`/auth/invite?token=${token}&message=Account exists. Please use your exact existing password to accept the invite.`)
       }
-      return redirect(`/invite?token=${token}&message=${signUpErrorObj.message}`)
+      return redirect(`/auth/invite?token=${token}&message=${signUpErrorObj.message}`)
     }
 
     if (!signUpDataResult?.user) {
-      return redirect(`/invite?token=${token}&message=Failed to create account.`)
+      return redirect(`/auth/invite?token=${token}&message=Failed to create account.`)
     }
     userId = signUpDataResult.user.id;
   }
@@ -195,7 +195,7 @@ export async function acceptInvite(formData: FormData) {
 
       if (processError) {
         console.error('Invite processing error:', processError);
-        return redirect(`/invite?token=${token}&message=Failed to attach you to the clinic.`)
+        return redirect(`/auth/invite?token=${token}&message=Failed to attach you to the clinic.`)
       }
     } else {
       // If they already have a membership, just neutralize the invite record without modifying their role!
@@ -206,7 +206,7 @@ export async function acceptInvite(formData: FormData) {
 
       if (updateError) {
         console.error('Failed to mark existing membership invite as accepted:', updateError);
-        return redirect(`/invite?token=${token}&message=Failed to complete invitation processing.`);
+        return redirect(`/auth/invite?token=${token}&message=Failed to complete invitation processing.`);
       }
     }
   }
@@ -214,7 +214,7 @@ export async function acceptInvite(formData: FormData) {
   if (isNewUser) {
     await supabase.auth.signOut()
     revalidatePath('/', 'layout')
-    redirect('/login?message=To join the clinic please check your inbox and verify your email, then try to login.')
+    redirect('/auth/login?message=To join the clinic please check your inbox and verify your email, then try to login.')
   }
 
   revalidatePath('/', 'layout')
@@ -226,18 +226,18 @@ export async function requestPasswordReset(formData: FormData) {
   const email = formData.get('email') as string;
 
   if (!email) {
-    return redirect('/forgot-password?message=Email is required');
+    return redirect('/auth/forgot-password?message=Email is required');
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') ? 'http://localhost:3000' : 'https://clerixs.vercel.app'}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') ? 'http://localhost:3000' : 'https://clerixs.vercel.app'}/auth/reset-password`,
   });
 
   if (error) {
-    return redirect(`/forgot-password?message=${error.message}`);
+    return redirect(`/auth/forgot-password?message=${error.message}`);
   }
 
-  return redirect(`/forgot-password?success=${encodeURIComponent('Check your email for the password reset link.')}`);
+  return redirect(`/auth/forgot-password?success=${encodeURIComponent('Check your email for the password reset link.')}`);
 }
 
 export async function updatePassword(formData: FormData) {
@@ -245,14 +245,14 @@ export async function updatePassword(formData: FormData) {
   const password = formData.get('password') as string;
 
   if (!password || password.length < 6) {
-    return redirect('/reset-password?message=Password must be at least 6 characters');
+    return redirect('/auth/reset-password?message=Password must be at least 6 characters');
   }
 
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    return redirect(`/reset-password?message=${error.message}`);
+    return redirect(`/auth/reset-password?message=${error.message}`);
   }
 
-  return redirect(`/reset-password?success=${encodeURIComponent('Password has been successfully updated.')}`);
+  return redirect(`/auth/reset-password?success=${encodeURIComponent('Password has been successfully updated.')}`);
 }

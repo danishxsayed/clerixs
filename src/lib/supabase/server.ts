@@ -34,7 +34,7 @@ export async function requireAuthAndRole(allowedRoles: string[]) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/auth/login')
   }
 
   const { data: membership } = await supabase
