@@ -50,37 +50,50 @@ export default async function AdminSubscriptionsPage() {
       </div>
 
       {/* Subscriptions Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
-              <th className="py-4 px-6">Clinic organization</th>
-              <th className="py-4 px-6">Billing Plan</th>
-              <th className="py-4 px-6">Price Point</th>
-              <th className="py-4 px-6">Interval</th>
-              <th className="py-4 px-6">Next Billing Date</th>
-              <th className="py-4 px-6">Payment Gateway</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
-            {subscriptions.map((sub) => (
-              <tr key={sub.id} className="hover:bg-slate-50/50 transition-all">
-                <td className="py-4 px-6 text-slate-900 font-bold">{sub.clinic}</td>
-                <td className="py-4 px-6 text-slate-600 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-emerald-600" />
-                  {sub.plan}
-                </td>
-                <td className="py-4 px-6 font-semibold text-slate-900">{sub.price}</td>
-                <td className="py-4 px-6 text-slate-500">{sub.billingCycle}</td>
-                <td className="py-4 px-6 text-slate-500">{sub.nextBilling}</td>
-                <td className="py-4 px-6 text-emerald-600 flex items-center gap-1">
-                  <ShieldCheck className="h-4 w-4" />
-                  {sub.gateway}
-                </td>
+      <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100/60 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                <th className="py-5 px-8">Clinic organization</th>
+                <th className="py-5 px-8">Billing Plan</th>
+                <th className="py-5 px-8">Price Point</th>
+                <th className="py-5 px-8">Interval</th>
+                <th className="py-5 px-8">Next Billing Date</th>
+                <th className="py-5 px-8">Payment Gateway</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-50 text-sm font-semibold text-slate-700">
+              {subscriptions.map((sub: any) => (
+                <tr key={sub.id} className="hover:bg-slate-50/80 hover:shadow-[inset_4px_0_0_rgb(16,185,129)] transition-all duration-300 group">
+                  <td className="py-5 px-8 text-slate-900 font-black tracking-tight">{sub.clinic}</td>
+                  <td className="py-5 px-8 text-slate-600 flex items-center gap-3">
+                    <div className="h-8 w-8 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100/50">
+                      <CreditCard className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    {sub.plan}
+                  </td>
+                  <td className="py-5 px-8 font-black text-slate-900">{sub.price}</td>
+                  <td className="py-5 px-8">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase bg-slate-50 text-slate-500 border border-slate-200/50">
+                      {sub.billingCycle}
+                    </span>
+                  </td>
+                  <td className="py-5 px-8 text-slate-400 font-medium">{sub.nextBilling}</td>
+                  <td className="py-5 px-8">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${
+                      sub.gateway === 'Cashfree' ? 'bg-blue-50 text-blue-600 border-blue-200/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]' :
+                      'bg-slate-50 text-slate-600 border-slate-200/50'
+                    }`}>
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      {sub.gateway}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

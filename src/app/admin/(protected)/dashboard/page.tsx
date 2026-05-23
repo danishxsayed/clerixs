@@ -32,35 +32,50 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Overview</h2>
-        <p className="text-slate-500 mt-1">Here is a quick snapshot of the Clerixs network health and metrics.</p>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">System Overview</h2>
+        <p className="text-slate-500 mt-2 font-medium">Here is a quick snapshot of the Clerixs network health and metrics.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-40">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-500">{stat.name}</span>
-              <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center">
-                <stat.icon className="h-5 w-5 text-slate-600" />
+          <div key={stat.name} className="relative group bg-white/60 backdrop-blur-xl p-6 rounded-3xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between h-44 hover:-translate-y-1.5 transition-all duration-500 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-sm font-bold text-slate-500">{stat.name}</span>
+              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner ${
+                stat.color === 'blue' ? 'bg-blue-50/50 text-blue-600' :
+                stat.color === 'emerald' ? 'bg-emerald-50/50 text-emerald-600' :
+                stat.color === 'indigo' ? 'bg-indigo-50/50 text-indigo-600' :
+                'bg-red-50/50 text-red-600'
+              }`}>
+                <stat.icon className="h-6 w-6" />
               </div>
             </div>
-            <div className="mt-4">
-              <span className="text-3xl font-extrabold text-slate-900">{stat.value}</span>
-              <p className="text-xs font-semibold text-slate-400 mt-1">{stat.change}</p>
+            <div className="mt-4 relative z-10">
+              <span className="text-4xl font-black text-slate-900 tracking-tight">{stat.value}</span>
+              <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-widest">{stat.change}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Admin Panel Welcome */}
-      <div className="bg-gradient-to-r from-red-600 to-rose-600 rounded-3xl p-8 text-white shadow-lg shadow-red-600/10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-2xl" />
+      <div className="rounded-3xl p-10 text-white relative overflow-hidden group border border-white/10 shadow-2xl">
+        {/* Dynamic mesh gradient background */}
+        <div className="absolute inset-0 bg-slate-950" />
+        <div className="absolute top-[-50%] left-[-10%] w-[70%] h-[150%] bg-gradient-to-br from-red-600 to-rose-900 rounded-full mix-blend-screen filter blur-[80px] opacity-80 group-hover:opacity-100 transition-opacity duration-1000" />
+        <div className="absolute bottom-[-50%] right-[-10%] w-[60%] h-[120%] bg-gradient-to-tl from-indigo-600 to-purple-900 rounded-full mix-blend-screen filter blur-[80px] opacity-60 group-hover:scale-110 transition-transform duration-1000" />
+        
+        {/* Abstract shapes */}
+        <div className="absolute right-10 top-10 w-32 h-32 border border-white/10 rounded-full opacity-20" />
+        <div className="absolute right-20 top-20 w-16 h-16 border border-white/20 rounded-full opacity-30" />
+
         <div className="relative z-10 max-w-2xl">
-          <h3 className="text-2xl font-bold mb-2">Welcome Back, Clerixs Administrator!</h3>
-          <p className="text-red-100 leading-relaxed font-medium">
-            You are logged into the central control panel. From here you can audit clinic organizations, adjust subscriptions, manage enterprise tier accounts, and verify overall database health.
+          <h3 className="text-3xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-rose-200">Welcome Back, System Administrator!</h3>
+          <p className="text-slate-300/90 leading-relaxed font-medium text-lg">
+            You have full elevated access to the central control panel. Audit clinic organizations, adjust subscriptions, manage enterprise tier accounts, and monitor database health in real-time.
           </p>
         </div>
       </div>

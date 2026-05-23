@@ -60,49 +60,53 @@ export default async function AdminClinicsPage() {
       </div>
 
       {/* Clinics Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
-              <th className="py-4 px-6">Clinic Name</th>
-              <th className="py-4 px-6">Owner / Doctor</th>
-              <th className="py-4 px-6">Org Code</th>
-              <th className="py-4 px-6">Created On</th>
-              <th className="py-4 px-6">Plan Tier</th>
-              <th className="py-4 px-6">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
-            {clinics.map((clinic) => (
-              <tr key={clinic.id} className="hover:bg-slate-50/50 transition-all">
-                <td className="py-4 px-6 flex items-center gap-3">
-                  <div className="h-8 w-8 bg-red-50 rounded-lg flex items-center justify-center">
-                    <Landmark className="h-4 w-4 text-red-600" />
-                  </div>
-                  <span className="text-slate-900 font-bold">{clinic.name}</span>
-                </td>
-                <td className="py-4 px-6 text-slate-600">{clinic.owner}</td>
-                <td className="py-4 px-6 font-mono text-xs">{clinic.organizationCode}</td>
-                <td className="py-4 px-6 text-slate-500">{clinic.created}</td>
-                <td className="py-4 px-6">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    clinic.tier === 'Enterprise' ? 'bg-purple-100 text-purple-800' :
-                    clinic.tier === 'Professional' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                  }`}>
-                    {clinic.tier}
-                  </span>
-                </td>
-                <td className="py-4 px-6">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    clinic.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                  }`}>
-                    {clinic.status}
-                  </span>
-                </td>
+      <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-100/60 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                <th className="py-5 px-8">Clinic Name</th>
+                <th className="py-5 px-8">Owner / Doctor</th>
+                <th className="py-5 px-8">Org Code</th>
+                <th className="py-5 px-8">Created On</th>
+                <th className="py-5 px-8">Plan Tier</th>
+                <th className="py-5 px-8">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-50 text-sm font-semibold text-slate-700">
+              {clinics.map((clinic: any) => (
+                <tr key={clinic.id} className="hover:bg-slate-50/80 hover:shadow-[inset_4px_0_0_rgb(225,29,72)] transition-all duration-300 group">
+                  <td className="py-5 px-8 flex items-center gap-4">
+                    <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-red-50 group-hover:border-red-100 transition-colors duration-300">
+                      <Landmark className="h-5 w-5 text-slate-400 group-hover:text-red-500 transition-colors duration-300" />
+                    </div>
+                    <span className="text-slate-900 font-black tracking-tight">{clinic.name}</span>
+                  </td>
+                  <td className="py-5 px-8 text-slate-500 font-medium">{clinic.owner}</td>
+                  <td className="py-5 px-8 font-mono text-xs font-bold text-slate-400 bg-slate-50/50 rounded-lg px-2 py-1 ml-6 w-fit">{clinic.organizationCode}</td>
+                  <td className="py-5 px-8 text-slate-400 font-medium">{clinic.created}</td>
+                  <td className="py-5 px-8">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${
+                      clinic.tier === 'Enterprise' ? 'bg-purple-50 text-purple-600 border-purple-200/50 shadow-[0_0_10px_rgba(168,85,247,0.2)]' :
+                      clinic.tier === 'Professional' ? 'bg-blue-50 text-blue-600 border-blue-200/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]' : 'bg-slate-50 text-slate-600 border-slate-200/50'
+                    }`}>
+                      {clinic.tier}
+                    </span>
+                  </td>
+                  <td className="py-5 px-8">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${
+                      clinic.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-200/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 
+                      clinic.status === 'Trialing' ? 'bg-amber-50 text-amber-600 border-amber-200/50 shadow-[0_0_10px_rgba(245,158,11,0.2)]' :
+                      'bg-rose-50 text-rose-600 border-rose-200/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]'
+                    }`}>
+                      {clinic.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
