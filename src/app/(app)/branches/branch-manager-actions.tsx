@@ -39,6 +39,7 @@ interface BranchManagerActionsProps {
   branch: {
     id: string;
     name: string;
+    email?: string | null;
     has_login: boolean;
     login_email?: string | null;
     login_status?: string | null;
@@ -80,9 +81,8 @@ export function BranchManagerActions({ branch, isEnterprise }: BranchManagerActi
   };
 
   const handleOpenCreate = () => {
-    // Generate an automatic professional email prefix & random password
-    const prefix = branch.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    setEmail(`${prefix}@clerixsbranch.com`);
+    // Pre-fill with the branch contact email if available, otherwise blank
+    setEmail(branch.email || '');
     const pass = generateSecurePassword();
     setPassword(pass);
     setConfirmPassword(pass);
