@@ -33,6 +33,7 @@ const SUBSCRIPTION_EXEMPT_PATHS = [
   '/privacy-policy',
   '/terms-of-service',
   '/cookie-policy',
+  '/admin',
 ];
 
 function isProtectedPath(pathname: string): boolean {

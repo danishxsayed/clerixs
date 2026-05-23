@@ -15,8 +15,12 @@ export async function middleware(request: NextRequest) {
     if (pathname === '/') {
       return NextResponse.redirect(new URL('/admin', request.url))
     }
+    // Block standard auth routes on admin domain
+    if (pathname.startsWith('/auth')) {
+      return NextResponse.redirect(new URL('/admin/login', request.url))
+    }
     // If not accessing admin routes, rewrite to admin
-    if (!pathname.startsWith('/admin') && !pathname.startsWith('/auth')) {
+    if (!pathname.startsWith('/admin')) {
       return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url))
     }
   }
