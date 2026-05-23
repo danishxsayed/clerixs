@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Landmark, Plus, Search } from 'lucide-react';
+import Link from 'next/link';
+import { Landmark, Plus, Search, ArrowRight } from 'lucide-react';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -41,9 +42,9 @@ export default async function AdminClinicsPage() {
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Clinics Registered</h2>
           <p className="text-slate-500 mt-1">Review and manage registered clinic organizations globally.</p>
         </div>
-        <button className="h-10 px-4 inline-flex items-center justify-center text-sm font-semibold bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-md shadow-red-600/10 cursor-pointer">
+        <Link href="/admin/clinics/new" className="h-10 px-4 inline-flex items-center justify-center text-sm font-semibold bg-red-600 text-white rounded-xl hover:bg-red-700 hover:scale-105 active:scale-95 transition-all shadow-md shadow-red-600/20 cursor-pointer">
           <Plus className="mr-2 h-4 w-4" /> Add Clinic Manual
-        </button>
+        </Link>
       </div>
 
       {/* Filter and Search */}
@@ -80,7 +81,10 @@ export default async function AdminClinicsPage() {
                     <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 group-hover:bg-red-50 group-hover:border-red-100 transition-colors duration-300">
                       <Landmark className="h-5 w-5 text-slate-400 group-hover:text-red-500 transition-colors duration-300" />
                     </div>
-                    <span className="text-slate-900 font-black tracking-tight">{clinic.name}</span>
+                    <Link href={`/admin/clinics/${clinic.id}`} className="text-slate-900 font-black tracking-tight hover:text-red-600 hover:underline flex items-center gap-2 group/link">
+                      {clinic.name}
+                      <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all text-red-500" />
+                    </Link>
                   </td>
                   <td className="py-5 px-8 text-slate-500 font-medium">{clinic.owner}</td>
                   <td className="py-5 px-8 font-mono text-xs font-bold text-slate-400 bg-slate-50/50 rounded-lg px-2 py-1 ml-6 w-fit">{clinic.organizationCode}</td>
