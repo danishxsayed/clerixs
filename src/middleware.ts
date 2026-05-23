@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
   if (isAdminSubdomain) {
     // If trying to access root, redirect to admin dashboard
     if (pathname === '/') {
-      return NextResponse.redirect(new URL('/admin', request.url))
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
     }
     // Block standard auth routes on admin domain
     if (pathname.startsWith('/auth')) {
