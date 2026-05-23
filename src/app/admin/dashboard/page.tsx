@@ -1,12 +1,32 @@
 import * as React from 'react';
 import { Landmark, Users, CreditCard, ShieldAlert } from 'lucide-react';
 
+import { createClient } from '@supabase/supabase-js';
+
 export default async function AdminDashboardPage() {
+  // Initialize admin client with service role to bypass RLS for global metrics
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const [
+    { count: totalClinics },
+    { count: totalSubscribers },
+    { count: totalUsers },
+    { count: totalAlerts }
+  ] = await Promise.all([
+    supabaseAdmin.from('organizations').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('organization_subscriptions').select('*', { count: 'exact', head: true }).in('status', ['active', 'trialing']),
+    supabaseAdmin.from('profiles').select('*', { count: 'exact', head: true }),
+    supabaseAdmin.from('subscription_events').select('*', { count: 'exact', head: true }).eq('status', 'failed')
+  ]);
+
   const stats = [
-    { name: 'Total Clinics Registered', value: '142', icon: Landmark, change: '+12% this month', color: 'blue' },
-    { name: 'Total Active Subscribers', value: '88', icon: CreditCard, change: '+8% this month', color: 'emerald' },
-    { name: 'Total Users/Staff', value: '624', icon: Users, change: '+18% this month', color: 'indigo' },
-    { name: 'System Logs/Alerts', value: '0 Warnings', icon: ShieldAlert, change: 'All systems operational', color: 'green' },
+    { name: 'Total Clinics Registered', value: totalClinics?.toString() || '0', icon: Landmark, change: 'Lifetime total', color: 'blue' },
+    { name: 'Total Active Subscribers', value: totalSubscribers?.toString() || '0', icon: CreditCard, change: 'Active or trailing', color: 'emerald' },
+    { name: 'Total Users/Staff', value: totalUsers?.toString() || '0', icon: Users, change: 'Registered profiles', color: 'indigo' },
+    { name: 'System Logs/Alerts', value: `${totalAlerts || 0} Warnings`, icon: ShieldAlert, change: totalAlerts === 0 ? 'All systems operational' : 'Requires attention', color: 'green' },
   ];
 
   return (

@@ -1,12 +1,27 @@
 import * as React from 'react';
 import { Settings, ShieldCheck, Database, Server } from 'lucide-react';
 
+import { createClient } from '@supabase/supabase-js';
+
 export default async function AdminSystemPage() {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  let dbOperational = false;
+  try {
+    const { error } = await supabaseAdmin.from('organizations').select('id').limit(1);
+    dbOperational = !error;
+  } catch (e) {
+    dbOperational = false;
+  }
+
   const configs = [
-    { key: 'ADMIN_EMAIL', value: 'clerixsofficial@gmail.com', source: 'Production Env', status: 'Secured' },
-    { key: 'NEXT_PUBLIC_APP_URL', value: 'https://app.clerixs.com', source: 'Production Env', status: 'Active' },
-    { key: 'NEXT_PUBLIC_ADMIN_URL', value: 'https://admin.clerixs.com', source: 'Production Env', status: 'Active' },
-    { key: 'NEXT_PUBLIC_MARKETING_URL', value: 'https://clerixs.com', source: 'Production Env', status: 'Active' },
+    { key: 'ADMIN_EMAIL', value: process.env.ADMIN_EMAIL || 'Missing', source: 'Production Env', status: process.env.ADMIN_EMAIL ? 'Secured' : 'Missing' },
+    { key: 'NEXT_PUBLIC_APP_URL', value: process.env.NEXT_PUBLIC_APP_URL || 'Missing', source: 'Production Env', status: process.env.NEXT_PUBLIC_APP_URL ? 'Active' : 'Missing' },
+    { key: 'NEXT_PUBLIC_ADMIN_URL', value: process.env.NEXT_PUBLIC_ADMIN_URL || 'Missing', source: 'Production Env', status: process.env.NEXT_PUBLIC_ADMIN_URL ? 'Active' : 'Missing' },
+    { key: 'NEXT_PUBLIC_MARKETING_URL', value: process.env.NEXT_PUBLIC_SITE_URL || 'Missing', source: 'Production Env', status: process.env.NEXT_PUBLIC_SITE_URL ? 'Active' : 'Missing' },
   ];
 
   return (
@@ -57,9 +72,15 @@ export default async function AdminSystemPage() {
             </div>
             <div className="flex justify-between items-center">
               <span>Database Connection</span>
-              <span className="text-emerald-600 font-bold flex items-center gap-1">
-                <Server className="h-4 w-4" /> Operational
-              </span>
+              {dbOperational ? (
+                <span className="text-emerald-600 font-bold flex items-center gap-1">
+                  <Server className="h-4 w-4" /> Operational
+                </span>
+              ) : (
+                <span className="text-red-600 font-bold flex items-center gap-1">
+                  <Server className="h-4 w-4" /> Failing
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -1,12 +1,46 @@
 import * as React from 'react';
 import { CreditCard, Landmark, ShieldCheck } from 'lucide-react';
 
+import { createClient } from '@supabase/supabase-js';
+
 export default async function AdminSubscriptionsPage() {
-  const subscriptions = [
-    { id: '1', clinic: 'Apex Dental Care', plan: 'Professional Monthly', price: '₹4,999/mo', billingCycle: 'Monthly', nextBilling: '2026-06-10', gateway: 'Cashfree' },
-    { id: '2', clinic: 'CarePlus Multispeciality', plan: 'Enterprise Annual', price: '₹49,999/yr', billingCycle: 'Annual', nextBilling: '2027-05-12', gateway: 'Cashfree' },
-    { id: '3', clinic: 'SecureMed Dental Group', plan: 'Basic Monthly', price: '₹2,499/mo', billingCycle: 'Monthly', nextBilling: '2026-06-15', gateway: 'Cashfree' },
-  ];
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: subData } = await supabaseAdmin
+    .from('organization_subscriptions')
+    .select(`
+      id,
+      provider,
+      current_period_end,
+      organizations (
+        name
+      ),
+      subscription_plans (
+        name,
+        monthly_price,
+        yearly_price
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  const subscriptions = (subData || []).map((sub: any) => {
+    const isYearly = sub.subscription_plans?.name?.toLowerCase().includes('annual');
+    const price = isYearly ? sub.subscription_plans?.yearly_price : sub.subscription_plans?.monthly_price;
+    const interval = isYearly ? 'Annual' : 'Monthly';
+    
+    return {
+      id: sub.id,
+      clinic: sub.organizations?.name || 'Unknown Clinic',
+      plan: sub.subscription_plans?.name || 'Unknown Plan',
+      price: price ? `₹${Number(price).toLocaleString('en-IN')}/${isYearly ? 'yr' : 'mo'}` : 'Custom',
+      billingCycle: interval,
+      nextBilling: sub.current_period_end ? new Date(sub.current_period_end).toISOString().split('T')[0] : 'N/A',
+      gateway: sub.provider === 'cashfree' ? 'Cashfree' : sub.provider === 'razorpay' ? 'Razorpay' : 'Manual',
+    };
+  });
 
   return (
     <div className="space-y-6">

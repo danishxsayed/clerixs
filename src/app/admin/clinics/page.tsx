@@ -1,13 +1,38 @@
 import * as React from 'react';
 import { Landmark, Plus, Search } from 'lucide-react';
 
+import { createClient } from '@supabase/supabase-js';
+
 export default async function AdminClinicsPage() {
-  const clinics = [
-    { id: '1', name: 'Apex Dental Care', owner: 'Dr. Amit Sharma', organizationCode: 'APEXDENT', created: '2026-05-10', tier: 'Professional', status: 'Active' },
-    { id: '2', name: 'CarePlus Multispeciality', owner: 'Dr. Priya Singh', organizationCode: 'CAREPLUS', created: '2026-05-12', tier: 'Enterprise', status: 'Active' },
-    { id: '3', name: 'SecureMed Dental Group', owner: 'Dr. Rohan Verma', organizationCode: 'SECUREMED', created: '2026-05-15', tier: 'Basic', status: 'Active' },
-    { id: '4', name: 'City Wellness Center', owner: 'Dr. Sarah Jenkins', organizationCode: 'CITYWELL', created: '2026-05-18', tier: 'Trial', status: 'Trialing' },
-  ];
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: orgData } = await supabaseAdmin
+    .from('organizations')
+    .select(`
+      id,
+      name,
+      slug,
+      created_at,
+      plan_code,
+      subscription_status,
+      profiles!organizations_owner_profile_id_fkey (
+        full_name
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  const clinics = (orgData || []).map((org: any) => ({
+    id: org.id,
+    name: org.name,
+    owner: org.profiles?.full_name || 'Unknown Owner',
+    organizationCode: org.slug,
+    created: new Date(org.created_at).toISOString().split('T')[0],
+    tier: org.plan_code === 'enterprise' ? 'Enterprise' : org.plan_code === 'pro' ? 'Professional' : 'Basic',
+    status: org.subscription_status === 'active' ? 'Active' : org.subscription_status === 'trialing' ? 'Trialing' : 'Inactive',
+  }));
 
   return (
     <div className="space-y-6">
