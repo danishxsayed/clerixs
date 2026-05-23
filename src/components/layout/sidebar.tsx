@@ -41,19 +41,19 @@ import {
 } from '@/components/ui/select';
 
 const SIDEBAR_ITEMS = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['org_owner', 'doctor', 'receptionist'] },
-  { name: 'Patients', href: '/patients', icon: Users, roles: ['org_owner', 'doctor', 'receptionist'] },
-  { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['org_owner', 'doctor', 'receptionist'] },
-  { name: 'Queue', href: '/queue', icon: Activity, roles: ['org_owner', 'doctor', 'receptionist'], pulsing: true },
-  { name: 'Treatments', href: '/treatments', icon: Stethoscope, roles: ['org_owner', 'doctor'] },
-  { name: 'Lab Dashboard', href: '/lab', icon: FlaskConical, roles: ['org_owner', 'doctor', 'laboratory'] },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['org_owner', 'doctor', 'receptionist', 'branch_manager'] },
+  { name: 'Patients', href: '/patients', icon: Users, roles: ['org_owner', 'doctor', 'receptionist', 'branch_manager'] },
+  { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['org_owner', 'doctor', 'receptionist', 'branch_manager'] },
+  { name: 'Queue', href: '/queue', icon: Activity, roles: ['org_owner', 'doctor', 'receptionist', 'branch_manager'], pulsing: true },
+  { name: 'Treatments', href: '/treatments', icon: Stethoscope, roles: ['org_owner', 'doctor', 'branch_manager'] },
+  { name: 'Lab Dashboard', href: '/lab', icon: FlaskConical, roles: ['org_owner', 'doctor', 'laboratory', 'branch_manager'] },
   { name: 'Billing', href: '/billing', icon: Receipt, roles: ['org_owner', 'receptionist'] },
   { name: 'WhatsApp', href: '/whatsapp', icon: MessageSquare, roles: ['org_owner', 'admin'] },
   { name: 'Reports', href: '/reports', icon: BarChart3, roles: ['org_owner', 'admin'] },
   { name: 'Staff', href: '/staff', icon: UserRoundCog, roles: ['org_owner', 'admin'] },
   { name: 'Branches', href: '/branches', icon: Building2, roles: ['org_owner', 'admin'] },
   { name: 'Files', href: '/files', icon: Files, roles: ['org_owner', 'admin'] },
-  { name: 'Settings', href: '/settings', icon: Settings, roles: ['org_owner', 'doctor', 'receptionist'] },
+  { name: 'Settings', href: '/settings', icon: Settings, roles: ['org_owner', 'doctor', 'receptionist', 'branch_manager'] },
 ];
 
 interface SidebarProps {

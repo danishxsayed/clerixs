@@ -16,15 +16,39 @@ import { SettingsContent } from './settings-content';
 import { SettingsSkeleton } from './skeleton';
 
 export default async function SettingsPage() {
+  const supabase = await createClient();
+
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData?.user) return notFound();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('default_organization_id')
+    .eq('id', userData.user.id)
+    .single();
+
+  let isOwner = false;
+  if (profile?.default_organization_id) {
+    const { data: membership } = await supabase
+      .from('organization_memberships')
+      .select('role')
+      .eq('organization_id', profile.default_organization_id)
+      .eq('profile_id', userData.user.id)
+      .single();
+    isOwner = membership?.role === 'org_owner';
+  }
+
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Settings</h2>
-        <Button variant="outline" asChild className="rounded-full shadow-sm">
-          <Link href="/settings/subscription">
-            Manage Subscription
-          </Link>
-        </Button>
+        {isOwner && (
+          <Button variant="outline" asChild className="rounded-full shadow-sm">
+            <Link href="/settings/subscription">
+              Manage Subscription
+            </Link>
+          </Button>
+        )}
       </div>
 
       <Suspense fallback={<SettingsSkeleton />}>

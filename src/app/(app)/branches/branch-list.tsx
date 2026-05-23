@@ -13,8 +13,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
+import { BranchManagerActions } from './branch-manager-actions';
 
-export async function BranchList({ query: searchQuery }: { query: string }) {
+export async function BranchList({ 
+  query: searchQuery, 
+  isEnterprise 
+}: { 
+  query: string;
+  isEnterprise: boolean;
+}) {
   const supabase = await createClient();
 
   const { data: userData } = await supabase.auth.getUser();
@@ -64,17 +71,18 @@ export async function BranchList({ query: searchQuery }: { query: string }) {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
-              <TableHead className="w-[300px]">Location</TableHead>
+              <TableHead className="w-[260px]">Location</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead>Code</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="w-[300px] text-right">Login Access</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {!branches || branches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   No branches found. Add your first clinic location.
                 </TableCell>
               </TableRow>
@@ -90,7 +98,7 @@ export async function BranchList({ query: searchQuery }: { query: string }) {
                         <div className="font-medium text-foreground">{branch.name}</div>
                         <div className="text-xs text-muted-foreground flex items-center mt-1">
                           <MapPin className="h-3 w-3 mr-1 shrink-0" />
-                          <span className="truncate max-w-[200px]">
+                          <span className="truncate max-w-[150px]">
                             {branch.city ? `${branch.city}, ${branch.state || ''}` : 'No address set'}
                           </span>
                         </div>
@@ -106,7 +114,7 @@ export async function BranchList({ query: searchQuery }: { query: string }) {
                         </div>
                       )}
                       {branch.email && (
-                        <div className="text-xs text-muted-foreground mt-0.5">
+                        <div className="text-xs text-muted-foreground mt-0.5 font-mono">
                           {branch.email}
                         </div>
                       )}
@@ -128,6 +136,9 @@ export async function BranchList({ query: searchQuery }: { query: string }) {
                     ) : (
                        <Badge variant="secondary" className="capitalize">Inactive</Badge>
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <BranchManagerActions branch={branch} isEnterprise={isEnterprise} />
                   </TableCell>
                   <TableCell className="text-right">
                      <Link href={`/branches/${branch.id}/edit`}>

@@ -51,6 +51,14 @@ export default async function BranchesPage({
       redirect('/dashboard');
   }
 
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('is_enterprise')
+    .eq('id', profile.default_organization_id)
+    .single();
+
+  const isEnterprise = org?.is_enterprise || false;
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -67,7 +75,7 @@ export default async function BranchesPage({
       </div>
 
       <Suspense key={searchQuery} fallback={<BranchSkeleton />}>
-        <BranchList query={searchQuery} />
+        <BranchList query={searchQuery} isEnterprise={isEnterprise} />
       </Suspense>
     </div>
   );

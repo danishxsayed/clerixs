@@ -42,6 +42,11 @@ export default async function ClinicManagePage({
     .single();
 
   const { data: plans } = await supabaseAdmin.from('subscription_plans').select('*');
+  const { data: branches } = await supabaseAdmin
+    .from('branches')
+    .select('id, name, has_login, login_email, login_status')
+    .eq('organization_id', id)
+    .order('created_at', { ascending: false });
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -263,6 +268,68 @@ export default async function ClinicManagePage({
 
         </div>
       </div>
+
+      {/* Branches & Branch Login Status Section (Visible to Admin only) */}
+      <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+        <div className="flex items-center gap-3 border-b border-slate-100/60 pb-4 mb-4">
+          <div className="h-10 w-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+            <Building className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Clinic Locations & Login Statuses</h3>
+            <p className="text-xs text-slate-500 font-semibold">All physical branch sites of this clinic and their login statuses.</p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-slate-600 font-semibold">
+            <thead className="text-xs text-slate-400 uppercase bg-slate-50 rounded-xl">
+              <tr>
+                <th className="px-6 py-3 rounded-l-xl">Branch Name</th>
+                <th className="px-6 py-3">Login Status</th>
+                <th className="px-6 py-3">Manager Login Email</th>
+                <th className="px-6 py-3 rounded-r-xl">Database ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!branches || branches.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-slate-400 font-medium italic">
+                    No branch locations have been added yet by this clinic.
+                  </td>
+                </tr>
+              ) : (
+                branches.map((b) => (
+                  <tr key={b.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 text-slate-900 font-extrabold flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-slate-400"></span>
+                      {b.name}
+                    </td>
+                    <td className="px-6 py-4">
+                      {b.has_login ? (
+                        b.login_status === 'disabled' ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-100 uppercase">Disabled</span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase">Active</span>
+                        )
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-400 border border-slate-200 uppercase">No Login</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs">
+                      {b.login_email || <span className="text-slate-400 italic">Not set</span>}
+                    </td>
+                    <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                      {b.id}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -111,6 +111,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     };
   }
 
+  // Fetch branch manager info if the user is a branch_manager
+  let branchManagerInfo = null;
+  if (membership?.role === 'branch_manager') {
+    const { data: branchData } = await supabase
+      .from('branch_memberships')
+      .select('branches(name)')
+      .eq('organization_membership_id', (membership as any).id || '')
+      .maybeSingle();
+      
+    const { data: orgData } = await supabase
+      .from('organizations')
+      .select('name')
+      .eq('id', profile.default_organization_id)
+      .single();
+
+    const branchName = (branchData?.branches as any)?.name || 'Assigned Branch';
+    const clinicName = orgData?.name || 'Clerixs Clinic';
+    branchManagerInfo = { branchName, clinicName };
+  }
+
   return (
     <ThemeProvider
       attribute="class"
@@ -122,6 +142,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <LockScreen>
           <BranchProvider organizationId={profile.default_organization_id} userRole={membership?.role || 'admin'}>
             <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
+            {branchManagerInfo && (
+              <div className="bg-blue-600 dark:bg-blue-900 text-white py-1.5 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2 shadow-sm shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                You are logged in as <span className="underline decoration-wavy decoration-blue-300 font-bold">{branchManagerInfo.branchName}</span> Manager — Branch of {branchManagerInfo.clinicName}
+              </div>
+            )}
             <TrialBanner />
             <div className="flex flex-1 overflow-hidden">
               <div className="print:hidden h-full">
