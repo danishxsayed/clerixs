@@ -79,6 +79,37 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <div className="pt-6">
+        <h3 className="text-xl font-black text-slate-900 mb-4 tracking-tight">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <a href="/admin/clinics/new" className="bg-white hover:bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-sm transition-all flex items-center gap-3 group">
+            <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-slate-700 text-sm">Manually Add Subscription</span>
+          </a>
+          <a href="/admin/clinics?filter=trialing" className="bg-white hover:bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-sm transition-all flex items-center gap-3 group">
+            <div className="h-10 w-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Users className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-slate-700 text-sm">View All Trialing Clinics</span>
+          </a>
+          <a href="/admin/clinics?filter=expiring" className="bg-white hover:bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-sm transition-all flex items-center gap-3 group">
+            <div className="h-10 w-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ShieldAlert className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-slate-700 text-sm">View Expiring Soon</span>
+          </a>
+          <button className="bg-white hover:bg-slate-50 border border-slate-200 p-4 rounded-2xl shadow-sm transition-all flex items-center gap-3 group text-left cursor-pointer">
+            <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Landmark className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-slate-700 text-sm">Send Bulk Email</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
