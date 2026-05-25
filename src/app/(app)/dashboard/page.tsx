@@ -136,9 +136,13 @@ export default async function DashboardPage({
   if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsListQuery = realTodaysAppointmentsListQuery.eq('branch_id', selectedBranchId);
   const { data: realTodaysAppointmentsList } = await realTodaysAppointmentsListQuery;
 
-  // DEMO DATA LOGIC
-  const isDataEmpty = (totalPatients || 0) === 0 && (completedTreatments || 0) === 0 && cashflow === 0 && (realTodaysAppointments || 0) === 0;
-  const showDemoData = isDataEmpty;
+  // Fetch global counts to determine if the entire clinic has no data at all (across all branches)
+  const [{ count: globalPatientsCount }, { count: globalAppointmentsCount }] = await Promise.all([
+    supabase.from('patients').select('*', { count: 'exact', head: true }).eq('organization_id', orgId),
+    supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('organization_id', orgId)
+  ]);
+
+  const showDemoData = (globalPatientsCount || 0) === 0 && (globalAppointmentsCount || 0) === 0;
 
   const displayTotalPatients = showDemoData ? 247 : (totalPatients || 0);
   const displayCompletedTreatments = showDemoData ? 3 : (completedTreatments || 0);

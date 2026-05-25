@@ -200,6 +200,9 @@ export const BranchProvider = ({
       localStorage.setItem('clerixs_selected_branch', branchId);
       document.cookie = `clerixs_selected_branch=${branchId}; path=/; max-age=31536000`;
       router.refresh();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
     }
   };
 
@@ -209,6 +212,9 @@ export const BranchProvider = ({
       localStorage.setItem('clerixs_selected_branch', 'all');
       document.cookie = `clerixs_selected_branch=all; path=/; max-age=31536000`;
       router.refresh();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
     }
   };
 
