@@ -142,7 +142,7 @@ export default async function DashboardPage({
     supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('organization_id', orgId)
   ]);
 
-  const showDemoData = (globalPatientsCount || 0) === 0 && (globalAppointmentsCount || 0) === 0;
+  const showDemoData = false;
 
   const displayTotalPatients = showDemoData ? 247 : (totalPatients || 0);
   const displayCompletedTreatments = showDemoData ? 3 : (completedTreatments || 0);
