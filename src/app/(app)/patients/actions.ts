@@ -26,20 +26,32 @@ export async function createPatient(formData: z.infer<typeof patientSchema>, bra
   }
 
   // 2. Derive the organization_id from their active membership
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membershipData, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id, branch_id')
+    .select(`
+      id,
+      organization_id,
+      branch_memberships!inner (
+        branch_id
+      )
+    `)
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
     .single();
 
-  if (membershipError || !membership) {
+  if (membershipError || !membershipData) {
+    console.error("Membership Error:", membershipError);
     return { error: 'No active organization found for your account.' };
   }
 
-  const organizationId = membership.organization_id;
-  const branchId = branchIdOverride || membership.branch_id;
+  const organizationId = membershipData.organization_id;
+  const branchMemberships = membershipData.branch_memberships as any;
+  const derivedBranchId = Array.isArray(branchMemberships) 
+    ? branchMemberships[0]?.branch_id 
+    : branchMemberships?.branch_id;
+
+  const branchId = branchIdOverride || derivedBranchId;
   
   if (!branchId) {
     return { error: 'Please select a branch to create the patient in.' };
@@ -149,19 +161,32 @@ export async function updatePatient(patientId: string, formData: Partial<z.infer
   }
 
   // 2. Derive the organization_id from their active membership
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membershipData, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id, branch_id')
+    .select(`
+      id,
+      organization_id,
+      branch_memberships!inner (
+        branch_id
+      )
+    `)
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
     .single();
 
-  if (membershipError || !membership) {
+  if (membershipError || !membershipData) {
+    console.error("Membership Error:", membershipError);
     return { error: 'No active organization found for your account.' };
   }
 
-  const organizationId = membership.organization_id;
+  const organizationId = membershipData.organization_id;
+  const branchMemberships = membershipData.branch_memberships as any;
+  const derivedBranchId = Array.isArray(branchMemberships) 
+    ? branchMemberships[0]?.branch_id 
+    : branchMemberships?.branch_id;
+
+  const branchId = derivedBranchId;
 
   // 3. Update the patient
   const { error: updateError } = await supabase
@@ -176,11 +201,11 @@ export async function updatePatient(patientId: string, formData: Partial<z.infer
       emergency_contact: formData.emergency_contact || null,
       gender: formData.gender || null,
       address: formData.address || null,
-      branch_id: membership.branch_id,
+      branch_id: branchId,
     })
     .eq('id', patientId)
     .eq('organization_id', organizationId)
-    .eq('branch_id', membership.branch_id);
+    .eq('branch_id', branchId);
 
   if (updateError) {
     console.error('Failed to update patient:', updateError);
@@ -204,20 +229,35 @@ export async function getPatientDashboard(patientId: string) {
   }
 
   // 2. Derive the organization_id from their active membership
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membershipData, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id, role, branch_id')
+    .select(`
+      id,
+      organization_id,
+      role,
+      branch_memberships!inner (
+        branch_id
+      )
+    `)
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
     .single();
 
-  if (membershipError || !membership) {
+  if (membershipError || !membershipData) {
+    console.error("Membership Error:", membershipError);
     return { error: 'No active organization found for your account.' };
   }
 
-  const organizationId = membership.organization_id;
-  const role = membership.role;
+  const organizationId = membershipData.organization_id;
+  const role = membershipData.role;
+  
+  const branchMemberships = membershipData.branch_memberships as any;
+  const derivedBranchId = Array.isArray(branchMemberships) 
+    ? branchMemberships[0]?.branch_id 
+    : branchMemberships?.branch_id;
+
+  const branchId = derivedBranchId;
 
   try {
     // 3. Fetch Patient Details
@@ -226,7 +266,7 @@ export async function getPatientDashboard(patientId: string) {
       .select('*')
       .eq('id', patientId)
       .eq('organization_id', organizationId)
-      .eq('branch_id', membership.branch_id)
+      .eq('branch_id', branchId)
       .single();
 
     if (patientError || !patient) throw new Error('Patient not found');
@@ -236,7 +276,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('appointments')
       .select('*')
       .eq('patient_id', patientId)
-      .eq('branch_id', membership.branch_id)
+      .eq('branch_id', branchId)
       .order('appointment_date', { ascending: false })
       .order('start_time', { ascending: false });
 
@@ -247,7 +287,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('invoices')
       .select('*, payments(*)')
       .eq('patient_id', patientId)
-      .eq('branch_id', membership.branch_id)
+      .eq('branch_id', branchId)
       .order('issue_date', { ascending: false });
 
     // 6. Fetch Patient Prescriptions
@@ -255,7 +295,7 @@ export async function getPatientDashboard(patientId: string) {
       .from('prescriptions')
       .select('*, prescription_items(*), doctor_membership_id(profiles(full_name))')
       .eq('patient_id', patientId)
-      .eq('branch_id', membership.branch_id)
+      .eq('branch_id', branchId)
       .order('created_at', { ascending: false });
 
     if (prescriptionsError) throw new Error('Failed to fetch prescriptions');
@@ -265,7 +305,7 @@ export async function getPatientDashboard(patientId: string) {
        .from('lab_orders')
        .select('*, lab_order_items(lab_test_id, lab_tests(name), lab_package_id, lab_packages(name)), doctor_membership_id(profiles(full_name))')
        .eq('patient_id', patientId)
-       .eq('branch_id', membership.branch_id)
+       .eq('branch_id', branchId)
        .order('order_date', { ascending: false });
  
      // 8. Fetch Clinical Notes
@@ -273,7 +313,7 @@ export async function getPatientDashboard(patientId: string) {
        .from('clinical_notes')
        .select('*, author_membership_id(profile_id(full_name, avatar_url))')
        .eq('patient_id', patientId)
-       .eq('branch_id', membership.branch_id)
+       .eq('branch_id', branchId)
        .order('created_at', { ascending: false });
  
      return {
