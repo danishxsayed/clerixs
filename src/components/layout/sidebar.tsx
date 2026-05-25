@@ -149,7 +149,9 @@ export function Sidebar({
             }}
           >
             <SelectTrigger className="w-full bg-muted/50 border-none shadow-none h-9">
-              <SelectValue placeholder="Select Branch" />
+              <SelectValue>
+                {isAllBranches ? 'All Branches' : (currentBranch?.name || 'Select Branch')}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {(userRole === 'org_owner') && (
