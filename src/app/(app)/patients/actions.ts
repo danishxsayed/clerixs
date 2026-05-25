@@ -334,41 +334,58 @@ export async function getPatientDashboard(patientId: string) {
    }
  }
  
- export async function addClinicalNote(patientId: string, content: string, noteType: string = 'general') {
-   const supabase = await createClient();
- 
-   const { data: { user } } = await supabase.auth.getUser();
-   if (!user) return { error: 'Authentication required' };
- 
-   const { data: membership, error: membershipError } = await supabase
-     .from('organization_memberships')
-     .select('id, organization_id')
-     .eq('profile_id', user.id)
-     .eq('status', 'active')
-     .single();
- 
-   if (membershipError || !membership) {
-     return { error: `Membership error: ${membershipError?.message || 'No active membership found'}` };
-   }
- 
-   const { error } = await supabase
-     .from('clinical_notes')
-     .insert({
-       organization_id: membership.organization_id,
-       patient_id: patientId,
-       author_membership_id: membership.id,
-       content,
-       note_type: noteType
-     });
- 
-   if (error) {
-     console.error('Clinical note insert error:', error);
-     return { error: `Database error: ${error.message} (Code: ${error.code})` };
-   }
- 
-   revalidatePath(`/patients/${patientId}`);
-   return { success: true };
- }
+  export async function addClinicalNote(patientId: string, content: string, noteType: string = 'general') {
+    const supabase = await createClient();
+  
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Authentication required' };
+  
+    const { data: membershipData, error: membershipError } = await supabase
+      .from('organization_memberships')
+      .select(`
+        id,
+        organization_id,
+        branch_memberships!inner (
+          branch_id
+        )
+      `)
+      .eq('profile_id', user.id)
+      .eq('status', 'active')
+      .limit(1)
+      .single();
+  
+    if (membershipError || !membershipData) {
+      return { error: `Membership error: ${membershipError?.message || 'No active membership found'}` };
+    }
+
+    const branchMemberships = membershipData.branch_memberships as any;
+    const derivedBranchId = Array.isArray(branchMemberships) 
+      ? branchMemberships[0]?.branch_id 
+      : branchMemberships?.branch_id;
+
+    if (!derivedBranchId) {
+      return { error: 'No active branch membership found for your account.' };
+    }
+  
+    const { error } = await supabase
+      .from('clinical_notes')
+      .insert({
+        organization_id: membershipData.organization_id,
+        branch_id: derivedBranchId,
+        patient_id: patientId,
+        author_membership_id: membershipData.id,
+        content,
+        note_type: noteType
+      });
+  
+    if (error) {
+      console.error('Clinical note insert error:', error);
+      return { error: `Database error: ${error.message} (Code: ${error.code})` };
+    }
+  
+    revalidatePath(`/patients/${patientId}`);
+    return { success: true };
+  }
  
  export async function deleteClinicalNote(noteId: string, patientId: string) {
    const supabase = await createClient();
