@@ -150,7 +150,11 @@ export function Sidebar({
           >
             <SelectTrigger className="w-full bg-muted/50 border-none shadow-none h-9">
               <SelectValue>
-                {isAllBranches ? 'All Branches' : (currentBranch?.name || 'Select Branch')}
+                {(val) => {
+                  if (val === 'all') return 'All Branches';
+                  const found = branches.find(b => b.id === val);
+                  return found?.name || currentBranch?.name || 'Select Branch';
+                }}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
