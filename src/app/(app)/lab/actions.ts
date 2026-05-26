@@ -7,17 +7,40 @@ import { revalidatePath } from 'next/cache';
 async function getAuthAndOrg() {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) return { error: 'Not logged in', supabase: null, user: null, organizationId: null };
-  const { data: membership, error: membershipError } = await supabase
+  if (authError || !user) return { error: 'Not logged in', supabase: null, user: null, organizationId: null, branchId: null };
+  const { data: membershipData, error: membershipError } = await supabase
     .from('organization_memberships')
-    .select('organization_id, role')
+    .select(`
+      id,
+      organization_id,
+      role,
+      branch_memberships!inner (
+        branch_id
+      )
+    `)
     .eq('profile_id', user.id)
     .eq('status', 'active')
     .limit(1)
     .single();
   
-  if (membershipError || !membership) return { error: 'No active organization', supabase: null, user: null, organizationId: null };
-  return { error: null, supabase, user, organizationId: membership.organization_id, role: membership.role };
+  if (membershipError || !membershipData) {
+    console.error("Lab Auth/Branch Error:", membershipError);
+    return { error: 'No active organization or branch found.', supabase: null, user: null, organizationId: null, branchId: null };
+  }
+
+  const branchMemberships = membershipData.branch_memberships as any;
+  const derivedBranchId = Array.isArray(branchMemberships) 
+    ? branchMemberships[0]?.branch_id 
+    : branchMemberships?.branch_id;
+
+  return { 
+    error: null, 
+    supabase, 
+    user, 
+    organizationId: membershipData.organization_id, 
+    role: membershipData.role,
+    branchId: derivedBranchId
+  };
 }
 
 // -------------------------------------------------------------------------------- //
@@ -266,7 +289,7 @@ export async function getLabCatalog() {
 import { createInvoice } from '../billing/actions';
 
 export async function createLabOrder(data: any) {
-  const { error, supabase, organizationId, user } = await getAuthAndOrg();
+  const { error, supabase, organizationId, user, branchId } = await getAuthAndOrg();
   if (error || !supabase) return { error };
 
   // STORAGE QUOTA CHECK
@@ -301,6 +324,7 @@ export async function createLabOrder(data: any) {
     .from('lab_orders')
     .insert({
       organization_id: organizationId,
+      branch_id: branchId,
       patient_id: data.patient_id,
       appointment_id: data.appointment_id || null,
       doctor_membership_id: data.doctor_membership_id || null,
@@ -400,7 +424,7 @@ export async function submitLabResults(orderId: string, results: any[]) {
 }
 
 export async function uploadExternalLabReport(formData: FormData) {
-  const { error, supabase, organizationId, user } = await getAuthAndOrg();
+  const { error, supabase, organizationId, user, branchId } = await getAuthAndOrg();
   if (error || !supabase) return { error };
 
   // STORAGE QUOTA CHECK
@@ -464,6 +488,7 @@ export async function uploadExternalLabReport(formData: FormData) {
       .from('lab_orders')
       .insert({
         organization_id: organizationId,
+        branch_id: branchId,
         patient_id: patient_id,
         status: 'completed',
         is_external: true,
