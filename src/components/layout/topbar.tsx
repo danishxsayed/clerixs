@@ -31,7 +31,7 @@ export function Topbar({
   userRole?: string;
 }) {
   const router = useRouter();
-  const { toggleMobileSidebar } = useSidebar();
+  const { isMobileOpen, setIsMobileOpen } = useSidebar();
 
   // Create initials e.g. "John Doe" -> "JD"
   const getInitials = (name: string) => {
@@ -53,7 +53,7 @@ export function Topbar({
           variant="ghost"
           size="icon"
           className="md:hidden"
-          onClick={toggleMobileSidebar}
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
           aria-label="Toggle Menu"
         >
           <Menu className="h-5 w-5" />
