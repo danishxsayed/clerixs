@@ -70,15 +70,18 @@ const walkInSchema = z.object({
 export function AddWalkinDialog({ 
   open, 
   onOpenChange, 
-  doctors 
+  doctors,
+  onAddEntry
 }: { 
   open: boolean, 
   onOpenChange: (open: boolean) => void,
-  doctors: any[]
+  doctors: any[],
+  onAddEntry?: (entry: any) => void
 }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [patients, setPatients] = React.useState<{ id: string; full_name: string; phone?: string; age?: string; gender?: string }[]>([]);
   const [patientOpen, setPatientOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
   const supabase = createClient();
 
   const form = useForm<z.infer<typeof walkInSchema>>({
@@ -114,15 +117,25 @@ export function AddWalkinDialog({
 
   React.useEffect(() => {
     async function fetchPatients() {
-      const { data } = await supabase
+      let query = supabase
         .from('patients')
         .select('id, full_name, phone, age, gender')
         .order('full_name')
         .limit(10); // Limit for search preview
+
+      if (searchTerm) {
+        query = query.ilike('full_name', `%${searchTerm}%`);
+      }
+
+      const { data } = await query;
       if (data) setPatients(data);
     }
-    if (open) fetchPatients();
-  }, [open, supabase]);
+    if (open) {
+      fetchPatients();
+    } else {
+      setSearchTerm('');
+    }
+  }, [open, searchTerm, supabase]);
 
   async function onSubmit(values: z.infer<typeof walkInSchema>) {
     setIsSubmitting(true);
@@ -133,6 +146,11 @@ export function AddWalkinDialog({
       toast.error(result.error);
     } else {
       toast.success('Patient added to queue!');
+      
+      if (onAddEntry && result.entry) {
+        onAddEntry(result.entry);
+      }
+
       onOpenChange(false);
       form.reset();
     }
@@ -173,10 +191,11 @@ export function AddWalkinDialog({
                         </button>
                       } />
                       <PopoverContent className="w-[300px] p-0" align="start">
-                        <Command>
+                        <Command shouldFilter={false}>
                           <CommandInput 
                             placeholder="Search patients..." 
                             onValueChange={(val) => {
+                              setSearchTerm(val);
                               form.setValue('patient_name', val);
                               form.setValue('patient_id', ''); // Clear ID if typing
                             }}

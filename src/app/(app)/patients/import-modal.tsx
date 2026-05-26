@@ -136,7 +136,7 @@ export function ImportPatientsModal() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={
-        <Button variant="outline" className="h-10 px-4 py-2 bg-background">
+        <Button variant="outline" className="h-10 px-4 py-2 bg-background w-full sm:w-auto">
           <Upload className="mr-2 h-4 w-4" />
           Import
         </Button>

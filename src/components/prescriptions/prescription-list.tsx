@@ -65,7 +65,7 @@ export function PrescriptionList({
 
     setIsSending(px.id);
     try {
-      const pdfUrl = `${window.location.origin}/prescriptions/print/${px.id}`;
+      const pdfUrl = `${window.location.origin}/api/prescriptions/${px.id}/pdf`;
       
       const result = await sendWhatsAppPrescriptionAction({
         prescriptionId: px.id,

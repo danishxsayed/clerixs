@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 
 export type SearchResult = {
   id: string;
-  type: 'patient' | 'appointment';
+  type: 'patient' | 'appointment' | 'invoice';
   title: string;
   subtitle: string;
   url: string;
@@ -33,15 +33,17 @@ export async function globalSearch(query: string): Promise<{ data?: SearchResult
     const searchTerm = `%${query}%`;
     const results: SearchResult[] = [];
 
-    // 2. Search Patients (match name, phone, or patient_code using OR syntax)
-    // Supabase OR syntax requires: column.operator.value,column2.operator.value
-    // Because we are searching against text, we use `ilike`
+    // 2. Search Patients concurrently/sequentially (match name, phone, or email)
     const { data: patients, error: patientsError } = await supabase
       .from('patients')
-      .select('id, full_name, patient_code, phone')
+      .select('id, full_name, patient_code, phone, email')
       .eq('organization_id', orgId)
-      .or(`full_name.ilike.${searchTerm},patient_code.ilike.${searchTerm},phone.ilike.${searchTerm}`)
+      .or(`full_name.ilike.${searchTerm},phone.ilike.${searchTerm},email.ilike.${searchTerm}`)
       .limit(5);
+
+    if (patientsError) {
+      console.error("Patients search query failed:", patientsError);
+    }
 
     if (!patientsError && patients) {
       patients.forEach(p => {
@@ -49,41 +51,93 @@ export async function globalSearch(query: string): Promise<{ data?: SearchResult
           id: p.id,
           type: 'patient',
           title: p.full_name,
-          subtitle: `${p.patient_code} ${p.phone ? `• ${p.phone}` : ''}`,
+          subtitle: `${p.patient_code}${p.phone ? ` • ${p.phone}` : ''}${p.email ? ` • ${p.email}` : ''}`,
           url: `/patients/${p.id}`,
         });
       });
     }
 
-    // 3. Search Appointments 
-    // We will search by appointment title, notes, or patient name natively by joining the patients table
-    const { data: appointments, error: aptError } = await supabase
+    const matchedPatientIds = patients?.map(p => p.id) || [];
+
+    // 3. Search Appointments simultaneously (by patient name, treatment)
+    let appointmentQuery = supabase
       .from('appointments')
       .select(`
         id, 
-        title, 
+        chief_complaint, 
+        appointment_date,
         start_time,
         patients (
           full_name,
           patient_code
         )
       `)
-      .eq('organization_id', orgId)
-      // Since inner joins are complex with `.or()` in Supabase RPC, 
-      // we'll primarily search the appointment title natively here
-      .ilike('title', searchTerm)
-      .limit(5);
+      .eq('organization_id', orgId);
+
+    if (matchedPatientIds.length > 0) {
+      appointmentQuery = appointmentQuery.or(`chief_complaint.ilike.${searchTerm},patient_id.in.(${matchedPatientIds.join(',')})`);
+    } else {
+      appointmentQuery = appointmentQuery.ilike('chief_complaint', searchTerm);
+    }
+
+    const { data: appointments, error: aptError } = await appointmentQuery.limit(5);
+
+    if (aptError) {
+      console.error("Appointments search query failed:", aptError);
+    }
 
     if (!aptError && appointments) {
       appointments.forEach(apt => {
         const p = apt.patients as any;
         const pName = p && !Array.isArray(p) ? p.full_name : 'Unknown Patient';
+        const pCode = p && !Array.isArray(p) ? p.patient_code : '';
         results.push({
           id: apt.id,
           type: 'appointment',
-          title: apt.title,
-          subtitle: `${format(new Date(apt.start_time), 'PPp')} • ${pName}`,
-          url: `/appointments`, // Simplified, could push to a specific appointment ID if we had an edit view
+          title: apt.chief_complaint || 'Consultation',
+          subtitle: `${pName}${pCode ? ` (${pCode})` : ''} • ${apt.appointment_date} ${apt.start_time?.slice(0, 5) || ''}`,
+          url: `/appointments/${apt.id}`,
+        });
+      });
+    }
+
+    // 4. Search Invoices simultaneously (by invoice number, patient name)
+    let invoiceQuery = supabase
+      .from('invoices')
+      .select(`
+        id, 
+        invoice_number, 
+        total_amount,
+        issue_date,
+        patients (
+          full_name,
+          patient_code
+        )
+      `)
+      .eq('organization_id', orgId);
+
+    if (matchedPatientIds.length > 0) {
+      invoiceQuery = invoiceQuery.or(`invoice_number.ilike.${searchTerm},patient_id.in.(${matchedPatientIds.join(',')})`);
+    } else {
+      invoiceQuery = invoiceQuery.ilike('invoice_number', searchTerm);
+    }
+
+    const { data: invoices, error: invError } = await invoiceQuery.limit(5);
+
+    if (invError) {
+      console.error("Invoices search query failed:", invError);
+    }
+
+    if (!invError && invoices) {
+      invoices.forEach(inv => {
+        const p = inv.patients as any;
+        const pName = p && !Array.isArray(p) ? p.full_name : 'Unknown Patient';
+        results.push({
+          id: inv.id,
+          type: 'invoice',
+          title: `Invoice #${inv.invoice_number}`,
+          subtitle: `${pName} • INR ${inv.total_amount} • Issued ${inv.issue_date}`,
+          url: `/billing/${inv.id}`,
         });
       });
     }

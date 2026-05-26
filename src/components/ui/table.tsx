@@ -6,15 +6,20 @@ import { cn } from "@/lib/utils"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div
-      data-slot="table-container"
-      className="relative w-full overflow-x-auto"
-    >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+    <div className="space-y-1">
+      <div
+        data-slot="table-container"
+        className="relative w-full overflow-x-auto rounded-md border"
+      >
+        <table
+          data-slot="table"
+          className={cn("w-full min-w-[600px] md:min-w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </div>
+      <div className="text-[10px] font-medium tracking-wide text-muted-foreground text-right md:hidden pr-1 select-none">
+        scroll →
+      </div>
     </div>
   )
 }

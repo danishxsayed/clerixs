@@ -24,6 +24,7 @@ export function QueueClient({
   const supabase = createClient();
 
   React.useEffect(() => {
+    console.log('Registering Realtime listener for queue_entries, org:', organizationId);
     const channel = supabase
       .channel('queue_changes')
       .on(
@@ -35,24 +36,62 @@ export function QueueClient({
           filter: `organization_id=eq.${organizationId}`,
         },
         async (payload) => {
+          console.log('Realtime event received for queue_entries:', payload);
           if (payload.eventType === 'INSERT') {
             // Fetch the full entry with patient details
             const { data: newEntry } = await supabase
               .from('queue_entries')
-              .select('*, patients(*)')
+              .select(`
+                *,
+                patients (
+                  id,
+                  full_name,
+                  patient_code
+                ),
+                appointment_id
+              `)
               .eq('id', payload.new.id)
               .single();
-            if (newEntry) setEntries(prev => [...prev, newEntry]);
+            
+            if (newEntry) {
+              console.log('Realtime INSERT: Adding new entry:', newEntry);
+              setEntries(prev => {
+                if (prev.some(e => e.id === newEntry.id)) return prev;
+                return [...prev, newEntry];
+              });
+            }
           } else if (payload.eventType === 'UPDATE') {
-            setEntries(prev => prev.map(e => e.id === payload.new.id ? { ...e, ...payload.new } : e));
+            // Fetch the full updated entry with patient details to ensure DOM updates correctly
+            const { data: updatedEntry } = await supabase
+              .from('queue_entries')
+              .select(`
+                *,
+                patients (
+                  id,
+                  full_name,
+                  patient_code
+                ),
+                appointment_id
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (updatedEntry) {
+              console.log('Realtime UPDATE: Updating entry:', updatedEntry);
+              setEntries(prev => prev.map(e => e.id === payload.new.id ? updatedEntry : e));
+            }
           } else if (payload.eventType === 'DELETE') {
-            setEntries(prev => prev.filter(e => e.id === payload.old.id));
+            console.log('Realtime DELETE: Removing entry ID:', payload.old.id);
+            setEntries(prev => prev.filter(e => e.id !== payload.old.id));
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up Realtime listener for queue_entries');
       supabase.removeChannel(channel);
     };
   }, [organizationId]);
@@ -134,6 +173,13 @@ export function QueueClient({
         open={isAddOpen} 
         onOpenChange={setIsAddOpen} 
         doctors={initialDoctors} 
+        onAddEntry={(newEntry) => {
+          console.log('Optimistic / Direct walk-in entry added:', newEntry);
+          setEntries(prev => {
+            if (prev.some(e => e.id === newEntry.id)) return prev;
+            return [...prev, newEntry];
+          });
+        }}
       />
     </div>
   );

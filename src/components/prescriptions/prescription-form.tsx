@@ -71,6 +71,7 @@ export function PrescriptionForm({
   const [openLoadTemplate, setOpenLoadTemplate] = React.useState(false);
   const [openSaveTemplate, setOpenSaveTemplate] = React.useState(false);
   const [loadedTemplateName, setLoadedTemplateName] = React.useState<string | null>(null);
+  const [templateData, setTemplateData] = React.useState<{ diagnosis: string; instructions?: string; medicines: any[] } | null>(null);
 
   const form = useForm<z.infer<typeof rxSchema>>({
     resolver: zodResolver(rxSchema) as any,
@@ -85,6 +86,22 @@ export function PrescriptionForm({
     control: form.control,
     name: "medicines"
   });
+
+  React.useEffect(() => {
+    form.reset(initialData || {
+      diagnosis: '',
+      instructions: '',
+      medicines: [{ medicine_name: '', dosage: '', frequency: '1-0-1', duration_days: 5, notes: '' }]
+    });
+
+    return () => {
+      form.reset({
+        diagnosis: '',
+        instructions: '',
+        medicines: [{ medicine_name: '', dosage: '', frequency: '1-0-1', duration_days: 5, notes: '' }]
+      });
+    };
+  }, [initialData, form]);
 
   async function onSubmit(values: z.infer<typeof rxSchema>) {
     setIsSubmitting(true);
@@ -174,7 +191,7 @@ export function PrescriptionForm({
   };
 
   // Medicine Autocomplete Hook & State
-  const AutocompleteField = ({ index }: { index: number }) => {
+  const AutocompleteField = ({ index, hasError }: { index: number; hasError?: boolean }) => {
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState('');
     const [results, setResults] = React.useState<any[]>([]);
@@ -199,7 +216,11 @@ export function PrescriptionForm({
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger className={cn("inline-flex items-center justify-between rounded-md border border-input bg-background px-3 h-10 py-2 text-sm shadow-sm ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-full font-normal", !currentName && "text-muted-foreground")}>
+        <PopoverTrigger className={cn(
+          "inline-flex items-center justify-between rounded-md border border-input bg-background px-3 h-10 py-2 text-sm shadow-sm ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-full font-normal", 
+          !currentName && "text-muted-foreground",
+          hasError && "border-destructive ring-destructive focus-visible:ring-destructive"
+        )}>
           <span className="truncate">{currentName || "Search medicine..."}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </PopoverTrigger>
@@ -292,6 +313,11 @@ export function PrescriptionForm({
                 toast.error("Please fill the prescription before saving as template.");
                 return;
               }
+              setTemplateData({
+                diagnosis: values.diagnosis || '',
+                instructions: values.instructions || '',
+                medicines: values.medicines || []
+              });
               setOpenSaveTemplate(true);
             }}
           >
@@ -324,11 +350,18 @@ export function PrescriptionForm({
             <FormField
               control={form.control}
               name="diagnosis"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem className="bg-white p-5 rounded-xl border shadow-sm">
                   <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Clinical Diagnosis</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Acute Pharyngitis" className="mt-2 text-md h-12" {...field} />
+                    <Input 
+                      placeholder="e.g. Acute Pharyngitis" 
+                      className={cn(
+                        "mt-2 text-md h-12",
+                        fieldState.error && "border-destructive focus-visible:ring-destructive"
+                      )} 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -338,6 +371,11 @@ export function PrescriptionForm({
             <div className="bg-white p-5 rounded-xl border shadow-sm">
               <div className="flex items-center justify-between mb-4 border-b pb-4">
                 <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Medications Rx</h3>
+                {form.formState.errors.medicines?.message && (
+                  <p className="text-xs font-semibold text-destructive uppercase tracking-wider">
+                    {form.formState.errors.medicines.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -363,10 +401,10 @@ export function PrescriptionForm({
                       <FormField
                         control={form.control}
                         name={`medicines.${index}.medicine_name`}
-                        render={({ field: _field }) => (
+                        render={({ field: _field, fieldState }) => (
                           <FormItem className="md:col-span-2">
                             <FormLabel className="text-xs font-medium text-slate-500">Drug Name</FormLabel>
-                            <AutocompleteField index={index} />
+                            <AutocompleteField index={index} hasError={!!fieldState.error} />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -376,11 +414,15 @@ export function PrescriptionForm({
                       <FormField
                         control={form.control}
                         name={`medicines.${index}.dosage`}
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
                             <FormLabel className="text-xs font-medium text-slate-500">Dosage</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g. 500mg" {...field} />
+                              <Input 
+                                placeholder="e.g. 500mg" 
+                                className={cn(fieldState.error && "border-destructive focus-visible:ring-destructive")} 
+                                {...field} 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -391,11 +433,16 @@ export function PrescriptionForm({
                       <FormField
                         control={form.control}
                         name={`medicines.${index}.duration_days`}
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
                             <FormLabel className="text-xs font-medium text-slate-500">Duration (Days)</FormLabel>
                             <FormControl>
-                              <Input type="number" min="1" {...field} />
+                              <Input 
+                                type="number" 
+                                min="1" 
+                                className={cn(fieldState.error && "border-destructive focus-visible:ring-destructive")} 
+                                {...field} 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -503,15 +550,16 @@ export function PrescriptionForm({
         onSelect={handleApplyTemplate}
       />
 
-      <SaveTemplateModal 
-        open={openSaveTemplate} 
-        onOpenChange={setOpenSaveTemplate}
-        prescriptionData={{
-          diagnosis: form.getValues().diagnosis,
-          instructions: form.getValues().instructions,
-          medicines: form.getValues().medicines
-        }}
-      />
+      {templateData && (
+        <SaveTemplateModal 
+          open={openSaveTemplate} 
+          onOpenChange={(open) => {
+            setOpenSaveTemplate(open);
+            if (!open) setTemplateData(null);
+          }}
+          prescriptionData={templateData}
+        />
+      )}
     </>
   );
 }

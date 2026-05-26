@@ -194,6 +194,10 @@ export function InvoiceCreateForm({
   const formatCurrency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format;
 
   const onSubmit = (data: InvoiceFormValues) => {
+    if (totals.discount > totals.subtotal) {
+      toast.error(`Discount cannot exceed the invoice total of ${formatCurrency(totals.subtotal)}`);
+      return;
+    }
     startTransition(async () => {
       try {
         const result = await createInvoice(data);
@@ -354,6 +358,11 @@ export function InvoiceCreateForm({
               <Label htmlFor="discount_amount">Global Discount (₹)</Label>
               <Input id="discount_amount" type="number" step="0.01" min="0" {...register('discount_amount')} placeholder="0.00" />
               {errors.discount_amount && <p className="text-xs text-destructive">{errors.discount_amount.message}</p>}
+              {totals.discount > totals.subtotal && (
+                <p className="text-xs text-destructive font-medium mt-1">
+                  Discount cannot exceed the invoice total of {formatCurrency(totals.subtotal)}
+                </p>
+              )}
             </div>
             <div className="flex justify-between items-center text-muted-foreground pt-2">
               <span>Subtotal:</span>

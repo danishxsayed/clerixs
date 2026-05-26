@@ -29,7 +29,7 @@ import {
 import { useBranch } from '@/contexts/BranchContext';
 
 const inviteSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Please enter a valid email address'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']),
   branch_id: z.string().min(1, 'Branch selection is required'),
 });

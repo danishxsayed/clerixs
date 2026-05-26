@@ -90,8 +90,9 @@ export function LabOrderForm({ patientId, tests, packages }: { patientId: string
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     if (selectedItems.length === 0) {
-      toast.error('Please select at least one test to proceed.');
+      toast.error('Please add at least one test before confirming');
       return;
     }
 
@@ -345,7 +346,7 @@ export function LabOrderForm({ patientId, tests, packages }: { patientId: string
             <CardFooter className="flex flex-col gap-2 pt-0 pb-6">
               <Button 
                 type="submit" 
-                disabled={loading || selectedItems.length === 0}
+                disabled={loading}
                 className="w-full gap-2 h-11"
               >
                 {loading ? <div className="h-4 w-4 border-b-2 border-white rounded-full animate-spin" /> : <Check className="h-4 w-4" />}

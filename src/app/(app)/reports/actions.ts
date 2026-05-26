@@ -162,10 +162,14 @@ export async function getAdvancedReportMetrics(dateFilter: string = 'last-6-mont
     });
     
     // Sort chronologically using a Date property
-    const monthlyRevenue = Object.entries(monthlyRevenueMap).map(([month, revenue]) => {
+    const monthlyRevenueAll = Object.entries(monthlyRevenueMap).map(([month, revenue]) => {
       const [m, y] = month.split(' ');
       return { month, revenue, _date: new Date(`${m} 1, ${y}`) };
-    }).sort((a, b) => a._date.getTime() - b._date.getTime()).map(({ month, revenue }) => ({ month, revenue }));
+    }).sort((a, b) => a._date.getTime() - b._date.getTime());
+
+    // Limit to maximum 12 months (most recent 12 months)
+    const monthlyRevenueLimited = monthlyRevenueAll.slice(-12);
+    const monthlyRevenue = monthlyRevenueLimited.map(({ month, revenue }) => ({ month, revenue }));
 
     // 2. Outstanding Payments (Unpaid or Partially Paid)
     const { data: outstandingInvoices } = await supabase

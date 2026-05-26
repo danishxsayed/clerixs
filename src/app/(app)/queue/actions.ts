@@ -86,7 +86,7 @@ export async function addToQueue(formData: z.infer<typeof walkInSchema>) {
   const nextPos = (maxPos?.queue_position || 0) + 1;
 
   // 4. Insert Queue Entry
-  const { error } = await supabase
+  const { data: newEntry, error } = await supabase
     .from('queue_entries')
     .insert({
       organization_id: profile.default_organization_id,
@@ -97,7 +97,17 @@ export async function addToQueue(formData: z.infer<typeof walkInSchema>) {
       queue_position: nextPos,
       is_walkin: !patientId,
       checked_in_at: new Date().toISOString(),
-    });
+    })
+    .select(`
+      *,
+      patients (
+        id,
+        full_name,
+        patient_code
+      ),
+      appointment_id
+    `)
+    .single();
 
   if (error) {
     console.error('Queue Insert Error:', error);
@@ -105,7 +115,7 @@ export async function addToQueue(formData: z.infer<typeof walkInSchema>) {
   }
 
   revalidatePath('/queue');
-  return { success: true };
+  return { success: true, entry: newEntry };
 }
 
 export async function checkInToQueue(appointmentId: string) {

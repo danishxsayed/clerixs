@@ -32,6 +32,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Progress } from '@/components/ui/progress';
 import { createClient } from '@/lib/supabase/client';
 import { useBranch } from '@/contexts/BranchContext';
+import { useSidebar } from '@/contexts/SidebarContext';
 import {
   Select,
   SelectContent,
@@ -76,6 +77,7 @@ export function Sidebar({
   const [credits, setCredits] = React.useState<{ balance: number; total_used: number } | null>(null);
   
   const { branches, currentBranch, setCurrentBranch, setAllBranches, isAllBranches } = useBranch();
+  const { isMobileOpen, setIsMobileOpen } = useSidebar();
   const showBranchSwitcher = userRole === 'org_owner' || userRole === 'admin';
 
   const fetchCredits = React.useCallback(async () => {
@@ -110,6 +112,24 @@ export function Sidebar({
     fetchCredits();
   }, [fetchCredits, pathname, currentSearchParams]);
 
+  // Listen to Escape key to close the mobile sidebar
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileOpen(false);
+      }
+    };
+    if (isMobileOpen) {
+      window.addEventListener('keydown', handleEscape);
+    }
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isMobileOpen, setIsMobileOpen]);
+
+  // Close mobile sidebar on navigation path change
+  React.useEffect(() => {
+    setIsMobileOpen(false);
+  }, [pathname, setIsMobileOpen]);
+
   // Filter items based on user role
   const visibleItems = SIDEBAR_ITEMS.filter(item => item.roles.includes(userRole));
   
@@ -119,12 +139,24 @@ export function Sidebar({
   const managementItems = clinicBreakpoint > -1 ? visibleItems.slice(clinicBreakpoint) : [];
 
   return (
-    <div
-      className={cn(
-        'relative flex h-full flex-col border-r bg-background transition-all duration-300',
-        isCollapsed ? 'w-20' : 'w-64',
+    <>
+      {/* Backdrop overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden transition-opacity duration-300"
+          onClick={() => setIsMobileOpen(false)}
+        />
       )}
-    >
+
+      {/* Sidebar Panel */}
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background transition-transform duration-300 md:relative md:translate-x-0',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
+          isCollapsed ? 'md:w-20' : 'md:w-64',
+          'w-64', // default mobile width
+        )}
+      >
       <div className="flex h-16 items-center px-4 pt-6">
         <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden px-2">
           <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md">
@@ -315,10 +347,11 @@ export function Sidebar({
         variant="outline"
         size="icon"
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-4 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full border bg-white shadow-sm"
+        className="absolute -right-4 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full border bg-white shadow-sm hidden md:flex"
       >
         {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </Button>
     </div>
+    </>
   );
 }

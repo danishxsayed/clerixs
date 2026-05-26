@@ -7,11 +7,37 @@ import { Download, FileSpreadsheet, Printer } from 'lucide-react';
 import { getPatientsExportData, getInvoicesExportData } from './actions';
 import { toast } from 'sonner';
 import { FeatureLock } from '@/components/subscription/FeatureLock';
-import { 
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, 
-  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-  ResponsiveContainer, Legend 
-} from 'recharts';
+
+// Dynamically load Recharts drawing components
+const RevenueTrendChart = React.lazy(() => import('./components/LazyCharts').then(m => ({ default: m.RevenueTrendChart })));
+const StaffRevenueChart = React.lazy(() => import('./components/LazyCharts').then(m => ({ default: m.StaffRevenueChart })));
+const PatientRetentionChart = React.lazy(() => import('./components/LazyCharts').then(m => ({ default: m.PatientRetentionChart })));
+const AppointmentStatusChart = React.lazy(() => import('./components/LazyCharts').then(m => ({ default: m.AppointmentStatusChart })));
+const TopTreatmentsChart = React.lazy(() => import('./components/LazyCharts').then(m => ({ default: m.TopTreatmentsChart })));
+
+// Skeletons
+const ChartSkeleton = () => (
+  <div className="w-full h-full flex flex-col justify-between p-4 space-y-4 animate-pulse select-none">
+    <div className="flex justify-between items-end h-[220px] gap-2 pt-4">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-muted rounded w-full" style={{ height: `${20 + i * 15}%` }} />
+      ))}
+    </div>
+    <div className="h-4 bg-muted rounded w-1/3 mx-auto"></div>
+  </div>
+);
+
+const PieChartSkeleton = () => (
+  <div className="w-full h-full flex flex-col items-center justify-center p-4 space-y-6 animate-pulse select-none">
+    <div className="h-36 w-36 rounded-full border-[16px] border-muted flex items-center justify-center">
+      <div className="h-12 w-12 bg-muted rounded-full"></div>
+    </div>
+    <div className="flex gap-4">
+      <div className="h-4 bg-muted rounded w-16"></div>
+      <div className="h-4 bg-muted rounded w-16"></div>
+    </div>
+  </div>
+);
 
 interface AdvancedReportsProps {
   data: any;
@@ -62,7 +88,7 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
     if (res.error) {
       toast.error(res.error);
     } else if (res.data) {
-      // Flatten the relational data for CSV
+      // Flatten relational data for CSV export
       const flatData = res.data.map((inv: any) => ({
         invoice_number: inv.invoice_number,
         patient_name: inv.patients?.full_name || '',
@@ -131,30 +157,9 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
           <CardContent>
             <div className="h-[300px] w-full">
               {data.monthlyRevenue?.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data.monthlyRevenue} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12} 
-                      tickLine={false} 
-                      axisLine={false} 
-                      tickFormatter={(v) => `₹${v}`}
-                    />
-                    <RechartsTooltip 
-                      formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Revenue']}
-                      contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))' }}
-                    />
-                    <Area type="monotone" dataKey="revenue" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6' }} activeDot={{ r: 6 }} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <React.Suspense fallback={<ChartSkeleton />}>
+                  <RevenueTrendChart monthlyRevenue={data.monthlyRevenue} />
+                </React.Suspense>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">No revenue data.</div>
               )}
@@ -170,24 +175,9 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
           <CardContent>
             <div className="h-[300px] w-full">
               {data.staffRevenue?.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.staffRevenue} layout="vertical" margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted))" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis dataKey="name" type="category" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} width={80} />
-                    <RechartsTooltip 
-                      formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Revenue']}
-                      cursor={false}
-                      contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))' }}
-                    />
-                    <Bar dataKey="revenue" radius={[0, 4, 4, 0]} barSize={24}>
-                      {data.staffRevenue.map((entry: any, index: number) => {
-                        const colors = ['#3b82f6', '#06b6d4', '#10b981', '#8b5cf6'];
-                        return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <React.Suspense fallback={<ChartSkeleton />}>
+                  <StaffRevenueChart staffRevenue={data.staffRevenue} />
+                </React.Suspense>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">No staff revenue data.</div>
               )}
@@ -206,26 +196,9 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
           <CardContent>
             <div className="h-[250px] w-full">
               {data.patientRetention?.[0]?.value > 0 || data.patientRetention?.[1]?.value > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.patientRetention}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {data.patientRetention.map((entry: any, index: number) => {
-                        const colors = ['#14b8a6', '#f43f5e']; // Teal for New, Rose for Returning
-                        return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                      })}
-                    </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }} />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                  </PieChart>
-                </ResponsiveContainer>
+                <React.Suspense fallback={<PieChartSkeleton />}>
+                  <PatientRetentionChart patientRetention={data.patientRetention} />
+                </React.Suspense>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">No patient data.</div>
               )}
@@ -241,25 +214,9 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
           <CardContent>
             <div className="h-[250px] w-full">
               {data.appointmentStatus?.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.appointmentStatus}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {data.appointmentStatus.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }} />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                  </PieChart>
-                </ResponsiveContainer>
+                <React.Suspense fallback={<PieChartSkeleton />}>
+                  <AppointmentStatusChart appointmentStatus={data.appointmentStatus} />
+                </React.Suspense>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">No appointment data.</div>
               )}
@@ -278,24 +235,9 @@ export function AdvancedReports({ data, isLoading, dateFilter }: AdvancedReports
           <CardContent>
              <div className="h-[300px] w-full">
               {data.topTreatmentsByRevenue?.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.topTreatmentsByRevenue} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v}`} />
-                    <RechartsTooltip 
-                      formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Revenue']}
-                      cursor={false}
-                      contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--background))' }}
-                    />
-                    <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                      {data.topTreatmentsByRevenue.map((entry: any, index: number) => {
-                         const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6', '#10b981'];
-                         return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <React.Suspense fallback={<ChartSkeleton />}>
+                  <TopTreatmentsChart topTreatmentsByRevenue={data.topTreatmentsByRevenue} />
+                </React.Suspense>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">No treatment data.</div>
               )}

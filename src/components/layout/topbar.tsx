@@ -1,13 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { Search } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
 import { signout } from '@/app/auth/actions';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GlobalSearch } from './global-search';
 import { NotificationBell } from './notification-bell';
+import { useSidebar } from '@/contexts/SidebarContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ export function Topbar({
   userRole?: string;
 }) {
   const router = useRouter();
+  const { toggleMobileSidebar } = useSidebar();
 
   // Create initials e.g. "John Doe" -> "JD"
   const getInitials = (name: string) => {
@@ -44,9 +46,18 @@ export function Topbar({
   return (
     <header 
       suppressHydrationWarning 
-      className="sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b bg-background px-6"
+      className="sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={toggleMobileSidebar}
+          aria-label="Toggle Menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
         <h1 className="text-xl font-semibold">Dashboard</h1>
       </div>
 

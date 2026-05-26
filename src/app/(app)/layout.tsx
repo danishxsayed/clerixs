@@ -44,6 +44,7 @@ async function TopbarDataFetcher({ userId, userEmail }: { userId: string, userEm
   return <Topbar userFullName={profile?.full_name || "User"} userEmail={userEmail} userAvatar={profile?.avatar_url} userRole={userRole} />;
 }
 import { ThemeProvider } from '@/components/theme-provider';
+import { SidebarProvider } from '@/contexts/SidebarContext';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -141,35 +142,37 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <SubscriptionProvider subscription={formattedSubData} orgCreatedAt={org?.created_at}>
         <LockScreen>
           <BranchProvider organizationId={profile.default_organization_id} userRole={membership?.role || 'admin'}>
-            <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
-            {branchManagerInfo && (
-              <div className="bg-blue-600 dark:bg-blue-900 text-white py-1.5 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2 shadow-sm shrink-0">
-                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
-                You are logged in as <span className="underline decoration-wavy decoration-blue-300 font-bold">{branchManagerInfo.branchName}</span> Manager — Branch of {branchManagerInfo.clinicName}
-              </div>
-            )}
-            <TrialBanner />
-            <div className="flex flex-1 overflow-hidden">
-              <div className="print:hidden h-full">
-                <Suspense fallback={<SidebarSkeleton />}>
-                  <SidebarDataFetcher userId={user.id} />
-                </Suspense>
-              </div>
-              <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible min-w-0">
-                <div className="print:hidden">
-                  <Suspense fallback={<TopbarSkeleton />}>
-                    <TopbarDataFetcher userId={user.id} userEmail={user.email || ''} />
+            <SidebarProvider>
+              <div className="flex flex-col h-screen print:h-auto bg-background overflow-hidden print:overflow-visible print:bg-white">
+              {branchManagerInfo && (
+                <div className="bg-blue-600 dark:bg-blue-900 text-white py-1.5 px-4 text-center text-xs font-semibold flex items-center justify-center gap-2 shadow-sm shrink-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                  You are logged in as <span className="underline decoration-wavy decoration-blue-300 font-bold">{branchManagerInfo.branchName}</span> Manager — Branch of {branchManagerInfo.clinicName}
+                </div>
+              )}
+              <TrialBanner />
+              <div className="flex flex-1 overflow-hidden">
+                <div className="print:hidden h-full">
+                  <Suspense fallback={<SidebarSkeleton />}>
+                    <SidebarDataFetcher userId={user.id} />
                   </Suspense>
                 </div>
-                <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-3 sm:p-6 print:p-0">
-                  {children}
-                </main>
+                <div className="flex-1 flex flex-col h-full print:h-auto relative overflow-hidden print:overflow-visible min-w-0">
+                  <div className="print:hidden">
+                    <Suspense fallback={<TopbarSkeleton />}>
+                      <TopbarDataFetcher userId={user.id} userEmail={user.email || ''} />
+                    </Suspense>
+                  </div>
+                  <main className="flex-1 overflow-auto print:overflow-visible bg-background/50 dark:bg-zinc-950/20 print:bg-white p-3 sm:p-6 print:p-0">
+                    {children}
+                  </main>
+                </div>
               </div>
+              <Toaster />
+              <GlobalVoicePTT />
+              <KeyboardShortcutsManager />
             </div>
-            <Toaster />
-            <GlobalVoicePTT />
-            <KeyboardShortcutsManager />
-          </div>
+            </SidebarProvider>
           </BranchProvider>
         </LockScreen>
       </SubscriptionProvider>

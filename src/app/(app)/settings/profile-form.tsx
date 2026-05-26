@@ -20,7 +20,9 @@ import {
 } from '@/components/ui/form';
 
 const profileSchema = z.object({
-  full_name: z.string().min(2, 'Name must be at least 2 characters.'),
+  full_name: z.string().refine((val) => val.trim().length > 0, {
+    message: 'Name cannot be empty',
+  }),
   phone: z.string().optional(),
   avatar_url: z.string().optional(),
 });
