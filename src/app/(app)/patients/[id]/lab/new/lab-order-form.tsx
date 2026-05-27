@@ -92,7 +92,7 @@ export function LabOrderForm({ patientId, tests, packages }: { patientId: string
     e.preventDefault();
     if (loading) return;
     if (selectedItems.length === 0) {
-      toast.error('Please add at least one test before confirming');
+      toast.error('Please add at least one test before confirming the order.');
       return;
     }
 

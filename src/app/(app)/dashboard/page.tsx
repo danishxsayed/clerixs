@@ -43,7 +43,7 @@ export default async function DashboardPage({
 
     orgId = profile?.default_organization_id || '';
     fullName = profile?.full_name 
-      ? profile.full_name.split(' ')[0] 
+      ? profile.full_name.trim().split(' ')[0] 
       : 'there';
 
     if (!orgId) {

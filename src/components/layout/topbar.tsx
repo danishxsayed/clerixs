@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Search, Menu } from 'lucide-react';
 import { signout } from '@/app/auth/actions';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GlobalSearch } from './global-search';
@@ -31,11 +31,32 @@ export function Topbar({
   userRole?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isMobileOpen, setIsMobileOpen } = useSidebar();
+
+  const pageNames: Record<string, string> = {
+    '/dashboard': 'Dashboard',
+    '/patients': 'Patients',
+    '/appointments': 'Appointments',
+    '/billing': 'Billing & Invoices',
+    '/reports': 'Reports & Analytics',
+    '/settings': 'Settings',
+    '/queue': 'Live Queue',
+    '/staff': 'Staff & Team',
+  };
+
+  const getPageTitle = (path: string) => {
+    if (pageNames[path]) return pageNames[path];
+    const match = Object.keys(pageNames).find(key => key !== '/' && path.startsWith(key));
+    return match ? pageNames[match] : 'Dashboard';
+  };
+
+  const pageTitle = getPageTitle(pathname || '/dashboard');
 
   // Create initials e.g. "John Doe" -> "JD"
   const getInitials = (name: string) => {
     return name
+      .trim()
       .split(' ')
       .slice(0, 2)
       .map(n => n[0])
@@ -58,7 +79,7 @@ export function Topbar({
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <h1 className="text-xl font-semibold">Dashboard</h1>
+        <h1 className="text-xl font-semibold">{pageTitle}</h1>
       </div>
 
       <div className="flex flex-1 items-center justify-center px-6">

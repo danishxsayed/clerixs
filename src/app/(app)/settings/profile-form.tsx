@@ -33,7 +33,7 @@ export function ProfileForm({ profile }: { profile: any }) {
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      full_name: profile.full_name || '',
+      full_name: (profile.full_name || '').trim(),
       phone: profile.phone || '',
       avatar_url: profile.avatar_url || '',
     },
@@ -41,7 +41,7 @@ export function ProfileForm({ profile }: { profile: any }) {
 
   const getInitials = (name: string) => {
     if (!name) return 'U';
-    return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+    return name.trim().split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
   };
 
   const handleAvatarUpload = (url: string) => {
@@ -52,12 +52,17 @@ export function ProfileForm({ profile }: { profile: any }) {
 
   function onSubmit(values: z.infer<typeof profileSchema>) {
     startTransition(async () => {
-      const result = await updateProfile(values);
+      const trimmedValues = {
+        ...values,
+        full_name: values.full_name.trim(),
+      };
+      const result = await updateProfile(trimmedValues);
       if (result.error) {
         toast.error(result.error);
         return;
       }
       toast.success('Profile updated successfully');
+      window.location.reload();
     });
   }
 

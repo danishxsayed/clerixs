@@ -292,6 +292,10 @@ export async function createLabOrder(data: any) {
   const { error, supabase, organizationId, user, branchId } = await getAuthAndOrg();
   if (error || !supabase) return { error };
 
+  if (!data.items || data.items.length === 0) {
+    return { error: 'Please add at least one test before confirming the order.' };
+  }
+
   // STORAGE QUOTA CHECK
   try {
     const { ensureStorageQuota } = await import('@/lib/quota');

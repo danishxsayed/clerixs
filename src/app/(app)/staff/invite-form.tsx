@@ -29,7 +29,7 @@ import {
 import { useBranch } from '@/contexts/BranchContext';
 
 const inviteSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Please enter a valid email address (e.g. doctor@clinic.com)'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']),
   branch_id: z.string().min(1, 'Branch selection is required'),
 });
@@ -128,7 +128,7 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
            </Button>
         </div>
         <div className="pt-4 flex justify-end">
-          <Button type="button" variant="outline" onClick={() => { setInviteLink(null); if (onSuccess) onSuccess(); }}>
+          <Button type="button" variant="outline" onClick={() => { setInviteLink(null); window.location.reload(); if (onSuccess) onSuccess(); }}>
             Close
           </Button>
         </div>

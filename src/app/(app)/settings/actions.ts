@@ -37,7 +37,7 @@ export async function updateProfile(data: ProfileFormValues) {
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
-        full_name: validatedData.full_name,
+        full_name: validatedData.full_name.trim(),
         phone: validatedData.phone || null,
         avatar_url: validatedData.avatar_url || null,
         updated_at: new Date().toISOString(),
@@ -49,7 +49,6 @@ export async function updateProfile(data: ProfileFormValues) {
       return { error: updateError.message };
     }
 
-    revalidatePath('/settings');
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -101,9 +100,6 @@ export async function updateOrganization(data: OrganizationFormValues) {
       return { error: updateError.message };
     }
 
-    revalidatePath('/settings');
-    // Revalidate Root layout essentially to refresh the sidebar Clinic Name if it changed.
-    revalidatePath('/', 'layout'); 
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {

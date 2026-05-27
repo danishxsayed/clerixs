@@ -9,7 +9,7 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const inviteSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Please enter a valid email address (e.g. doctor@clinic.com)'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']), // Using 'admin' in UI mapped to 'org_owner' in DB
   branch_id: z.string().min(1, 'Branch selection is required'),
 });
@@ -159,12 +159,10 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
 
     if (emailError) {
       console.error('[Invite Staff] Resend email delivery failed:', emailError);
-      revalidatePath('/staff');
       // Return success with emailError indicator so UI can adapt
       return { success: true, token, emailError: emailError.message };
     }
 
-    revalidatePath('/staff');
     return { success: true, token };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -195,7 +193,6 @@ export async function updateStaffStatus(membershipId: string, newStatus: 'active
       return { error: updateError.message };
     }
 
-    revalidatePath('/staff');
     return { success: true };
   } catch (error) {
     return { error: 'An unexpected error occurred' };
@@ -219,7 +216,6 @@ export async function removeStaff(membershipId: string) {
         return { error: 'Failed to fully remove staff: ' + deleteError.message };
       }
   
-      revalidatePath('/staff');
       return { success: true };
     } catch (error) {
       return { error: 'An unexpected error occurred' };
@@ -244,7 +240,6 @@ export async function deleteInvite(inviteId: string) {
         return { error: deleteError.message };
       }
   
-      revalidatePath('/staff');
       return { success: true };
     } catch (error) {
       return { error: 'An unexpected error occurred' };

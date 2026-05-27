@@ -60,7 +60,7 @@ export function PrescriptionForm({
   initialData
 }: {
   patientId: string,
-  onSuccess: () => void,
+  onSuccess: (prescription?: any) => void,
   prescriptionId?: string,
   initialData?: any
 }) {
@@ -115,6 +115,7 @@ export function PrescriptionForm({
         });
         if (result?.error) throw new Error(result.error);
         toast.success('Prescription updated successfully!');
+        onSuccess(result.prescription);
       } else {
         const result = await createPrescription({
           patientId,
@@ -124,8 +125,8 @@ export function PrescriptionForm({
         });
         if (result?.error) throw new Error(result.error);
         toast.success('Prescription created and saved to history!');
+        onSuccess(result.prescription);
       }
-      onSuccess();
     } catch (error: any) {
       toast.error(error.message || 'An unexpected error occurred');
     } finally {
@@ -219,7 +220,7 @@ export function PrescriptionForm({
         <PopoverTrigger className={cn(
           "inline-flex items-center justify-between rounded-md border border-input bg-background px-3 h-10 py-2 text-sm shadow-sm ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 w-full font-normal", 
           !currentName && "text-muted-foreground",
-          hasError && "border-destructive ring-destructive focus-visible:ring-destructive"
+          hasError && "border-red-500 text-red-500 focus-visible:ring-red-500"
         )}>
           <span className="truncate">{currentName || "Search medicine..."}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -358,12 +359,16 @@ export function PrescriptionForm({
                       placeholder="e.g. Acute Pharyngitis" 
                       className={cn(
                         "mt-2 text-md h-12",
-                        fieldState.error && "border-destructive focus-visible:ring-destructive"
+                        fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200"
                       )} 
                       {...field} 
                     />
                   </FormControl>
-                  <FormMessage />
+                  {fieldState.error && (
+                    <p className="text-xs font-bold text-red-500 mt-1">
+                      {fieldState.error.message || 'Clinical diagnosis is required'}
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
@@ -405,7 +410,11 @@ export function PrescriptionForm({
                           <FormItem className="md:col-span-2">
                             <FormLabel className="text-xs font-medium text-slate-500">Drug Name</FormLabel>
                             <AutocompleteField index={index} hasError={!!fieldState.error} />
-                            <FormMessage />
+                            {fieldState.error && (
+                              <p className="text-xs font-bold text-red-500 mt-1">
+                                {fieldState.error.message || 'Medicine name required'}
+                              </p>
+                            )}
                           </FormItem>
                         )}
                       />
@@ -420,11 +429,15 @@ export function PrescriptionForm({
                             <FormControl>
                               <Input 
                                 placeholder="e.g. 500mg" 
-                                className={cn(fieldState.error && "border-destructive focus-visible:ring-destructive")} 
+                                className={cn(fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200")} 
                                 {...field} 
                               />
                             </FormControl>
-                            <FormMessage />
+                            {fieldState.error && (
+                              <p className="text-xs font-bold text-red-500 mt-1">
+                                {fieldState.error.message || 'Dosage required'}
+                              </p>
+                            )}
                           </FormItem>
                         )}
                       />
