@@ -237,7 +237,7 @@ export async function GET(
     doc.setTextColor(71, 85, 105);
     const dateText = `Date: ${format(new Date(px.created_at), 'PPP')}`;
     doc.text(dateText, colRightX, currentY + 17, { align: 'right' });
-    doc.text(`Doctor: ${doctor?.full_name || 'Dr. Practitioner'}`, colRightX, currentY + 22, { align: 'right' });
+    doc.text(`Doctor: ${(doctor?.full_name || 'Dr. Practitioner').trim()}`, colRightX, currentY + 22, { align: 'right' });
 
     currentY += 40;
 
@@ -372,7 +372,7 @@ export async function GET(
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(30, 41, 59);
-    doc.text(doctor?.full_name || 'Dr. Practitioner', sigStartX + (sigWidth / 2), footerY + 5, { align: 'center' });
+    doc.text((doctor?.full_name || 'Dr. Practitioner').trim(), sigStartX + (sigWidth / 2), footerY + 5, { align: 'center' });
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);

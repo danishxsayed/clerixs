@@ -139,20 +139,25 @@ export function AddWalkinDialog({
 
   async function onSubmit(values: z.infer<typeof walkInSchema>) {
     setIsSubmitting(true);
-    const result = await addToQueue(values);
-    setIsSubmitting(false);
+    try {
+      const result = await addToQueue(values);
+      setIsSubmitting(false);
 
-    if (result.error) {
-      toast.error(result.error);
-    } else {
-      toast.success('Patient added to queue!');
-      
-      if (onAddEntry && result.entry) {
-        onAddEntry(result.entry);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success('Patient added to queue successfully.');
+        
+        if (onAddEntry && result.entry) {
+          onAddEntry(result.entry);
+        }
+
+        onOpenChange(false);
+        form.reset();
       }
-
-      onOpenChange(false);
-      form.reset();
+    } catch (error: any) {
+      setIsSubmitting(false);
+      toast.error(error.message || 'Failed to add patient to queue');
     }
   }
 
@@ -433,7 +438,7 @@ export function AddWalkinDialog({
                   {isSubmitting ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Confirm & Add to Queue
+                  {isSubmitting ? 'Adding...' : 'Confirm & Add to Queue'}
                 </Button>
               </DialogFooter>
             </form>

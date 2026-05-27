@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { 
   Key, 
   ShieldAlert, 
@@ -70,6 +71,26 @@ export function BranchManagerActions({ branch, isEnterprise }: BranchManagerActi
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; pass: string } | null>(null);
   const [resetCredentials, setResetCredentials] = useState<{ pass: string } | null>(null);
 
+  // Email validation state
+  const [emailError, setEmailError] = useState('');
+
+  const validateEmail = (val: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (val && !emailRegex.test(val)) {
+      setEmailError('Please enter a valid email address (e.g. doctor@clinic.com)');
+      return false;
+    } else if (!val) {
+      setEmailError('Email address is required.');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
+
+  const handleEmailBlur = () => {
+    validateEmail(email);
+  };
+
   const generateSecurePassword = () => {
     const length = 12;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
@@ -110,8 +131,8 @@ export function BranchManagerActions({ branch, isEnterprise }: BranchManagerActi
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      toast.error('Email address is required.');
+    if (!validateEmail(email)) {
+      toast.error('Please enter a valid email address (e.g. doctor@clinic.com)');
       return;
     }
     if (password.length < 8) {
@@ -323,7 +344,7 @@ export function BranchManagerActions({ branch, isEnterprise }: BranchManagerActi
               </DialogFooter>
             </div>
           ) : (
-            <form onSubmit={handleCreateSubmit} className="space-y-5">
+            <form onSubmit={handleCreateSubmit} noValidate className="space-y-5">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-lg">
                   <Key className="h-5 w-5 text-blue-600" />
@@ -341,14 +362,26 @@ export function BranchManagerActions({ branch, isEnterprise }: BranchManagerActi
                     <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
-                      type="email"
+                      type="text"
                       required
                       placeholder="branch@example.com"
-                      className="pl-9 font-mono text-sm"
+                      className={cn(
+                        "pl-9 font-mono text-sm",
+                        emailError && "border-red-500 focus-visible:ring-red-500"
+                      )}
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (emailError) validateEmail(e.target.value);
+                      }}
+                      onBlur={handleEmailBlur}
                     />
                   </div>
+                  {emailError && (
+                    <p className="text-xs font-bold text-red-500 mt-1">
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

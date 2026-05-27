@@ -30,15 +30,15 @@ import { SaveTemplateModal } from './save-template-modal';
 import { Badge } from '@/components/ui/badge';
 
 const rxSchema = z.object({
-  diagnosis: z.string().min(2, 'Diagnosis is required'),
+  diagnosis: z.string().min(1, 'Clinical diagnosis is required'),
   instructions: z.string().optional(),
   medicines: z.array(z.object({
-    medicine_name: z.string().min(2, 'Medicine name required'),
+    medicine_name: z.string().min(1, 'Medicine name is required'),
     dosage: z.string().min(1, 'Required (e.g. 500mg)'),
     frequency: z.string().min(1, 'Required'),
     duration_days: z.coerce.number().min(1, 'Min 1 day'),
     notes: z.string().optional()
-  })).min(1, 'At least one medicine is required')
+  })).min(1, 'Please add at least one medicine with a drug name.')
 });
 
 // A localized debouncer hook could be used, but keeping it simple with inline debounce or direct calls
@@ -102,6 +102,26 @@ export function PrescriptionForm({
       });
     };
   }, [initialData, form]);
+
+  const onInvalid = (errors: any) => {
+    console.log("Validation errors:", errors);
+    
+    if (errors.diagnosis) {
+      toast.error('Clinical diagnosis is required');
+      const el = document.getElementById('diagnosis-field');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const input = el.querySelector('input');
+        if (input) input.focus();
+      }
+    } else if (errors.medicines) {
+      toast.error('Please add at least one medicine with a drug name.');
+      const el = document.getElementById('medicines-field');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof rxSchema>) {
     setIsSubmitting(true);
@@ -346,13 +366,13 @@ export function PrescriptionForm({
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6">
             <FormField
               control={form.control}
               name="diagnosis"
               render={({ field, fieldState }) => (
-                <FormItem className="bg-white p-5 rounded-xl border shadow-sm">
+                <FormItem className="bg-white p-5 rounded-xl border shadow-sm" id="diagnosis-field">
                   <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Clinical Diagnosis</FormLabel>
                   <FormControl>
                     <Input 
@@ -366,21 +386,19 @@ export function PrescriptionForm({
                   </FormControl>
                   {fieldState.error && (
                     <p className="text-xs font-bold text-red-500 mt-1">
-                      {fieldState.error.message || 'Clinical diagnosis is required'}
+                      Clinical diagnosis is required
                     </p>
                   )}
                 </FormItem>
               )}
             />
 
-            <div className="bg-white p-5 rounded-xl border shadow-sm">
+            <div className={cn(
+              "bg-white p-5 rounded-xl border shadow-sm transition-colors duration-200",
+              form.formState.errors.medicines && "border-red-500"
+            )} id="medicines-field">
               <div className="flex items-center justify-between mb-4 border-b pb-4">
                 <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Medications Rx</h3>
-                {form.formState.errors.medicines?.message && (
-                  <p className="text-xs font-semibold text-destructive uppercase tracking-wider">
-                    {form.formState.errors.medicines.message}
-                  </p>
-                )}
               </div>
 
               <div className="space-y-4">
@@ -506,6 +524,11 @@ export function PrescriptionForm({
                   <Plus className="h-4 w-4 mr-2" /> Add Another Medicine
                 </Button>
               </div>
+              {form.formState.errors.medicines && (
+                <p className="text-xs font-bold text-red-500 mt-3">
+                  Please add at least one medicine with a drug name.
+                </p>
+              )}
             </div>
 
             <FormField

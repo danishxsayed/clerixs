@@ -16,7 +16,7 @@ import { useBranch } from '@/contexts/BranchContext';
 const patientSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters.'),
   phone: z.string().regex(/^\d{10}$/, 'Must be exactly 10 digits').optional().or(z.literal('')),
-  email: z.string().email('Invalid email address.').optional().or(z.literal('')),
+  email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'Please enter a valid email address (e.g. doctor@clinic.com)').optional().or(z.literal('')),
   date_of_birth: z.string().optional(),
   age: z.string().min(1, 'Age is required.'),
   blood_group: z.enum(['', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional(),
@@ -41,6 +41,7 @@ export default function NewPatientPage() {
     formState: { errors },
   } = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
+    mode: 'onBlur',
     defaultValues: {
       full_name: '',
       phone: '',
@@ -96,7 +97,7 @@ export default function NewPatientPage() {
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6 overflow-hidden">
         <p className="text-muted-foreground mb-6">Enter the patient's details below to register them in the system.</p>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
           <div className="space-y-4">
             
             {isAllBranches && (

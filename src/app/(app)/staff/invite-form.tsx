@@ -29,7 +29,7 @@ import {
 import { useBranch } from '@/contexts/BranchContext';
 
 const inviteSchema = z.object({
-  email: z.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Please enter a valid email address (e.g. doctor@clinic.com)'),
+  email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'Please enter a valid email address (e.g. doctor@clinic.com)'),
   role: z.enum(['admin', 'doctor', 'receptionist', 'laboratory']),
   branch_id: z.string().min(1, 'Branch selection is required'),
 });
@@ -43,6 +43,7 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const form = useForm<z.infer<typeof inviteSchema>>({
     resolver: zodResolver(inviteSchema),
+    mode: 'onBlur',
     defaultValues: {
       email: '',
       role: 'doctor',
@@ -138,7 +139,7 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
         <FormField
           control={form.control}
           name="email"

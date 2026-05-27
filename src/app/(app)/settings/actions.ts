@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 const profileSchema = z.object({
   full_name: z.string().refine((val) => val.trim().length > 0, {
-    message: 'Name cannot be empty',
+    message: 'Name cannot be blank.',
   }),
   phone: z.string().optional(),
   avatar_url: z.string().optional(),

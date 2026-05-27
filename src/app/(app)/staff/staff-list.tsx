@@ -140,7 +140,7 @@ export async function StaffList() {
                         </div>
                         <div>
                           <div className="font-medium text-foreground flex items-center gap-2">
-                              {membership.profiles?.full_name || 'Unknown User'}
+                               {(membership.profiles?.full_name || 'Unknown User').trim()}
                               {membership.role === 'org_owner' && (
                                   <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
                               )}

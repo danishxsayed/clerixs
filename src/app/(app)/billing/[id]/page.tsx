@@ -127,7 +127,7 @@ export default async function InvoiceViewPage({
         <div className="p-8 md:p-12 border-b">
           <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-400 mb-4">Billed To</h3>
           <div className="flex flex-col gap-1 text-sm">
-            <p className="text-lg font-bold text-zinc-900">{invoice.patients?.full_name}</p>
+            <p className="text-lg font-bold text-zinc-900">{invoice.patients?.full_name?.trim()}</p>
             {invoice.patients?.phone && <p className="text-zinc-600">{invoice.patients.phone}</p>}
             {invoice.patients?.email && <p className="text-zinc-600">{invoice.patients.email}</p>}
             {invoice.patients?.address && <p className="text-zinc-600 mt-2 max-w-sm">{invoice.patients.address}</p>}

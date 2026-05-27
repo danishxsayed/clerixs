@@ -97,15 +97,15 @@ export function Topbar({
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Avatar className="h-9 w-9">
-              <AvatarImage src={userAvatar || ""} alt={userFullName} className="object-cover" />
-              <AvatarFallback className="bg-primary/10 text-primary">{getInitials(userFullName) || 'U'}</AvatarFallback>
+              <AvatarImage src={userAvatar || ""} alt={userFullName.trim()} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary">{getInitials(userFullName.trim()) || 'U'}</AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{userFullName}</p>
+                  <p className="text-sm font-medium leading-none">{userFullName.trim()}</p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {userEmail}
                   </p>
