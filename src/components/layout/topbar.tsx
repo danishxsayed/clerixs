@@ -74,7 +74,10 @@ export function Topbar({
           variant="ghost"
           size="icon"
           className="md:hidden"
-          onClick={toggleMobileSidebar}
+          onClick={() => {
+            console.log('Topbar: Hamburger button clicked!');
+            toggleMobileSidebar();
+          }}
           aria-label="Toggle Menu"
         >
           <Menu className="h-5 w-5" />

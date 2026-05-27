@@ -26,6 +26,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleSetIsMobileOpen = (open: boolean) => {
+    console.log('SidebarContext: handleSetIsMobileOpen called with:', open);
     setIsMobileOpen(open);
     try {
       localStorage.setItem('clerixs_sidebar_open', String(open));
@@ -35,8 +36,10 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleMobileSidebar = () => {
+    console.log('SidebarContext: toggleMobileSidebar called. Viewport width:', typeof window !== 'undefined' ? window.innerWidth : 'SSR');
     setIsMobileOpen(prev => {
       const next = !prev;
+      console.log('SidebarContext: Toggling isMobileOpen state from', prev, 'to', next);
       try {
         localStorage.setItem('clerixs_sidebar_open', String(next));
       } catch (err) {
