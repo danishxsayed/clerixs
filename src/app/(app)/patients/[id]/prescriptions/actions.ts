@@ -50,12 +50,42 @@ export async function createPrescription(data: {
 
   if (!membership) return { error: 'Only doctors and clinic owners can create prescriptions' };
 
+  // Get target patient's branch_id
+  const { data: patientData, error: patientError } = await supabase
+    .from('patients')
+    .select('branch_id')
+    .eq('id', data.patientId)
+    .single();
+
+  if (patientError || !patientData) {
+    console.error('Fetch Patient Branch Error:', patientError);
+    return { error: 'Failed to retrieve patient branch details.' };
+  }
+
+  let activeBranchId = patientData.branch_id;
+  
+  if (!activeBranchId) {
+    // Fallback to the first available clinic branch
+    const { data: defaultBranch } = await supabase
+      .from('branches')
+      .select('id')
+      .eq('organization_id', orgId)
+      .limit(1)
+      .maybeSingle();
+      
+    if (!defaultBranch?.id) {
+      return { error: 'Patient is not assigned to a branch, and no clinic branches were found.' };
+    }
+    activeBranchId = defaultBranch.id;
+  }
+
   // 3. Create master prescription record
   const { data: prescription, error: prescriptionError } = await supabase
     .from('prescriptions')
     .insert({
       organization_id: orgId,
       patient_id: data.patientId,
+      branch_id: activeBranchId,
       treatment_id: data.treatmentId || null,
       doctor_membership_id: membership.id,
       diagnosis: data.diagnosis,
@@ -115,10 +145,14 @@ export async function createPrescription(data: {
     console.error('Queue Sync Error:', err);
   }
 
-  // Clear dashboard caches
-  revalidatePath(`/patients/${data.patientId}`);
-  revalidatePath('/queue');
-  return { success: true, prescriptionId: prescription.id };
+  // Clear dashboard caches (Disabled to avoid Vercel RSC 503)
+  const { data: fullPrescription } = await supabase
+    .from('prescriptions')
+    .select('*, prescription_items(*)')
+    .eq('id', prescription.id)
+    .single();
+
+  return { success: true, prescriptionId: prescription.id, prescription: fullPrescription };
 }
 
 export async function updatePrescription(
@@ -187,6 +221,11 @@ export async function updatePrescription(
     }
   }
 
-  revalidatePath(`/patients/${data.patientId}`);
-  return { success: true };
+  const { data: fullPrescription } = await supabase
+    .from('prescriptions')
+    .select('*, prescription_items(*)')
+    .eq('id', prescriptionId)
+    .single();
+
+  return { success: true, prescription: fullPrescription };
 }
