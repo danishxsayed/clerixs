@@ -152,7 +152,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               )}
               <TrialBanner />
               <div className="flex flex-1 overflow-hidden">
-                <div className="print:hidden h-full hidden md:block">
+                <div className="print:hidden h-full md:w-64 shrink-0 overflow-visible">
                   <Suspense fallback={<SidebarSkeleton />}>
                     <SidebarDataFetcher userId={user.id} />
                   </Suspense>

@@ -116,6 +116,7 @@ export function Sidebar({
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        console.log('Sidebar: Escape key pressed! Closing sidebar.');
         setIsMobileOpen(false);
       }
     };
@@ -127,6 +128,7 @@ export function Sidebar({
 
   // Close mobile sidebar on navigation path change
   React.useEffect(() => {
+    console.log('Sidebar: Pathname change effect triggered. Current pathname:', pathname);
     setIsMobileOpen(false);
   }, [pathname, setIsMobileOpen]);
 
@@ -144,7 +146,10 @@ export function Sidebar({
       {isMobileOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden transition-opacity duration-300"
-          onClick={() => setIsMobileOpen(false)}
+          onClick={() => {
+            console.log('Sidebar: Backdrop overlay clicked! Closing sidebar.');
+            setIsMobileOpen(false);
+          }}
         />
       )}
 
@@ -160,7 +165,10 @@ export function Sidebar({
       <div className="flex h-16 items-center px-4 pt-6">
         <Link 
           href="/dashboard" 
-          onClick={() => setIsMobileOpen(false)}
+          onClick={() => {
+            console.log('Sidebar: Logo/Dashboard link clicked! Closing sidebar.');
+            setIsMobileOpen(false);
+          }}
           className="flex items-center gap-2 overflow-hidden px-2"
         >
           <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md">
@@ -236,7 +244,10 @@ export function Sidebar({
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={() => {
+                    console.log('Sidebar: Clinic item clicked:', item.name);
+                    setIsMobileOpen(false);
+                  }}
                   className={cn(
                     'group relative flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
                     isActive
@@ -273,7 +284,10 @@ export function Sidebar({
                         <Link
                         key={item.name}
                         href={item.href}
-                        onClick={() => setIsMobileOpen(false)}
+                        onClick={() => {
+                          console.log('Sidebar: Management item clicked:', item.name);
+                          setIsMobileOpen(false);
+                        }}
                         className={cn(
                             'group flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors',
                             isActive
