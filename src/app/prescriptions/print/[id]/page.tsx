@@ -81,6 +81,13 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
             border: none !important;
             box-shadow: none !important;
           }
+          /* Fix browser print engine scaling bug for letterhead image */
+          .print-letterhead {
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            display: block !important;
+          }
         }
       ` }} />
       
@@ -105,7 +112,7 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
               <img 
                 src={clinic.letterhead_url} 
                 alt="Clinic Letterhead" 
-                className="w-full h-auto max-h-[100px] object-contain object-top" 
+                className="w-full h-auto max-h-[100px] object-contain object-top print-letterhead" 
               />
             )}
           </div>

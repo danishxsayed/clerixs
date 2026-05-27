@@ -125,7 +125,7 @@ export default async function LabReportPrintPage({ params }: PrintPageProps) {
             {clinic.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe src={`${clinic.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0`} className="w-full h-48 print:h-64 border-none" title="Clinic Letterhead" />
             ) : (
-              <img src={clinic.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top" />
+              <img src={clinic.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top print-letterhead" />
             )}
           </div>
         ) : (

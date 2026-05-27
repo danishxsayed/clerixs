@@ -64,7 +64,7 @@ export default async function InvoiceViewPage({
           invoice.organizations.letterhead_url.toLowerCase().includes('.pdf') ? (
             <iframe src={`${invoice.organizations.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0`} className="w-full h-48 print:h-64 border-none border-b" title="Clinic Letterhead" />
           ) : (
-            <img src={invoice.organizations.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top border-b" />
+            <img src={invoice.organizations.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top border-b print-letterhead" />
           )
         )}
         
