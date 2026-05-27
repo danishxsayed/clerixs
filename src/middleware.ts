@@ -1,46 +1,41 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+const APP_PATHS = [
+  '/dashboard',
+  '/patients',
+  '/appointments',
+  '/treatments',
+  '/lab',
+  '/billing',
+  '/reports',
+  '/staff',
+  '/branches',
+  '/files',
+  '/whatsapp',
+  '/settings',
+  '/onboarding',
+  '/verify',
+  '/auth',
+  '/login',
+  '/signup',
+];
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const pathname = request.nextUrl.pathname
 
-  // Detect environment & subdomain
-  const isDev = hostname.includes('localhost') || hostname.includes('127.0.0.1') || process.env.NODE_ENV === 'development'
+  // Detect subdomain
   const isAdminSubdomain = hostname.startsWith('admin.')
   const isAppSubdomain = hostname.startsWith('app.')
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
 
-  // Roster of paths belonging exclusively to the app workspace domain
-  const APP_PATHS = [
-    '/dashboard',
-    '/patients',
-    '/appointments',
-    '/treatments',
-    '/lab',
-    '/billing',
-    '/reports',
-    '/staff',
-    '/branches',
-    '/files',
-    '/whatsapp',
-    '/auth',
-    '/onboarding',
-    '/verify',
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-  ];
-
-  const isAppPath = APP_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(path + '/')
-  );
-
-  // Force app subdomain redirect in production if app routes are accessed on main domain
-  if (!isDev && !isAppSubdomain && !isAdminSubdomain && isAppPath) {
-    const appUrl = new URL(request.url)
-    appUrl.hostname = 'app.clerixs.com'
-    return NextResponse.redirect(appUrl)
+  // Redirect dashboard/app routes on the main domain to the app subdomain in production
+  if (!isLocalhost && !isAppSubdomain && !isAdminSubdomain) {
+    const isAppPath = APP_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'))
+    if (isAppPath) {
+      return NextResponse.redirect(`https://app.clerixs.com${pathname}${request.nextUrl.search}`)
+    }
   }
 
   // Admin subdomain handling
