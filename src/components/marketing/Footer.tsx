@@ -50,9 +50,15 @@ export function Footer() {
           <div className="flex flex-col gap-5 col-span-1">
             <h3 className="font-bold text-sm uppercase tracking-widest text-slate-500">Product</h3>
             <div className="flex flex-col gap-3">
-              {['Features', 'Pricing', 'Changelog', 'Roadmap'].map((item) => (
-                <Link key={item} href={item === 'Pricing' ? '/pricing' : '/#features'} className="text-slate-400 hover:text-primary transition-colors text-sm font-semibold w-fit">
-                  {item}
+              {[
+                { name: 'Features', href: '/#features' },
+                { name: 'Pricing', href: '/pricing' },
+                { name: 'Documentation', href: '/docs' },
+                { name: 'Changelog', href: '/#features' },
+                { name: 'Roadmap', href: '/#features' }
+              ].map((item) => (
+                <Link key={item.name} href={item.href} className="text-slate-400 hover:text-primary transition-colors text-sm font-semibold w-fit">
+                  {item.name}
                 </Link>
               ))}
             </div>
