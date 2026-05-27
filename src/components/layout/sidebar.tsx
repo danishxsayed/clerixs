@@ -151,14 +151,11 @@ export function Sidebar({
       {/* Sidebar Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background md:relative md:translate-x-0',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
+          'fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r bg-background md:relative md:translate-x-0 mobile-sidebar',
+          isMobileOpen && 'mobile-sidebar-open',
           isCollapsed ? 'md:w-20' : 'md:w-64',
           'w-64', // default mobile width
         )}
-        style={{
-          transition: 'transform 0.3s ease',
-        }}
       >
       <div className="flex h-16 items-center px-4 pt-6">
         <Link 

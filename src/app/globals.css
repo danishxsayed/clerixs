@@ -146,3 +146,13 @@
     height: 200px !important;
   }
 }
+
+@media (max-width: 767px) {
+  .mobile-sidebar {
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+  }
+  .mobile-sidebar-open {
+    transform: translateX(0) !important;
+  }
+}
