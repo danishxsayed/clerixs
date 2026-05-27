@@ -16,6 +16,11 @@ interface AppointmentActionButtonsProps {
 export function AppointmentActionButtons({ appointmentId, currentStatus }: AppointmentActionButtonsProps) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
+  const [status, setStatus] = React.useState(currentStatus);
+
+  React.useEffect(() => {
+    setStatus(currentStatus);
+  }, [currentStatus]);
 
   const handleUpdateStatus = (newStatus: string) => {
     startTransition(async () => {
@@ -24,6 +29,7 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
         toast.error(result.error);
       } else {
         toast.success(`Appointment marked as ${newStatus}.`);
+        setStatus(newStatus);
         router.refresh(); 
       }
     });
@@ -36,18 +42,19 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
         toast.error(result.error);
       } else {
         toast.success(`Patient checked in to queue.`);
+        setStatus('checked_in');
         router.refresh();
       }
     });
   };
 
-  if (currentStatus === 'completed' || currentStatus === 'cancelled') {
+  if (status === 'completed' || status === 'cancelled') {
     return null;
   }
 
   return (
     <div className="flex items-center gap-2">
-       {currentStatus === 'scheduled' && (
+       {status === 'scheduled' && (
          <Button 
            variant="outline" 
            className="border-primary text-primary hover:bg-primary/5"

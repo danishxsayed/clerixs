@@ -116,8 +116,7 @@ export async function createAppointment(formData: z.infer<typeof appointmentSche
     type: 'appointment',
   });
 
-  // 5. Revalidate cache to reflect new data on the dashboard
-  revalidatePath('/appointments');
+  // 5. Revalidate cache to reflect new data on the dashboard (Disabled to avoid Vercel RSC 503)
   
   return { success: true };
 }
@@ -153,7 +152,6 @@ export async function deleteAppointment(appointmentId: string) {
     return { error: 'Database error: Could not delete the appointment.' };
   }
 
-  revalidatePath('/appointments');
   return { success: true };
 }
 
@@ -242,10 +240,6 @@ export async function updateAppointment(appointmentId: string, formData: Partial
     }
   }
 
-  revalidatePath('/appointments');
-  revalidatePath('/queue');
-  revalidatePath(`/appointments/${appointmentId}/edit`);
-  
   return { success: true };
 }
 

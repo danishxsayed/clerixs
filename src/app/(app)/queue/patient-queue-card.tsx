@@ -29,29 +29,53 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
 
-export function PatientQueueCard({ entry, isFirst }: { entry: any, isFirst: boolean }) {
+export function PatientQueueCard({ 
+  entry, 
+  isFirst,
+  onUpdateStatus,
+  onRemove,
+  onReorder
+}: { 
+  entry: any; 
+  isFirst: boolean;
+  onUpdateStatus?: (id: string, status: any) => void;
+  onRemove?: (id: string) => void;
+  onReorder?: (id: string, direction: 'up' | 'down') => void;
+}) {
   const [isPending, setIsPending] = React.useState(false);
 
   const handleStatus = async (status: any) => {
     setIsPending(true);
     const result = await updateQueueStatus(entry.id, status);
-    if (result.error) toast.error(result.error);
     setIsPending(false);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      if (onUpdateStatus) onUpdateStatus(entry.id, status);
+    }
   };
 
   const handleReorder = async (direction: 'up' | 'down') => {
     setIsPending(true);
     const result = await reorderQueue(entry.id, direction);
-    if (result.error) toast.error(result.error);
     setIsPending(false);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      if (onReorder) onReorder(entry.id, direction);
+    }
   };
 
   const handleRemove = async () => {
     if (!confirm('Remove this patient from the queue?')) return;
     setIsPending(true);
     const result = await removeFromQueue(entry.id);
-    if (result.error) toast.error(result.error);
     setIsPending(false);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      if (onRemove) onRemove(entry.id);
+    }
   };
 
   const statusStyles = {

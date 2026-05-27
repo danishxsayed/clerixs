@@ -71,6 +71,7 @@ export function OrganizationForm({ organization, profileId }: { organization: an
         return;
       }
       toast.success('Clinic settings updated successfully');
+      window.location.reload();
     });
   }
 

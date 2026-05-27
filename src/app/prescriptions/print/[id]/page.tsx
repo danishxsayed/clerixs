@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { format } from 'date-fns';
-import { ArrowLeft, Stethoscope } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PrintButton } from '@/components/prescriptions/print-button';
@@ -15,6 +15,12 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
   const resolvedParams = await params;
   const prescriptionId = resolvedParams.id;
   const supabase = await createClient();
+
+  // Validate Authentication
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/auth/login');
+  }
 
   // 1. Fetch prescription with extremely deep nested joins
   const { data: prescription, error } = await supabase
@@ -34,8 +40,7 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
     return notFound();
   }
 
-  // 2. Fetch the specific Branch? 
-  // We can fetch the primary branch to put on the letterhead
+  // 2. Fetch the specific Branch to put on the letterhead
   const { data: branch } = await supabase
     .from('branches')
     .select('*')
@@ -50,6 +55,34 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
 
   return (
     <div className="min-h-screen bg-slate-50 print:bg-white text-slate-900 pb-20">
+      {/* Inject custom print isolation styling */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          /* Hide everything in the document by default */
+          body * {
+            visibility: hidden;
+          }
+          /* Show only the prescription container and its children */
+          .print-prescription-container, .print-prescription-container * {
+            visibility: visible;
+          }
+          /* Align container at the absolute top-left without borders or shadows */
+          .print-prescription-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border: none !important;
+            box-shadow: none !important;
+          }
+        }
+      ` }} />
       
       {/* Hide controls on print */}
       <div className="print:hidden bg-white border-b sticky top-0 z-10 shadow-sm p-4 flex items-center justify-between max-w-4xl mx-auto mt-0 lg:mt-8 rounded-t-xl">
@@ -61,15 +94,19 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
         <PrintButton />
       </div>
 
-      {/* Actual Printable Document */}
-      <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 print:p-0 print:shadow-none shadow-sm min-h-[1056px] border print:border-none relative">
+      {/* Actual Printable Document Container */}
+      <div className="print-prescription-container max-w-4xl mx-auto bg-white p-8 md:p-12 print:p-0 print:shadow-none shadow-sm min-h-[1056px] border print:border-none relative">
         
         {clinic?.letterhead_url ? (
           <div className="mb-8 border-b-2 border-primary/20 pb-4">
             {clinic.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe src={`${clinic.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0`} className="w-full h-48 print:h-64 border-none" title="Clinic Letterhead" />
             ) : (
-              <img src={clinic.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top" />
+              <img 
+                src={clinic.letterhead_url} 
+                alt="Clinic Letterhead" 
+                className="w-full h-auto max-h-[100px] object-contain object-top" 
+              />
             )}
           </div>
         ) : (
@@ -166,7 +203,7 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
           </div>
         )}
 
-        {/* Footer & Signature block - Pushed to bottom via margin auto or absolute if needed, but spacing is good */}
+        {/* Footer & Signature block */}
         <div className="mt-20 pt-8 flex justify-between items-end">
           <div className="text-sm text-muted-foreground">
             <p>This is a computer-generated document and does not require a physical stamp inside Clerixs networks.</p>

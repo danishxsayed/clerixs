@@ -190,7 +190,6 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>) {
     link_url: `/billing/${invoiceResult.id}`
   });
 
-  revalidatePath('/billing');
   return { success: true, invoiceId: invoiceResult.id };
 }
 
@@ -258,8 +257,6 @@ export async function updateInvoiceStatus(invoiceId: string, status: 'draft' | '
     return { error: 'Database error: Could not update the invoice.' };
   }
 
-  revalidatePath('/billing');
-  revalidatePath(`/billing/${invoiceId}`);
   return { success: true };
 }
 
@@ -289,7 +286,6 @@ export async function deleteInvoice(invoiceId: string) {
     return { error: 'Database error: Could not delete the invoice.' };
   }
 
-  revalidatePath('/billing');
   return { success: true };
 }
 
@@ -433,8 +429,6 @@ export async function updateInvoice(invoiceId: string, formData: z.infer<typeof 
     return { error: 'Failed to save updated line items.' };
   }
 
-  revalidatePath('/billing');
-  revalidatePath(`/billing/${invoiceId}`);
   return { success: true };
 }
 
@@ -517,7 +511,5 @@ export async function recordPayment(invoiceId: string, paymentData: { amount: nu
     return { error: 'Payment recorded, but failed to update invoice balance natively.' };
   }
 
-  revalidatePath('/billing');
-  revalidatePath(`/billing/${invoiceId}`);
   return { success: true };
 }

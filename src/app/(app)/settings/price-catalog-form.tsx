@@ -48,7 +48,7 @@ const DEFAULT_CATEGORIES = [
 
 interface PriceCatalogFormProps {
   initialData?: any | null;
-  onSuccess: () => void;
+  onSuccess: (item?: any) => void;
   onCancel: () => void;
 }
 
@@ -78,12 +78,13 @@ export function PriceCatalogForm({ initialData, onSuccess, onCancel }: PriceCata
         const result = await updateCatalogItem(initialData.id, data);
         if (result?.error) throw new Error(result.error);
         toast.success('Catalog item updated');
+        onSuccess(result.item);
       } else {
         const result = await addCatalogItem(data);
         if (result?.error) throw new Error(result.error);
         toast.success('Catalog item added');
+        onSuccess(result.item);
       }
-      onSuccess();
     } catch (error: any) {
       toast.error(error.message || 'Something went wrong');
     } finally {

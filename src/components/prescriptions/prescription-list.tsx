@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 
 export function PrescriptionList({ 
   patientId, 
-  prescriptions, 
+  prescriptions: initialPrescriptions, 
   userRole, 
   patientName, 
   patientPhone 
@@ -32,6 +32,7 @@ export function PrescriptionList({
   patientName?: string,
   patientPhone?: string
 }) {
+  const [prescriptions, setPrescriptions] = React.useState(initialPrescriptions || []);
   const [openCreate, setOpenCreate] = React.useState(false);
   const [editingPrescription, setEditingPrescription] = React.useState<any | null>(null);
   const [workflowStep, setWorkflowStep] = React.useState<'select' | 'form'>('select');
@@ -40,11 +41,33 @@ export function PrescriptionList({
   const [isSending, setIsSending] = React.useState<string | null>(null);
   const canEdit = userRole === 'doctor' || userRole === 'org_owner';
 
+  React.useEffect(() => {
+    setPrescriptions(initialPrescriptions || []);
+  }, [initialPrescriptions]);
+
   const handleClose = () => {
     setOpenCreate(false);
     setEditingPrescription(null);
     setWorkflowStep('select');
     setSelectedTemplate(null);
+  };
+
+  const handleSuccess = (newPrescription?: any) => {
+    if (newPrescription) {
+      setPrescriptions(prev => {
+        const mappedPrescription = {
+          ...newPrescription,
+          created_at: newPrescription.created_at || new Date().toISOString(),
+          prescription_items: newPrescription.prescription_items || []
+        };
+        
+        if (editingPrescription) {
+          return prev.map(p => p.id === newPrescription.id ? mappedPrescription : p);
+        }
+        return [mappedPrescription, ...prev];
+      });
+    }
+    handleClose();
   };
 
   const handleStartBlank = () => {
@@ -126,7 +149,7 @@ export function PrescriptionList({
               {editingPrescription || workflowStep === 'form' ? (
                 <PrescriptionForm 
                   patientId={patientId} 
-                  onSuccess={handleClose} 
+                  onSuccess={handleSuccess} 
                   prescriptionId={editingPrescription?.id}
                   initialData={editingPrescription ? {
                     diagnosis: editingPrescription.diagnosis,

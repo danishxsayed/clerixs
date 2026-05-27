@@ -62,9 +62,8 @@ export async function addCatalogItem(data: {
       .select()
       .single();
 
-    if (error) throw error;
+     if (error) throw error;
     
-    revalidatePath('/settings');
     return { success: true, item: newItem };
   } catch (error: any) {
     console.error('Error adding catalog item:', error);
@@ -89,8 +88,13 @@ export async function updateCatalogItem(id: string, data: {
 
     if (error) throw error;
 
-    revalidatePath('/settings');
-    return { success: true };
+    const { data: updatedItem } = await supabase
+      .from('price_catalog')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    return { success: true, item: updatedItem };
   } catch (error: any) {
     console.error('Error updating catalog item:', error);
     return { error: error.message || 'Failed to update item' };
@@ -107,7 +111,6 @@ export async function deleteCatalogItem(id: string) {
 
     if (error) throw error;
 
-    revalidatePath('/settings');
     return { success: true };
   } catch (error: any) {
     console.error('Error deleting catalog item:', error);

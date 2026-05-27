@@ -9,7 +9,7 @@ async function checkStatus() {
   else console.log(JSON.stringify(plans, null, 2));
 
   console.log('\n--- Current Subscriptions ---');
-  const { data: subs, error: subsError } = await supabase.from('organization_subscriptions').select('*, subscription_plans(name)');
+  const { data: subs, error: subsError } = await supabase.from('organization_subscriptions').select('*, subscription_plans!organization_subscriptions_plan_id_fkey(name)');
   if (subsError) console.error('Subs Error:', subsError);
   else console.log(JSON.stringify(subs, null, 2));
 }

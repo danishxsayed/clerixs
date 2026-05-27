@@ -114,7 +114,6 @@ export async function addToQueue(formData: z.infer<typeof walkInSchema>) {
     return { error: 'Failed to add to queue' };
   }
 
-  revalidatePath('/queue');
   return { success: true, entry: newEntry };
 }
 
@@ -170,8 +169,6 @@ export async function checkInToQueue(appointmentId: string) {
     return { error: 'Failed to add to queue' };
   }
 
-  revalidatePath('/appointments');
-  revalidatePath('/queue');
   return { success: true };
 }
 
@@ -209,7 +206,6 @@ export async function updateQueueStatus(id: string, status: 'waiting' | 'in_cons
       .eq('id', entry.appointment_id);
   }
 
-  revalidatePath('/queue');
   return { success: true };
 }
 
@@ -243,7 +239,6 @@ export async function reorderQueue(id: string, direction: 'up' | 'down') {
     supabase.from('queue_entries').update({ queue_position: entry.queue_position }).eq('id', otherEntry.id)
   ]);
 
-  revalidatePath('/queue');
   return { success: true };
 }
 
@@ -257,6 +252,5 @@ export async function removeFromQueue(id: string) {
 
   if (error) return { error: 'Failed to remove from queue' };
 
-  revalidatePath('/queue');
   return { success: true };
 }

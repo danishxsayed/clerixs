@@ -195,7 +195,16 @@ export function PriceCatalogTab({ initialItems, isOwner }: { initialItems: any[]
           <PriceCatalogForm 
             initialData={editingItem} 
             onCancel={() => setOpenForm(false)} 
-            onSuccess={() => setOpenForm(false)} 
+            onSuccess={(item) => {
+              setOpenForm(false);
+              if (item) {
+                if (editingItem) {
+                  setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...item } : i));
+                } else {
+                  setItems(prev => [item, ...prev]);
+                }
+              }
+            }} 
           />
         </DialogContent>
       </Dialog>

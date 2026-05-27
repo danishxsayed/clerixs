@@ -103,9 +103,6 @@ export async function createPatient(formData: z.infer<typeof patientSchema>, bra
     return { error: 'Database error: Could not create the patient.' };
   }
 
-  // 5. Revalidate cache to reflect new data on the dashboard
-  revalidatePath('/patients');
-  
   return { success: true };
 }
 
@@ -145,9 +142,6 @@ export async function deletePatient(patientId: string) {
     return { error: 'Database error: Could not delete the patient. Make sure they have no active appointments.' };
   }
 
-  // 4. Revalidate cache
-  revalidatePath('/patients');
-  
   return { success: true };
 }
 
@@ -212,10 +206,6 @@ export async function updatePatient(patientId: string, formData: Partial<z.infer
     return { error: 'Database error: Could not update the patient.' };
   }
 
-  // 4. Revalidate cache
-  revalidatePath('/patients');
-  revalidatePath(`/patients/${patientId}/edit`);
-  
   return { success: true };
 }
 

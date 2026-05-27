@@ -23,6 +23,38 @@ export function QueueClient({
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const supabase = createClient();
 
+  const handleUpdateStatus = (id: string, status: any) => {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+  };
+
+  const handleRemove = (id: string) => {
+    setEntries(prev => prev.filter(e => e.id !== id));
+  };
+
+  const handleReorder = (id: string, direction: 'up' | 'down') => {
+    setEntries(prev => {
+      const entry = prev.find(e => e.id === id);
+      if (!entry) return prev;
+      
+      const doctorEntries = prev
+        .filter(e => e.doctor_membership_id === entry.doctor_membership_id && e.status === 'waiting')
+        .sort((a, b) => a.queue_position - b.queue_position);
+
+      const idx = doctorEntries.findIndex(e => e.id === id);
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      
+      if (swapIdx < 0 || swapIdx >= doctorEntries.length) return prev;
+      
+      const otherEntry = doctorEntries[swapIdx];
+      
+      return prev.map(e => {
+        if (e.id === entry.id) return { ...e, queue_position: otherEntry.queue_position };
+        if (e.id === otherEntry.id) return { ...e, queue_position: entry.queue_position };
+        return e;
+      });
+    });
+  };
+
   React.useEffect(() => {
     console.log('Registering Realtime listener for queue_entries, org:', organizationId);
     const channel = supabase
@@ -147,10 +179,13 @@ export function QueueClient({
                     <div className="space-y-3 p-2 sm:p-4">
                       {doctorQueue.length > 0 ? (
                         doctorQueue.map((entry, idx) => (
-                          <PatientQueueCard 
+                           <PatientQueueCard 
                             key={entry.id} 
                             entry={entry} 
                             isFirst={entry.status === 'waiting' && !doctorQueue.some(e => e.status === 'in_consultation' && e.id !== entry.id) && (doctorQueue.findIndex(e => e.status === 'waiting') === idx)}
+                            onUpdateStatus={handleUpdateStatus}
+                            onRemove={handleRemove}
+                            onReorder={handleReorder}
                           />
                         ))
                       ) : (

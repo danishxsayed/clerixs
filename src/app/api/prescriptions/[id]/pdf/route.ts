@@ -97,8 +97,35 @@ export async function GET(
       const letterheadBase64 = await fetchImageAsBase64(clinic.letterhead_url);
       if (letterheadBase64) {
         try {
-          doc.addImage(letterheadBase64, 'PNG', margin, currentY, pageWidth - (margin * 2), 35);
-          currentY += 38;
+          let imgWidth = 2000;
+          let imgHeight = 200; // default to 10:1
+          try {
+            const imgProps = doc.getImageProperties(letterheadBase64);
+            if (imgProps && imgProps.width && imgProps.height) {
+              imgWidth = imgProps.width;
+              imgHeight = imgProps.height;
+            }
+          } catch (e) {
+            console.warn("Could not get image properties, using default 10:1 ratio", e);
+          }
+
+          const maxWidth = pageWidth - (margin * 2);
+          const maxHeight = 40; // max height of 40mm to prevent pushing content down
+          const imgRatio = imgWidth / imgHeight;
+
+          let targetWidth = maxWidth;
+          let targetHeight = maxWidth / imgRatio;
+
+          if (targetHeight > maxHeight) {
+            targetHeight = maxHeight;
+            targetWidth = maxHeight * imgRatio;
+          }
+
+          // Center the letterhead horizontally if it is smaller than maxWidth
+          const startX = margin + (maxWidth - targetWidth) / 2;
+
+          doc.addImage(letterheadBase64, 'PNG', startX, currentY, targetWidth, targetHeight);
+          currentY += targetHeight + 3;
           letterheadLoaded = true;
         } catch (imgErr) {
           console.error('Failed to add letterhead image to PDF:', imgErr);
