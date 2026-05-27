@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { updateAppointment } from '../../actions';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -69,7 +68,14 @@ export function AppointmentEditForm({
           start_time: data.start_time.length === 5 ? `${data.start_time}:00` : data.start_time,
         };
 
-        const result = await updateAppointment(appointment.id, formattedData);
+        const response = await fetch(`/api/appointments/${appointment.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formattedData),
+        });
+        const result = await response.json();
         if (result?.error) {
           toast.error(result.error);
         } else {

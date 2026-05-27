@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, LogIn } from 'lucide-react';
-import { updateAppointment } from './actions';
 import { checkInToQueue } from '@/app/(app)/queue/actions';
 import { toast } from 'sonner';
 
@@ -24,13 +23,24 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
 
   const handleUpdateStatus = (newStatus: string) => {
     startTransition(async () => {
-      const result = await updateAppointment(appointmentId, { status: newStatus });
-      if (result?.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(`Appointment marked as ${newStatus}.`);
-        setStatus(newStatus);
-        router.refresh(); 
+      try {
+        const response = await fetch(`/api/appointments/${appointmentId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        const result = await response.json();
+        if (result?.error) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Appointment marked as ${newStatus}.`);
+          setStatus(newStatus);
+        }
+      } catch (error) {
+        console.error('Update error:', error);
+        toast.error('Failed to update appointment status.');
       }
     });
   };
@@ -43,7 +53,6 @@ export function AppointmentActionButtons({ appointmentId, currentStatus }: Appoi
       } else {
         toast.success(`Patient checked in to queue.`);
         setStatus('checked_in');
-        router.refresh();
       }
     });
   };

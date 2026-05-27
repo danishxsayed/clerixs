@@ -3,8 +3,7 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit2, Save, X, Activity } from 'lucide-react';
-import { updateAppointment } from '../actions';
+import { Edit2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -30,29 +29,28 @@ export function ClinicalNotesEditor({
 
   const handleSave = () => {
     startTransition(async () => {
-      const result = await updateAppointment(appointmentId, {
-        treatment: chiefComplaint,
-        // Using clinical_notes as the target for 'notes' column if we want to be precise, 
-        // but appointments table has 'notes' and 'chief_complaint'. 
-        // Our updateAppointment action currently handles treatment -> chief_complaint.
-        // I need to update the updateAppointment action to also handle 'notes'.
-      } as any);
+      try {
+        const response = await fetch(`/api/appointments/${appointmentId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            treatment: chiefComplaint,
+            notes: notes
+          }),
+        });
+        const res = await response.json();
 
-      // Wait, let's check updateAppointment in actions.ts again.
-      // It currently updates: patient_id, appointment_date, start_time, chief_complaint, doctor_membership_id, status.
-      // I'll update it to also handle 'notes'.
-      
-      const res = await updateAppointment(appointmentId, {
-        treatment: chiefComplaint,
-        notes: notes
-      } as any);
-
-      if (res.error) {
-        toast.error(res.error);
-      } else {
-        toast.success('Clinical notes updated');
-        setIsEditing(false);
-        router.refresh();
+        if (res.error) {
+          toast.error(res.error);
+        } else {
+          toast.success('Clinical notes updated');
+          setIsEditing(false);
+        }
+      } catch (error) {
+        console.error('Save notes error:', error);
+        toast.error('Failed to update clinical notes.');
       }
     });
   };
