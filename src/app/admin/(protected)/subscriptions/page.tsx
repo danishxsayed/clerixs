@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CreditCard, Landmark, ShieldCheck, Banknote, Activity, Clock, ShieldAlert, BadgeX } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function AdminSubscriptionsPage({
   searchParams,
@@ -10,10 +10,7 @@ export default async function AdminSubscriptionsPage({
   const resolvedParams = await (searchParams || Promise.resolve({ filter: 'all' }));
   const currentFilter = resolvedParams.filter || 'all';
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createAdminClient();
 
   // Fetch all subscriptions without filtering by status initially
   let query = supabaseAdmin
@@ -27,11 +24,9 @@ export default async function AdminSubscriptionsPage({
       trial_ends_at,
       organizations (
         name,
-        profiles!organizations_owner_profile_id_fkey (
-          email:id
-        )
+        id
       ),
-      subscription_plans (
+      subscription_plans:subscription_plans!organization_subscriptions_plan_id_fkey (
         name,
         monthly_price,
         yearly_price
@@ -82,6 +77,16 @@ export default async function AdminSubscriptionsPage({
       else if (planName.toLowerCase().includes('enterprise')) entCount++;
     }
     
+    const currentPeriodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
+    const trialEndsAt = sub.trial_ends_at ? new Date(sub.trial_ends_at) : null;
+    
+    let expirationDate = null;
+    if (currentPeriodEnd && trialEndsAt) {
+      expirationDate = currentPeriodEnd > trialEndsAt ? currentPeriodEnd : trialEndsAt;
+    } else {
+      expirationDate = currentPeriodEnd || trialEndsAt;
+    }
+    
     return {
       id: sub.id,
       clinic: sub.organizations?.name || 'Unknown Clinic',
@@ -91,8 +96,8 @@ export default async function AdminSubscriptionsPage({
       billingCycle: interval,
       status: sub.status,
       startDate: sub.current_period_start ? new Date(sub.current_period_start).toLocaleDateString() : 'N/A',
-      endDate: sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : 'N/A',
-      nextBilling: sub.current_period_end ? new Date(sub.current_period_end).toISOString().split('T')[0] : 'N/A',
+      endDate: expirationDate ? expirationDate.toLocaleDateString() : 'N/A',
+      nextBilling: expirationDate ? expirationDate.toISOString().split('T')[0] : 'N/A',
       gateway: sub.provider === 'cashfree' ? 'Cashfree' : sub.provider === 'razorpay' ? 'Razorpay' : 'Manual',
     };
   });
@@ -195,10 +200,19 @@ export default async function AdminSubscriptionsPage({
                   </td>
                   <td className="py-5 px-8">
                     <div className="flex items-center gap-3 text-slate-600">
-                      <div className="h-8 w-8 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100/50 shrink-0">
-                        <CreditCard className="h-4 w-4 text-emerald-600" />
+                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center border shrink-0 ${
+                        sub.status === 'active' ? 'bg-emerald-50 border-emerald-100/50' : 'bg-slate-50 border-slate-100'
+                      }`}>
+                        <CreditCard className={`h-4 w-4 ${sub.status === 'active' ? 'text-emerald-600' : 'text-slate-400'}`} />
                       </div>
-                      <span className="whitespace-nowrap">{sub.plan}</span>
+                      <div className="flex flex-col">
+                        <span className="whitespace-nowrap font-bold text-slate-800">{sub.plan}</span>
+                        {sub.status === 'active' && (
+                          <span className="inline-flex items-center w-fit mt-0.5 px-1.5 py-0.2 rounded text-[8px] font-black bg-emerald-500 text-white uppercase tracking-wider">
+                            Active Plan
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="py-5 px-8 whitespace-nowrap">
@@ -206,9 +220,16 @@ export default async function AdminSubscriptionsPage({
                     <span className="text-[10px] font-bold text-slate-400 uppercase">{sub.billingCycle}</span>
                   </td>
                   <td className="py-5 px-8">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${getStatusColor(sub.status)}`}>
-                      {sub.status}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className={`inline-flex items-center w-fit px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border ${getStatusColor(sub.status)}`}>
+                        {sub.status}
+                      </span>
+                      {sub.status === 'active' && (
+                        <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest pl-1">
+                          {sub.plan} Verified
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-5 px-8 whitespace-nowrap">
                     <span className="block text-slate-900 font-bold">{sub.startDate}</span>
