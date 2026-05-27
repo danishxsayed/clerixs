@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   BookOpen, 
   Search, 
@@ -2429,10 +2430,15 @@ export default function DocsPage() {
       <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b bg-white/95 px-4 md:px-8 backdrop-blur-md shadow-sm">
         <div className="flex items-center gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-blue-600 shadow flex items-center justify-center text-white font-extrabold text-sm">
-              C
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md">
+              <Image
+                src="/assets/logo.jpg"
+                alt="Clerixs Logo"
+                fill
+                className="object-contain"
+              />
             </div>
-            <span className="text-xl font-extrabold text-slate-900 tracking-tight">CLERIXS</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Clerixs</span>
           </Link>
           <span className="h-5 w-px bg-slate-200" />
           <span className="text-[10px] font-bold text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
