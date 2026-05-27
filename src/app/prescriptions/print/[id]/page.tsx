@@ -112,7 +112,8 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
               <img 
                 src={clinic.letterhead_url} 
                 alt="Clinic Letterhead" 
-                className="w-full h-auto max-h-[100px] object-contain object-top print-letterhead" 
+                className="w-full h-auto max-h-[100px] object-contain object-top print-letterhead pointer-events-none select-none" 
+                draggable="false"
               />
             )}
           </div>

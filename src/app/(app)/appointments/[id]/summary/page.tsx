@@ -92,7 +92,12 @@ export default async function VisitSummaryPage({ params }: VisitSummaryPageProps
             {orgData.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe src={`${orgData.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0`} className="w-full h-48 print:h-64 border-none" title="Clinic Letterhead" />
             ) : (
-              <img src={orgData.letterhead_url} alt="Clinic Letterhead" className="w-full object-contain max-h-48 print:max-h-64 object-top print-letterhead" />
+              <img 
+                src={orgData.letterhead_url} 
+                alt="Clinic Letterhead" 
+                className="w-full object-contain max-h-48 print:max-h-64 object-top print-letterhead pointer-events-none select-none" 
+                draggable="false" 
+              />
             )}
           </div>
         ) : (
