@@ -126,10 +126,15 @@ export function Sidebar({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isMobileOpen, setIsMobileOpen]);
 
+  const lastPathnameRef = React.useRef(pathname);
+
   // Close mobile sidebar on navigation path change
   React.useEffect(() => {
-    console.log('Sidebar: Pathname change effect triggered. Current pathname:', pathname);
-    setIsMobileOpen(false);
+    if (lastPathnameRef.current !== pathname) {
+      console.log('Sidebar: Pathname actually changed from', lastPathnameRef.current, 'to', pathname, '. Closing sidebar.');
+      setIsMobileOpen(false);
+      lastPathnameRef.current = pathname;
+    }
   }, [pathname, setIsMobileOpen]);
 
   // Filter items based on user role
