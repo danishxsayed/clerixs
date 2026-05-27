@@ -88,9 +88,14 @@ export default async function VisitSummaryPage({ params }: VisitSummaryPageProps
         
         {/* HEADER: Letterhead */}
         {orgData?.letterhead_url ? (
-          <div className="mb-8 border-b-2 border-primary/20 pb-4">
+          <div className="mb-8 border-b-2 border-primary/20 pb-4 w-full aspect-[10/1] overflow-hidden relative pointer-events-none select-none print-letterhead-container">
             {orgData.letterhead_url.toLowerCase().includes('.pdf') ? (
-              <iframe src={`${orgData.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0`} className="w-full h-48 print:h-64 border-none" title="Clinic Letterhead" />
+              <iframe 
+                src={`${orgData.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} 
+                className="absolute top-0 left-0 w-full h-full border-none pointer-events-none select-none" 
+                title="Clinic Letterhead" 
+                scrolling="no"
+              />
             ) : (
               <img 
                 src={orgData.letterhead_url} 

@@ -141,4 +141,9 @@
     max-height: none !important;
     display: block !important;
   }
+  .print-letterhead-container {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 10/1 !important;
+  }
 }
