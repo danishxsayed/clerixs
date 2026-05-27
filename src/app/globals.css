@@ -152,7 +152,7 @@
     transform: translateX(-100%) !important;
     transition: transform 0.3s ease !important;
   }
-  .mobile-sidebar-open {
+  .mobile-sidebar.mobile-sidebar-open {
     transform: translateX(0) !important;
   }
 }

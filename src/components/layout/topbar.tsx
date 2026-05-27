@@ -32,7 +32,7 @@ export function Topbar({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isMobileOpen, setIsMobileOpen } = useSidebar();
+  const { toggleMobileSidebar } = useSidebar();
 
   const pageNames: Record<string, string> = {
     '/dashboard': 'Dashboard',
@@ -74,7 +74,7 @@ export function Topbar({
           variant="ghost"
           size="icon"
           className="md:hidden"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          onClick={toggleMobileSidebar}
           aria-label="Toggle Menu"
         >
           <Menu className="h-5 w-5" />
