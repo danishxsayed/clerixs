@@ -88,7 +88,7 @@ export default async function VisitSummaryPage({ params }: VisitSummaryPageProps
         
         {/* HEADER: Letterhead */}
         {orgData?.letterhead_url ? (
-          <div className="mb-8 border-b-2 border-primary/20 pb-4 w-full aspect-[10/1] overflow-hidden relative pointer-events-none select-none print-letterhead-container">
+          <div className="mb-8 border-b-2 border-primary/20 pb-4 w-full h-[200px] overflow-hidden relative pointer-events-none select-none print-letterhead-container">
             {orgData.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe 
                 src={`${orgData.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} 

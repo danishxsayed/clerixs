@@ -61,7 +61,7 @@ export default async function InvoiceViewPage({
       <div id="invoice-document" className="rounded-xl border bg-white text-zinc-950 shadow-sm overflow-hidden print:shadow-none print:border-none relative">
         
         {invoice.organizations?.letterhead_url && (
-          <div className="w-full aspect-[10/1] overflow-hidden relative pointer-events-none select-none print-letterhead-container border-b">
+          <div className="w-full h-[200px] overflow-hidden relative pointer-events-none select-none print-letterhead-container border-b">
             {invoice.organizations.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe 
                 src={`${invoice.organizations.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} 

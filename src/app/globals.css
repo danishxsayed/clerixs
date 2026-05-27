@@ -143,7 +143,6 @@
   }
   .print-letterhead-container {
     width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 10/1 !important;
+    height: 200px !important;
   }
 }

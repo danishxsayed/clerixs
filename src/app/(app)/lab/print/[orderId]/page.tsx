@@ -121,7 +121,7 @@ export default async function LabReportPrintPage({ params }: PrintPageProps) {
       <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 print:p-0 print:shadow-none shadow-sm min-h-[1056px] border print:border-none relative">
         
         {clinic?.letterhead_url ? (
-          <div className="mb-8 border-b-2 border-primary/20 pb-4 w-full aspect-[10/1] overflow-hidden relative pointer-events-none select-none print-letterhead-container">
+          <div className="mb-8 border-b-2 border-primary/20 pb-4 w-full h-[200px] overflow-hidden relative pointer-events-none select-none print-letterhead-container">
             {clinic.letterhead_url.toLowerCase().includes('.pdf') ? (
               <iframe 
                 src={`${clinic.letterhead_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} 
