@@ -70,58 +70,11 @@ const BrowserHeader = ({ url }: { url: string }) => (
 const MockDashboardScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
     <BrowserHeader url="app.clerixs.com/dashboard" />
-    <div className="flex bg-white h-60 text-slate-400 text-[11px]">
-      {/* Mini Sidebar */}
-      <div className="w-1/5 border-r bg-slate-50/50 p-3 flex flex-col gap-2 shrink-0">
-        <div className="h-4 w-12 bg-slate-200/80 rounded mb-2" />
-        <div className="h-3 w-16 bg-blue-50 text-blue-600 font-semibold rounded border-l-2 border-blue-600 px-1 py-0.5 flex items-center gap-1">
-          <Layers className="h-2.5 w-2.5" /> Home
-        </div>
-        <div className="h-3 w-14 bg-slate-200/40 rounded px-1" />
-        <div className="h-3 w-18 bg-slate-200/40 rounded px-1" />
-        <div className="h-3 w-12 bg-slate-200/40 rounded px-1" />
-      </div>
-      {/* Content Pane */}
-      <div className="flex-1 p-3 space-y-3.5 overflow-hidden">
-        <div className="flex justify-between items-center">
-          <div className="h-4 w-28 bg-slate-200/70 rounded" />
-          <div className="h-5 w-14 bg-blue-600/10 rounded" />
-        </div>
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-4 gap-2">
-          <div className="p-2 border rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-1">
-            <p className="text-[9px] text-slate-400 font-medium">Cashflow Today</p>
-            <p className="font-bold text-slate-800 text-xs">₹45,200</p>
-          </div>
-          <div className="p-2 border rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-1">
-            <p className="text-[9px] text-slate-400 font-medium">Appointments</p>
-            <p className="font-bold text-slate-800 text-xs">14</p>
-          </div>
-          <div className="p-2 border rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-1">
-            <p className="text-[9px] text-slate-400 font-medium">Total Patients</p>
-            <p className="font-bold text-slate-800 text-xs">1,240</p>
-          </div>
-          <div className="p-2 border rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-1">
-            <p className="text-[9px] text-slate-400 font-medium">Waiting Queue</p>
-            <p className="font-bold text-slate-800 text-xs">3 Patients</p>
-          </div>
-        </div>
-        {/* Table Mockup */}
-        <div className="border rounded-lg bg-white p-2.5 space-y-2">
-          <div className="h-3 w-20 bg-slate-200/70 rounded" />
-          <div className="flex gap-2 border-t pt-2 items-center text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-            <div className="h-2 w-28 bg-slate-200/40 rounded" />
-            <div className="h-2.5 w-12 bg-slate-100 rounded ml-auto" />
-          </div>
-          <div className="flex gap-2 border-t pt-2 items-center text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-            <div className="h-2 w-24 bg-slate-200/40 rounded" />
-            <div className="h-2.5 w-12 bg-slate-100 rounded ml-auto" />
-          </div>
-        </div>
-      </div>
-    </div>
+    <img 
+      src="/assets/Mock-dash.png" 
+      alt="Clerixs Dashboard" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
