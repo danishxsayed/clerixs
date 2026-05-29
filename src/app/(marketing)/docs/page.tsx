@@ -81,166 +81,51 @@ const MockDashboardScreenshot = () => (
 const MockSignUpScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6 max-w-md mx-auto">
     <BrowserHeader url="app.clerixs.com/auth/signup" />
-    <div className="bg-white p-5 space-y-4 text-xs text-slate-600">
-      <div className="text-center space-y-1">
-        <h4 className="font-extrabold text-slate-900 text-sm">Create your Clerixs Account</h4>
-        <p className="text-[10px] text-slate-400">7-day free trial, no credit card required</p>
-      </div>
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Full Name</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800 font-medium">Dr. Devendra Sharma</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Email Address</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800 font-medium">contact@sharmadental.com</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Password</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-400 font-mono">••••••••••••</div>
-        </div>
-        <button disabled className="w-full bg-blue-600 text-white font-bold h-8 rounded text-[11px] shadow-sm mt-2">
-          Create Account
-        </button>
-      </div>
-    </div>
+    <img 
+      src="/assets/sign-up.png" 
+      alt="Clerixs Sign Up" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockLetterheadScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-5 text-xs text-slate-600 space-y-4">
-      <div className="border-b pb-3">
-        <span className="text-[10px] uppercase font-bold text-blue-600">Step 2 of 4</span>
-        <h4 className="font-extrabold text-slate-900 text-sm mt-0.5">Upload Clinic Letterhead</h4>
-        <p className="text-[10px] text-slate-400">Your printed prescriptions will use this header image</p>
-      </div>
-      <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50/50 text-center space-y-2">
-        <div className="mx-auto w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-          <Printer className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="font-semibold text-slate-800">Click to upload letterhead banner</p>
-          <p className="text-[10px] text-slate-400 mt-0.5">Recommended size: 1200×300 px (PNG/JPG)</p>
-        </div>
-      </div>
-      <div className="flex justify-between items-center pt-2">
-        <button disabled className="text-slate-400 hover:text-slate-600 font-bold">Skip this step</button>
-        <button disabled className="bg-blue-600 text-white font-bold h-8 px-4 rounded text-[11px] shadow-sm">Save & Continue</button>
-      </div>
-    </div>
+    <img 
+      src="/assets/setup.png" 
+      alt="Clinic Setup" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockAddPatientScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="flex justify-between items-center border-b pb-2">
-        <h4 className="font-bold text-slate-900">Add New Patient</h4>
-        <span className="text-[10px] bg-slate-100 text-slate-500 font-mono px-2 py-0.5 rounded">AUTO: PT-1002</span>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Full Name *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800 font-medium">Amitabh Bachchan</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Phone Number *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800 font-medium">+91 9820098200</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Date of Birth</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-400">11-10-1942</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Gender</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">Male</div>
-        </div>
-      </div>
-      <div className="flex justify-end gap-2 border-t pt-3">
-        <button disabled className="border border-slate-200 text-slate-600 font-semibold h-7 px-3 rounded text-[11px]">Cancel</button>
-        <button disabled className="bg-blue-600 text-white font-bold h-7 px-4 rounded text-[11px] shadow-sm">Save Patient</button>
-      </div>
-    </div>
+    <img 
+      src="/assets/Add-New-Patient.png" 
+      alt="Add New Patient" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockPatientProfileScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      {/* Patient header card */}
-      <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
-        <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">AB</div>
-        <div className="space-y-0.5">
-          <h4 className="font-extrabold text-slate-900 flex items-center gap-1.5">
-            Amitabh Bachchan
-            <span className="text-[9px] bg-blue-100 text-blue-800 font-mono font-bold px-1.5 py-0.2 rounded-full">PT-1002</span>
-          </h4>
-          <p className="text-[10px] text-slate-400">83 Yrs • Male • +91 9820098200 • Blood Group: B+</p>
-        </div>
-      </div>
-      {/* Tabs */}
-      <div className="border-b flex gap-4 text-[11px] font-bold text-slate-400">
-        <div className="border-b-2 border-blue-600 text-blue-600 pb-1.5 px-0.5 cursor-pointer">Appointments</div>
-        <div className="pb-1.5 px-0.5 cursor-pointer hover:text-slate-600">Prescriptions</div>
-        <div className="pb-1.5 px-0.5 cursor-pointer hover:text-slate-600">Lab & Docs</div>
-        <div className="pb-1.5 px-0.5 cursor-pointer hover:text-slate-600">Billing & Invoices</div>
-      </div>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center text-[10px] text-slate-400 font-semibold uppercase">
-          <span>Upcoming Appointments</span>
-          <button disabled className="text-blue-600 hover:underline">+ Book Appointment</button>
-        </div>
-        <div className="border rounded-lg p-2.5 flex items-center justify-between text-[11px] bg-slate-50/50">
-          <div className="space-y-0.5">
-            <p className="font-bold text-slate-800">Consultation — Dr. Devendra Sharma</p>
-            <p className="text-[10px] text-slate-400">Friday, May 29 • 10:30 AM</p>
-          </div>
-          <span className="text-[9px] uppercase font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">Scheduled</span>
-        </div>
-      </div>
-    </div>
+    <img 
+      src="/assets/pt-profile.png" 
+      alt="Patient Profile Overview" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockImportCsvScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="flex justify-between items-center border-b pb-2">
-        <h4 className="font-bold text-slate-900">CSV Bulk Import Preview</h4>
-        <span className="text-[10px] text-slate-400">File: sharma_dental_migration.csv</span>
-      </div>
-      <div className="overflow-hidden border rounded-lg bg-white text-[10px]">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-slate-500 font-bold border-b text-[9px]">
-            <tr>
-              <th className="px-3 py-1.5">Row</th>
-              <th className="px-3 py-1.5">Full Name</th>
-              <th className="px-3 py-1.5">Phone Number</th>
-              <th className="px-3 py-1.5">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-600">
-            <tr>
-              <td className="px-3 py-2 text-slate-400">1</td>
-              <td className="px-3 py-2 font-semibold text-slate-800">Rajesh Koothrappali</td>
-              <td className="px-3 py-2">+91 9998887776</td>
-              <td className="px-3 py-2"><span className="text-[9px] bg-emerald-50 text-emerald-600 font-bold px-1.5 py-0.2 rounded border border-emerald-100">Ready</span></td>
-            </tr>
-            <tr className="bg-red-50/20">
-              <td className="px-3 py-2 text-slate-400">2</td>
-              <td className="px-3 py-2 font-semibold text-slate-800">Penny Hofstadter</td>
-              <td className="px-3 py-2">+91 9820098200</td>
-              <td className="px-3 py-2"><span className="text-[9px] bg-red-50 text-red-600 font-bold px-1.5 py-0.2 rounded border border-red-100 flex items-center gap-0.5"><AlertCircle className="h-2 w-2 shrink-0" /> Duplicate Phone</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-[10px] text-slate-400">1 row ready, 1 row skipped due to duplicate check.</span>
-        <button disabled className="bg-blue-600 text-white font-bold h-7 px-3 rounded text-[11px] shadow-sm">Confirm Import</button>
-      </div>
-    </div>
+    <img 
+      src="/assets/import-data.png" 
+      alt="Bulk Importing Patients via CSV" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
