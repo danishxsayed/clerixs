@@ -130,120 +130,35 @@ const MockImportCsvScreenshot = () => (
 );
 
 const MockAddAppointmentScreenshot = () => (
-  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6 max-w-md mx-auto">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="border-b pb-2">
-        <h4 className="font-bold text-slate-900">Book New Appointment</h4>
-      </div>
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Patient *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800 font-medium">Amitabh Bachchan (PT-1002)</div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">Date *</label>
-            <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">2026-05-29</div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">Start Time *</label>
-            <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">10:30 AM</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">Treatment Category *</label>
-            <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">Consultation</div>
-          </div>
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">Doctor/Provider</label>
-            <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">Dr. Devendra Sharma</div>
-          </div>
-        </div>
-        <button disabled className="w-full bg-blue-600 text-white font-bold h-8 rounded text-[11px] shadow-sm mt-2">
-          Confirm Appointment Booking
-        </button>
-      </div>
-    </div>
+  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
+    <BrowserHeader url="app.clerixs.com/appointments" />
+    <img 
+      src="/assets/appointment.png" 
+      alt="Appointments" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockWaitingRoomScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-3">
-      <div className="flex justify-between items-center">
-        <div>
-          <h4 className="font-bold text-slate-900">Live Clinic waiting Room</h4>
-          <p className="text-[9px] text-slate-400">Updates instantly via active real-time data sync</p>
-        </div>
-        <button disabled className="bg-blue-600 text-white font-bold h-7 px-3 rounded text-[10px] shadow-sm">+ Add Walk-in</button>
-      </div>
-      <div className="space-y-2">
-        {/* Waiting card 1 */}
-        <div className="p-3 border rounded-lg bg-amber-50/20 border-amber-200/50 flex items-center justify-between text-[11px]">
-          <div className="space-y-0.5">
-            <p className="font-bold text-slate-800">Amitabh Bachchan <span className="text-[9px] text-slate-400 font-mono">(PT-1002)</span></p>
-            <p className="text-[10px] text-slate-400">Waiting for: <span className="font-semibold text-slate-600">Dr. Devendra Sharma</span> • 12 mins elapsed</p>
-          </div>
-          <div className="flex gap-1">
-            <span className="text-[9px] font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded shrink-0 flex items-center gap-0.5 mr-2">Waiting</span>
-            <button disabled className="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-[10px]">Call Next</button>
-            <button disabled className="border border-slate-200 text-slate-600 font-semibold px-2 py-0.5 rounded text-[10px]">Skip</button>
-          </div>
-        </div>
-        {/* In Consult Card */}
-        <div className="p-3 border rounded-lg bg-blue-50/20 border-blue-200/50 flex items-center justify-between text-[11px]">
-          <div className="space-y-0.5">
-            <p className="font-bold text-slate-800">Rajesh Koothrappali <span className="text-[9px] text-slate-400 font-mono">(PT-1001)</span></p>
-            <p className="text-[10px] text-slate-400">Consultation with: <span className="font-semibold text-slate-600">Dr. Devendra Sharma</span> • 8 mins</p>
-          </div>
-          <div className="flex gap-1">
-            <span className="text-[9px] font-bold text-blue-700 bg-blue-100/60 px-2 py-0.5 rounded shrink-0 flex items-center gap-0.5 mr-2">In Consultation</span>
-            <button disabled className="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[10px]">Complete</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <BrowserHeader url="app.clerixs.com/queue" />
+    <img 
+      src="/assets/queue.png" 
+      alt="Queue Management" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockPrescriptionFormScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="flex justify-between items-center border-b pb-2">
-        <h4 className="font-bold text-slate-900">New Prescription Form</h4>
-        <span className="text-[9px] text-red-600 font-bold bg-red-50 border border-red-100 px-2 py-0.5 rounded">R* Fields Required</span>
-      </div>
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-0.5">Clinical Diagnosis * <span className="text-red-500">*</span></label>
-          <div className="min-h-12 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-start text-slate-800 font-normal">Acute periapical abscess associated with tooth #46. Mild tenderness to percussion.</div>
-        </div>
-        
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Medications Rx *</label>
-          <div className="border rounded-lg overflow-hidden bg-slate-50/50">
-            {/* Med Row 1 */}
-            <div className="p-3 border-b flex gap-2 items-center text-[10px] bg-white">
-              <span className="font-bold text-slate-400 w-4">1.</span>
-              <div className="h-6 w-2/5 border rounded bg-slate-50 p-1 font-semibold text-slate-800">Amoxicillin 500mg (Cap)</div>
-              {/* Frequency buttons */}
-              <div className="flex gap-0.5 border rounded overflow-hidden">
-                <span className="bg-blue-600 text-white font-extrabold px-1.5 py-0.5 text-[8px]">Morn</span>
-                <span className="bg-slate-100 text-slate-400 px-1.5 py-0.5 text-[8px]">Aft</span>
-                <span className="bg-blue-600 text-white font-extrabold px-1.5 py-0.5 text-[8px]">Ngt</span>
-              </div>
-              <div className="h-6 w-16 border rounded bg-slate-50 p-1 flex items-center justify-center">5 Days</div>
-              <div className="h-6 w-20 border rounded bg-slate-50 p-1 flex items-center justify-center text-slate-500">After Food</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-between items-center pt-2">
-        <button disabled className="border border-slate-200 text-slate-600 font-semibold h-7 px-3 rounded text-[11px]">Save as Template</button>
-        <button disabled className="bg-blue-600 text-white font-bold h-7 px-4 rounded text-[11px] shadow-sm">Generate Prescription</button>
-      </div>
-    </div>
+    <BrowserHeader url="app.clerixs.com/prescriptions/new" />
+    <img 
+      src="/assets/Prescription.png" 
+      alt="Prescription Form" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
@@ -306,114 +221,45 @@ const MockPrescriptionPrintScreenshot = () => (
 );
 
 const MockLabDashboardScreenshot = () => (
-  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <BrowserHeader url="app.clerixs.com/lab" />
-    <div className="flex bg-white h-60 text-slate-400 text-[11px]">
-      <div className="flex-1 p-3 space-y-3.5 overflow-hidden">
-        <div className="flex justify-between items-center">
-          <div>
-            <h4 className="font-bold text-slate-900">Lab Diagnostic Board</h4>
-            <p className="text-[9px] text-slate-400">Monitor collections, entry, and doctor finalization</p>
-          </div>
-          <div className="h-5 w-20 bg-blue-600/10 rounded" />
-        </div>
-        {/* Status columns */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="p-2 border.5 rounded-lg bg-amber-50/20 border-amber-100 space-y-1 text-center">
-            <span className="text-[8px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-full">Pending Collection</span>
-            <p className="font-bold text-slate-800 text-xs">2 Orders</p>
-          </div>
-          <div className="p-2 border.5 rounded-lg bg-blue-50/20 border-blue-100 space-y-1 text-center">
-            <span className="text-[8px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.2 rounded-full">In Processing</span>
-            <p className="font-bold text-slate-800 text-xs">4 Samples</p>
-          </div>
-          <div className="p-2 border.5 rounded-lg bg-emerald-50/20 border-emerald-100 space-y-1 text-center">
-            <span className="text-[8px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">Completed Reports</span>
-            <p className="font-bold text-slate-800 text-xs">18 Reports</p>
-          </div>
-        </div>
-        {/* Active orders list */}
-        <div className="border rounded-lg bg-white p-2 flex items-center justify-between text-[10px]">
-          <div className="space-y-0.5">
-            <p className="font-semibold text-slate-800">Lipid Profile & HbA1c — PT-1002</p>
-            <p className="text-[9px] text-slate-400">Sample type: Blood • Ordered by Dr. D. Sharma</p>
-          </div>
-          <button disabled className="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-[10px]">Collect Sample</button>
-        </div>
-      </div>
+  <div className="space-y-6 my-6">
+    <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200">
+      <BrowserHeader url="app.clerixs.com/lab" />
+      <img 
+        src="/assets/lab.png" 
+        alt="Lab Dashboard" 
+        className="w-full h-auto object-cover"
+      />
+    </div>
+    <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200">
+      <BrowserHeader url="app.clerixs.com/lab/orders" />
+      <img 
+        src="/assets/Lab-order.png" 
+        alt="Lab Order Details" 
+        className="w-full h-auto object-cover"
+      />
     </div>
   </div>
 );
 
 const MockInvoiceFormScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="flex justify-between items-center border-b pb-2">
-        <h4 className="font-bold text-slate-900">Create Invoice</h4>
-        <span className="text-[9px] text-slate-400">AUTO-GEN: INV-000214</span>
-      </div>
-      <div className="space-y-2">
-        <div className="flex justify-between text-[10px] text-slate-500 font-bold uppercase px-1">
-          <span>Billing Item / Treatment</span>
-          <span>Price (₹)</span>
-        </div>
-        {/* Billing row */}
-        <div className="flex gap-2 items-center bg-slate-50 p-2 rounded border">
-          <div className="font-semibold text-slate-800 flex-1">Root Canal Treatment (RCT) — Single Root</div>
-          <div className="font-bold text-slate-800">₹4,500.00</div>
-        </div>
-        {/* GST block */}
-        <div className="border-t pt-2 space-y-1 text-[11px] text-slate-500 font-medium">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>₹4,500.00</span>
-          </div>
-          <div className="flex justify-between text-slate-400">
-            <span>CGST (2.5%)</span>
-            <span>₹112.50</span>
-          </div>
-          <div className="flex justify-between text-slate-400">
-            <span>SGST (2.5%)</span>
-            <span>₹112.50</span>
-          </div>
-          <div className="flex justify-between text-slate-900 font-bold text-xs border-t pt-1">
-            <span>Grand Total (Payable)</span>
-            <span>₹4,725.00</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end gap-2 border-t pt-3">
-        <button disabled className="border border-slate-200 text-slate-600 font-semibold h-7 px-3 rounded text-[11px]">Save as Draft</button>
-        <button disabled className="bg-blue-600 text-white font-bold h-7 px-4 rounded text-[11px] shadow-sm">Issue & Finalise Invoice</button>
-      </div>
-    </div>
+    <BrowserHeader url="app.clerixs.com/billing" />
+    <img 
+      src="/assets/invoice.png" 
+      alt="Billing & Invoices" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
 const MockInviteMemberScreenshot = () => (
-  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6 max-w-sm mx-auto">
-    <div className="bg-white p-4 text-xs text-slate-600 space-y-4">
-      <div className="border-b pb-2">
-        <h4 className="font-bold text-slate-900">Invite Clinic Staff Member</h4>
-      </div>
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Email Address *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">receptionist@sharmadental.com</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Role / Access Level *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">Receptionist</div>
-        </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-bold text-slate-500 uppercase">Primary Workspace Branch *</label>
-          <div className="h-7 w-full border rounded bg-slate-50 border-slate-200 p-2 flex items-center text-slate-800">Headquarters</div>
-        </div>
-        <button disabled className="w-full bg-blue-600 text-white font-bold h-8 rounded text-[11px] shadow-sm mt-2">
-          Send Invitation Email
-        </button>
-      </div>
-    </div>
+  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
+    <BrowserHeader url="app.clerixs.com/staff" />
+    <img 
+      src="/assets/staff.png" 
+      alt="Staff Management" 
+      className="w-full h-auto object-cover"
+    />
   </div>
 );
 
