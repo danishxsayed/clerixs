@@ -3,12 +3,13 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Landmark, CreditCard, Settings, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Landmark, CreditCard, Settings, Newspaper, LifeBuoy } from 'lucide-react';
 
 const navItems = [
   { name: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Clinics', href: '/admin/clinics', icon: Landmark },
   { name: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCard },
+  { name: 'Support Tickets', href: '/admin/support-tickets', icon: LifeBuoy },
   { name: 'Blogs', href: '/admin/blogs', icon: Newspaper },
   { name: 'System', href: '/admin/system', icon: Settings },
 ];

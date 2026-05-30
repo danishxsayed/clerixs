@@ -26,204 +26,14 @@ import {
 } from '@/components/ui/select';
 // @ts-ignore
 import { load } from '@cashfreepayments/cashfree-js';
+import { SupportModal } from '@/components/support/support-modal';
 
 interface PricingClientProps {
   plans: any[];
   user: any;
 }
 
-// ─── Enterprise Contact Modal ────────────────────────────────────────
-function EnterpriseModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const [submitting, setSubmitting] = React.useState(false);
-  const [submitted, setSubmitted] = React.useState(false);
-  const [formData, setFormData] = React.useState({
-    clinicName: '',
-    yourName: '',
-    phone: '',
-    branches: '',
-    city: '',
-    message: '',
-  });
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.clinicName || !formData.yourName || !formData.phone) {
-      toast.error('Please fill in all required fields.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/enterprise-inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to send inquiry');
-      }
-
-      setSubmitted(true);
-    } catch (err: any) {
-      toast.error(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleClose = (v: boolean) => {
-    if (!v) {
-      // Reset state on close
-      setTimeout(() => {
-        setSubmitted(false);
-        setFormData({ clinicName: '', yourName: '', phone: '', branches: '', city: '', message: '' });
-      }, 300);
-    }
-    onOpenChange(v);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
-        {/* Modal header with gradient */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-5">
-          <DialogHeader>
-            <DialogTitle className="text-white text-xl font-bold flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Talk to our Sales Team
-            </DialogTitle>
-            <DialogDescription className="text-amber-100/80 text-sm mt-1">
-              Fill in the details and we&apos;ll get back to you within 24 hours.
-            </DialogDescription>
-          </DialogHeader>
-        </div>
-
-        {submitted ? (
-          /* Success state */
-          <div className="p-8 text-center space-y-4">
-            <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900">Thank you!</h3>
-            <p className="text-slate-600">
-              Our team will contact you within 24 hours.
-            </p>
-            <Button
-              onClick={() => handleClose(false)}
-              className="mt-4 bg-slate-900 hover:bg-slate-800"
-            >
-              Close
-            </Button>
-          </div>
-        ) : (
-          /* Form */
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="clinicName" className="text-sm font-medium">
-                  Clinic Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="clinicName"
-                  placeholder="e.g., HealthFirst Clinics"
-                  value={formData.clinicName}
-                  onChange={e => handleChange('clinicName', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="yourName" className="text-sm font-medium">
-                  Your Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="yourName"
-                  placeholder="e.g., Dr. Sharma"
-                  value={formData.yourName}
-                  onChange={e => handleChange('yourName', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  Phone Number <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={formData.phone}
-                  onChange={e => handleChange('phone', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="branches" className="text-sm font-medium">
-                  Number of Branches
-                </Label>
-                <Select
-                  value={formData.branches}
-                  onValueChange={v => handleChange('branches', v ?? '')}
-                >
-                  <SelectTrigger id="branches">
-                    <SelectValue placeholder="Select range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2-5">2 – 5 branches</SelectItem>
-                    <SelectItem value="6-10">6 – 10 branches</SelectItem>
-                    <SelectItem value="10+">10+ branches</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city" className="text-sm font-medium">City</Label>
-              <Input
-                id="city"
-                placeholder="e.g., Mumbai"
-                value={formData.city}
-                onChange={e => handleChange('city', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="message" className="text-sm font-medium">Message (optional)</Label>
-              <Textarea
-                id="message"
-                placeholder="Tell us about your requirements..."
-                rows={3}
-                value={formData.message}
-                onChange={e => handleChange('message', e.target.value)}
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full h-12 text-base font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg"
-            >
-              {submitting ? (
-                <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Sending...</>
-              ) : (
-                'Send Request'
-              )}
-            </Button>
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
+// Legacy EnterpriseModal removed in favor of unified SupportModal
 
 // ─── Enterprise Features ─────────────────────────────────────────────
 const ENTERPRISE_FEATURES = [
@@ -540,8 +350,8 @@ export function PricingClient({ plans, user }: PricingClientProps) {
         for Enterprise pricing.
       </motion.p>
 
-      {/* Enterprise Modal */}
-      <EnterpriseModal open={enterpriseOpen} onOpenChange={setEnterpriseOpen} />
+      {/* Replaced with unified SupportModal */}
+      <SupportModal open={enterpriseOpen} onOpenChange={setEnterpriseOpen} initialCategory="Sales Inquiry" />
     </div>
   );
 }

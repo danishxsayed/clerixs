@@ -45,6 +45,7 @@ import {
   FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { SupportModal } from '@/components/support/support-modal';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -2068,6 +2069,8 @@ export default function DocsPage() {
   const [activeChapterId, setActiveChapterId] = React.useState('getting-started');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [supportOpen, setSupportOpen] = React.useState(false);
+  const [supportCategory, setSupportCategory] = React.useState<'Technical Support' | 'Sales Inquiry' | 'Billing & Subscription' | 'Feature Request' | 'Enterprise / Branches' | 'Bug Report' | 'Other'>('Technical Support');
 
   // Search filter
   const filteredDocs = DOCS_DATA.map(chapter => {
@@ -2212,10 +2215,18 @@ export default function DocsPage() {
           <div className="p-4 border-t bg-slate-50 text-center flex flex-col gap-1.5">
             <p className="text-[10px] font-bold text-slate-400 uppercase">Need more help?</p>
             <p className="text-xs text-slate-600 leading-normal font-medium">Our dedicated clinical team is available 9 AM – 6 PM IST.</p>
-            <Button asChild variant="outline" size="sm" className="mt-1 font-bold text-[11px] h-8 bg-white border-slate-200">
-              <a href="mailto:support@clerixs.com" className="flex items-center justify-center gap-1.5">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-1 font-bold text-[11px] h-8 bg-white border-slate-200 cursor-pointer"
+              onClick={() => {
+                setSupportCategory('Technical Support');
+                setSupportOpen(true);
+              }}
+            >
+              <span className="flex items-center justify-center gap-1.5 font-bold">
                 <HelpCircle className="h-3.5 w-3.5 text-blue-600" /> Contact Support
-              </a>
+              </span>
             </Button>
           </div>
         </aside>
@@ -2291,9 +2302,16 @@ export default function DocsPage() {
                   Technical Links
                 </div>
                 <div className="space-y-2 text-xs">
-                  <a href="mailto:enterprise@clerixs.com" className="flex items-center justify-between text-slate-600 hover:text-blue-600 transition-colors">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setSupportCategory('Sales Inquiry');
+                      setSupportOpen(true);
+                    }}
+                    className="flex items-center justify-between text-slate-600 hover:text-blue-600 transition-colors text-left w-full cursor-pointer font-bold text-xs"
+                  >
                     Contact Sales <ExternalLink className="h-3 w-3 opacity-60" />
-                  </a>
+                  </button>
                   <Link href="/terms-of-service" className="flex items-center justify-between text-slate-600 hover:text-blue-600 transition-colors">
                     Terms of Service <ExternalLink className="h-3 w-3 opacity-60" />
                   </Link>
@@ -2307,6 +2325,12 @@ export default function DocsPage() {
 
         </div>
       </div>
+      
+      <SupportModal 
+        open={supportOpen} 
+        onOpenChange={setSupportOpen} 
+        initialCategory={supportCategory} 
+      />
     </div>
   );
 }
