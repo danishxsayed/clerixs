@@ -144,7 +144,7 @@ const MockWaitingRoomScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
     <BrowserHeader url="app.clerixs.com/queue" />
     <img 
-      src="/assets/queue.png" 
+      src="/assets/queue-2.png" 
       alt="Queue Management" 
       className="w-full max-h-[300px] object-cover object-top"
     />
