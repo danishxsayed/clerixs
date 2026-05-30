@@ -146,7 +146,7 @@ const MockWaitingRoomScreenshot = () => (
     <img 
       src="/assets/queue.png" 
       alt="Queue Management" 
-      className="w-full h-auto object-cover"
+      className="w-full max-h-[300px] object-cover object-top"
     />
   </div>
 );
