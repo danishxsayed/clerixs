@@ -196,6 +196,7 @@ export function SupportModal({ open, onOpenChange, initialCategory = 'Technical 
   };
 
   const handleClose = () => {
+    setSuccessData(null);
     onOpenChange(false);
   };
 
@@ -535,7 +536,7 @@ export function SupportModal({ open, onOpenChange, initialCategory = 'Technical 
       </Dialog>
 
       {/* Success Modal */}
-      <Dialog open={!!successData} onOpenChange={handleClose}>
+      <Dialog open={open && !!successData} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[480px] p-8 text-center bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl rounded-3xl overflow-hidden">
           <div className="space-y-6">
             {/* Green Tick Animation Container */}
