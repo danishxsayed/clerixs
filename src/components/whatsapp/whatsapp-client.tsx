@@ -160,7 +160,7 @@ export function WhatsAppClient({ organizationId, userRole, userId }: WhatsAppCli
         </div>
         <TabsTrigger 
           value="buy" 
-          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-md transition-all shadow-sm data-active:!bg-blue-800 data-active:!text-white hover:text-white dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white"
+          className="flex-none gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-md transition-all shadow-sm data-active:!bg-blue-800 data-active:!text-white hover:text-white dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white"
         >
           <ShoppingCart className="h-4 w-4" /> Buy Credits
         </TabsTrigger>
