@@ -149,15 +149,20 @@ export function WhatsAppClient({ organizationId, userRole, userId }: WhatsAppCli
         />
       )}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-      <TabsList className="bg-muted/50 p-1">
-        <TabsTrigger value="overview" className="gap-2">
-          <TrendingUp className="h-4 w-4" /> Overview
-        </TabsTrigger>
-        <TabsTrigger value="buy" className="gap-2">
+      <TabsList className="bg-muted/50 p-1 flex justify-between items-center w-full">
+        <div className="flex items-center gap-1">
+          <TabsTrigger value="overview" className="gap-2">
+            <TrendingUp className="h-4 w-4" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2">
+            <HistoryIcon className="h-4 w-4" /> Transaction History
+          </TabsTrigger>
+        </div>
+        <TabsTrigger 
+          value="buy" 
+          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-md transition-all shadow-sm data-active:!bg-blue-800 data-active:!text-white hover:text-white dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white"
+        >
           <ShoppingCart className="h-4 w-4" /> Buy Credits
-        </TabsTrigger>
-        <TabsTrigger value="history" className="gap-2">
-          <HistoryIcon className="h-4 w-4" /> Transaction History
         </TabsTrigger>
       </TabsList>
 
