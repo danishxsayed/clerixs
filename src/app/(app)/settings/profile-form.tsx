@@ -18,6 +18,33 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search } from 'lucide-react';
+
+const SPECIALTIES = [
+  'General Physician',
+  'Dentist',
+  'Dermatologist / Skin Doctor',
+  'Hair Transplant Surgeon',
+  'Plastic Surgeon',
+  'Cosmetic Surgeon',
+  'Orthopedic Doctor',
+  'Gynecologist / Obstetrician',
+  'Pediatrician',
+  'Cardiologist',
+  'ENT Specialist',
+  'Ophthalmologist / Eye Specialist',
+  'Neurologist',
+  'Endocrinologist / Diabetologist',
+  'Psychiatrist',
+  'Urologist',
+  'Gastroenterologist',
+  'Pulmonologist',
+  'Nephrologist',
+  'Oncologist',
+  'Rheumatologist',
+  'Other'
+];
 
 const profileSchema = z.object({
   full_name: z.string().refine((val) => val.trim().length > 0, {
@@ -25,10 +52,15 @@ const profileSchema = z.object({
   }),
   phone: z.string().optional(),
   avatar_url: z.string().optional(),
+  specialty: z.string().min(1, 'Specialty is required.'),
+  otherSpecialty: z.string().optional(),
 });
 
 export function ProfileForm({ profile }: { profile: any }) {
   const [isPending, startTransition] = React.useTransition();
+  const [specialtySearch, setSpecialtySearch] = React.useState('');
+
+  const isCustomSpecialty = profile.specialty && !SPECIALTIES.includes(profile.specialty);
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -36,8 +68,12 @@ export function ProfileForm({ profile }: { profile: any }) {
       full_name: (profile.full_name || '').trim(),
       phone: profile.phone || '',
       avatar_url: profile.avatar_url || '',
+      specialty: isCustomSpecialty ? 'Other' : (profile.specialty || ''),
+      otherSpecialty: isCustomSpecialty ? profile.specialty : '',
     },
   });
+
+  const selectedSpecialty = form.watch('specialty');
 
   const getInitials = (name: string) => {
     if (!name) return 'U';
@@ -65,6 +101,10 @@ export function ProfileForm({ profile }: { profile: any }) {
       window.location.reload();
     });
   }
+
+  const filteredSpecialties = SPECIALTIES.filter(s =>
+    s.toLowerCase().includes(specialtySearch.toLowerCase())
+  );
 
   return (
     <div className="space-y-12 max-w-xl pb-16">
@@ -110,6 +150,54 @@ export function ProfileForm({ profile }: { profile: any }) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="specialty"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Doctor&apos;s Specialty <span className="text-red-500">*</span></FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select specialty" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px]">
+                  <div className="p-2 border-b flex items-center gap-2">
+                    <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Input 
+                      placeholder="Search specialties..." 
+                      value={specialtySearch} 
+                      onChange={(e) => setSpecialtySearch(e.target.value)} 
+                      className="h-8 text-xs bg-slate-50 border-none shadow-none focus-visible:ring-0" 
+                    />
+                  </div>
+                  {filteredSpecialties.map(spec => (
+                    <SelectItem key={spec} value={spec}>{spec}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {selectedSpecialty === 'Other' && (
+          <FormField
+            control={form.control}
+            name="otherSpecialty"
+            render={({ field }) => (
+              <FormItem className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <FormLabel>Specify Specialty <span className="text-red-500">*</span></FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your medical specialty" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>

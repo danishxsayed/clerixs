@@ -10,6 +10,8 @@ const profileSchema = z.object({
   }),
   phone: z.string().optional(),
   avatar_url: z.string().optional(),
+  specialty: z.string().min(1, 'Specialty is required.'),
+  otherSpecialty: z.string().optional(),
 });
 
 const organizationSchema = z.object({
@@ -33,6 +35,11 @@ export async function updateProfile(data: ProfileFormValues) {
     if (userError || !userData.user) return { error: 'Not authenticated' };
 
     const validatedData = profileSchema.parse(data);
+    const finalSpecialty = validatedData.specialty === 'Other' ? validatedData.otherSpecialty || 'Other' : validatedData.specialty;
+
+    if (validatedData.specialty === 'Other' && !validatedData.otherSpecialty) {
+      return { error: 'Please specify your other specialty.' };
+    }
 
     const { error: updateError } = await supabase
       .from('profiles')
@@ -40,6 +47,7 @@ export async function updateProfile(data: ProfileFormValues) {
         full_name: validatedData.full_name.trim(),
         phone: validatedData.phone || null,
         avatar_url: validatedData.avatar_url || null,
+        specialty: finalSpecialty,
         updated_at: new Date().toISOString(),
       })
       .eq('id', userData.user.id);
@@ -47,6 +55,32 @@ export async function updateProfile(data: ProfileFormValues) {
     if (updateError) {
       console.error('Update profile error:', updateError);
       return { error: updateError.message };
+    }
+
+    // Sync to organization primary_specialty if org_owner
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('default_organization_id')
+      .eq('id', userData.user.id)
+      .single();
+
+    if (profile?.default_organization_id) {
+      const { data: membership } = await supabase
+        .from('organization_memberships')
+        .select('role')
+        .eq('organization_id', profile.default_organization_id)
+        .eq('profile_id', userData.user.id)
+        .single();
+      
+      if (membership?.role === 'org_owner') {
+        await supabase
+          .from('organizations')
+          .update({
+            primary_specialty: finalSpecialty,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', profile.default_organization_id);
+      }
     }
 
     return { success: true };

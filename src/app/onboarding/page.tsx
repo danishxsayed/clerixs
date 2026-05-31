@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('default_organization_id, avatar_url')
+    .select('default_organization_id, avatar_url, full_name, specialty')
     .eq('id', userData.user.id)
     .single();
 
@@ -34,7 +34,7 @@ export default async function OnboardingPage() {
     .single();
 
   if (!org) {
-    redirect('/login');
+    redirect('/auth/login');
   }
 
   // If already completed, do not allow access
@@ -51,6 +51,9 @@ export default async function OnboardingPage() {
     address: org.address || '',
     letterhead_url: org.letterhead_url || '',
     signature_url: org.signature_url || '',
+    fullName: profile.full_name || '',
+    specialty: profile.specialty || '',
+    onboardingStep: org.onboarding_step || 1,
   };
 
   return (

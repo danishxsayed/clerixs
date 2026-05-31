@@ -26,6 +26,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: any; resetErrorBo
 
 interface DashboardContentProps {
   fullName?: string;
+  specialty?: string;
   currentDate?: string;
   showDemoData?: boolean;
   displayCashflow?: number;
@@ -45,6 +46,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({
   fullName = 'there',
+  specialty = '',
   currentDate = '',
   showDemoData = false,
   displayCashflow = 0,
@@ -108,6 +110,13 @@ export function DashboardContent({
       <div className="flex flex-col sm:flex-row gap-4 justify-between sm:items-end">
         <div>
           <Greeting name={fullName} />
+          {specialty && (
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                {specialty} · Clerixs Pro
+              </span>
+            </div>
+          )}
           <p className="text-muted-foreground/90 font-medium mt-1">{currentDate}</p>
         </div>
         <div className="flex items-center gap-2">

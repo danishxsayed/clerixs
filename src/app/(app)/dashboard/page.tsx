@@ -22,6 +22,7 @@ export default async function DashboardPage({
   let fullName = 'there';
   let isOwner = false;
   let selectedBranchId = 'all';
+  let specialty = '';
 
   let totalPatients = 0;
   let completedTreatments = 0;
@@ -42,7 +43,7 @@ export default async function DashboardPage({
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, default_organization_id')
+      .select('full_name, default_organization_id, specialty')
       .eq('id', userData.user.id)
       .single();
 
@@ -50,6 +51,7 @@ export default async function DashboardPage({
     fullName = profile?.full_name 
       ? profile.full_name.trim().split(' ')[0] 
       : 'there';
+    specialty = profile?.specialty || '';
 
     if (!orgId) {
       redirect('/onboarding');
@@ -181,6 +183,7 @@ export default async function DashboardPage({
   return (
     <SafeDashboardContent
       fullName={fullName}
+      specialty={specialty}
       currentDate={currentDate}
       showDemoData={false}
       displayCashflow={cashflow}
