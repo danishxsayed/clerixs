@@ -9,6 +9,72 @@ import { BranchBreakdown } from '@/components/dashboard/branch-breakdown';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import SafeDashboardContent from './dashboard-content';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Stethoscope, AlertCircle, Clock, Calendar } from 'lucide-react';
+import Link from 'next/link';
+
+// Locally defined Active Treatments Widget for premium presentation
+function ActiveTreatmentsWidget({ metrics }: { metrics: { inProgress: number; dueToday: number; needsAttention: number } }) {
+  return (
+    <Card className="col-span-full border shadow-sm rounded-2xl bg-gradient-to-r from-card via-card to-primary/5">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 bg-primary/10 text-primary rounded-full flex items-center justify-center">
+            <Stethoscope className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <CardTitle className="text-lg">Active Treatments Module</CardTitle>
+            <CardDescription>Real-time clinical session progress summaries</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          
+          {/* Card 1: In Progress */}
+          <Link href="/treatments?status=In Progress" className="block">
+            <div className="p-4 rounded-xl border bg-card hover:bg-muted/30 transition-all flex items-center justify-between cursor-pointer group">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">In Progress</span>
+                <p className="text-3xl font-extrabold text-blue-600 group-hover:scale-105 transition-transform">{metrics.inProgress}</p>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-600 flex items-center justify-center">
+                <Clock className="h-5 w-5" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Card 2: Due Today */}
+          <div className="p-4 rounded-xl border bg-card flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sessions Due Today</span>
+              <p className="text-3xl font-extrabold text-emerald-600">{metrics.dueToday}</p>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center">
+              <Calendar className="h-5 w-5" />
+            </div>
+          </div>
+
+          {/* Card 3: Needs Attention */}
+          <Link href="/treatments?status=In Progress" className="block">
+            <div className="p-4 rounded-xl border bg-card hover:bg-muted/30 transition-all flex items-center justify-between cursor-pointer group">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Needs Attention</span>
+                <p className={`text-3xl font-extrabold transition-transform group-hover:scale-105 ${metrics.needsAttention > 0 ? 'text-rose-600 animate-pulse' : 'text-slate-500'}`}>
+                  {metrics.needsAttention}
+                </p>
+              </div>
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${metrics.needsAttention > 0 ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600' : 'bg-slate-100 text-slate-400'}`}>
+                <AlertCircle className="h-5 w-5" />
+              </div>
+            </div>
+          </Link>
+
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default async function DashboardPage({
   searchParams,
@@ -31,6 +97,11 @@ export default async function DashboardPage({
   let realTodaysAppointmentsList: any[] = [];
   let chartData: any[] = [];
   let startDate: Date | null = null;
+
+  // Active treatment metrics
+  let inProgressCount = 0;
+  let dueTodayCount = 0;
+  let needsAttentionCount = 0;
 
   try {
     const { data: userData } = await supabase.auth.getUser();
@@ -162,6 +233,38 @@ export default async function DashboardPage({
     const { data: realTodaysAppointmentsListData } = await realTodaysAppointmentsListQuery;
     realTodaysAppointmentsList = realTodaysAppointmentsListData || [];
 
+    // ==========================================
+    // Fetch Active Treatments Metrics
+    // ==========================================
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // A. Treatments in progress count
+    const { count: activeCount } = await supabase
+      .from('treatments')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'in_progress');
+    inProgressCount = activeCount || 0;
+
+    // B. Sessions due today count
+    const { count: dueCount } = await supabase
+      .from('treatment_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'scheduled')
+      .eq('session_date', todayStr);
+    dueTodayCount = dueCount || 0;
+
+    // C. Needs attention count (No updates in 7+ days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: idleCount } = await supabase
+      .from('treatments')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'in_progress')
+      .lt('updated_at', sevenDaysAgo);
+    needsAttentionCount = idleCount || 0;
+
   } catch (error) {
     console.error('Error fetching dashboard data, applying safe defaults:', error);
   }
@@ -199,6 +302,11 @@ export default async function DashboardPage({
       date={date}
       isLoading={!orgId}
     >
+      {orgId && (
+        <div className="mt-6 col-span-full">
+          <ActiveTreatmentsWidget metrics={{ inProgress: inProgressCount, dueToday: dueTodayCount, needsAttention: needsAttentionCount }} />
+        </div>
+      )}
       {orgId && (!selectedBranchId || selectedBranchId === 'all') && (
         <React.Suspense fallback={<div className="h-48 rounded-2xl border-none shadow-sm col-span-full mt-6 bg-muted animate-pulse" />}>
           <BranchBreakdown orgId={orgId} startDate={startDate} />

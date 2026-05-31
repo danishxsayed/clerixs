@@ -8,15 +8,11 @@ import { Plus } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { TreatmentRowActions } from './treatment-row-actions';
-import { ListFilter } from '@/components/ui/list-filter';
-import { ListPagination } from '@/components/ui/list-pagination';
-import { getDateRangeBounds } from '@/lib/utils';
-
-import { Suspense } from 'react';
 import { TreatmentList } from './treatment-list';
 import { TreatmentSkeleton } from './skeleton';
+import { DoctorFilter } from './doctor-filter';
+import { ListFilter } from '@/components/ui/list-filter';
+import { Suspense } from 'react';
 
 export default async function TreatmentsPage({
   searchParams,
@@ -28,7 +24,22 @@ export default async function TreatmentsPage({
   const query = resolvedSearchParams?.query?.toString() || '';
   const statusFilter = resolvedSearchParams?.status?.toString() || 'All';
   const dateFilter = resolvedSearchParams?.date?.toString() || '';
+  const doctorFilter = resolvedSearchParams?.doctor?.toString() || 'All';
   const page = parseInt(resolvedSearchParams?.page?.toString() || '1', 10);
+
+  const supabase = await createClient();
+
+  // Fetch doctors for organization
+  const { data: doctorsData } = await supabase
+    .from('organization_memberships')
+    .select('id, profiles!inner(full_name)')
+    .eq('role', 'doctor')
+    .eq('status', 'active');
+
+  const doctors = doctorsData?.map((d: any) => ({
+    id: d.id,
+    full_name: d.profiles?.full_name || 'Unknown Doctor'
+  })).sort((a, b) => a.full_name.localeCompare(b.full_name)) || [];
 
   const filterGroups = [
     {
@@ -55,18 +66,25 @@ export default async function TreatmentsPage({
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-sm flex items-center gap-2">
-            <SearchInput placeholder="Search records..." />
+      <div className="flex flex-col lg:flex-row gap-4 justify-between lg:items-center">
+          <div className="flex flex-col sm:flex-row flex-1 gap-2 max-w-xl items-stretch sm:items-center">
+            <SearchInput placeholder="Search patient or treatment..." />
+            <DoctorFilter doctors={doctors} />
             <ListFilter groups={filterGroups} showDatePicker />
           </div>
 
-          <div className="flex rounded-md shadow-sm bg-background border overflow-hidden">
+          <div className="flex rounded-md shadow-sm bg-background border overflow-hidden self-start lg:self-auto max-w-full overflow-x-auto">
              {(['All', 'Planned', 'In Progress', 'Completed', 'Cancelled'] as const).map((status) => {
                const isActive = statusFilter === status;
-               const href = query 
-                ? `?query=${encodeURIComponent(query)}${status !== 'All' ? `&status=${status}` : ''}`
-                : status !== 'All' ? `?status=${status}` : '?';
+               
+               // Build clean link parameters
+               const params = new URLSearchParams();
+               if (query) params.set('query', query);
+               if (doctorFilter !== 'All') params.set('doctor', doctorFilter);
+               if (dateFilter) params.set('date', dateFilter);
+               if (status !== 'All') params.set('status', status);
+
+               const href = `?${params.toString()}`;
 
                return (
                 <Link
@@ -74,21 +92,22 @@ export default async function TreatmentsPage({
                   href={href}
                   className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive 
-                      ? 'bg-primary text-primary-foreground text-foreground' 
+                      ? 'bg-primary text-primary-foreground' 
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   } ${status !== 'All' ? 'border-l' : ''}`}
                 >
                   {status}
                 </Link>
-             )})}
+              )})}
           </div>
       </div>
 
-      <Suspense key={`${query}-${statusFilter}-${dateFilter}-${page}`} fallback={<TreatmentSkeleton />}>
+      <Suspense key={`${query}-${statusFilter}-${dateFilter}-${doctorFilter}-${page}`} fallback={<TreatmentSkeleton />}>
         <TreatmentList 
           query={query}
           statusFilter={statusFilter}
           dateFilter={dateFilter}
+          doctorFilter={doctorFilter}
           page={page}
         />
       </Suspense>

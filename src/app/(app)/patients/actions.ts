@@ -305,6 +305,14 @@ export async function getPatientDashboard(patientId: string) {
        .eq('patient_id', patientId)
        .eq('branch_id', branchId)
        .order('created_at', { ascending: false });
+
+     // 9. Fetch Treatments with their sessions
+     const { data: treatments, error: treatmentsError } = await supabase
+       .from('treatments')
+       .select('*, treatment_sessions(*)')
+       .eq('patient_id', patientId)
+       .eq('branch_id', branchId)
+       .order('created_at', { ascending: false });
  
      return {
        success: true,
@@ -315,6 +323,7 @@ export async function getPatientDashboard(patientId: string) {
          prescriptions: prescriptions || [],
          labOrders: labOrders || [],
          clinicalNotes: clinicalNotes || [],
+         treatments: treatments || [],
          role
        }
      };

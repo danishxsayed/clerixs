@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getPatientDashboard } from '../actions';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Calendar, FileText, Phone, Mail, User, MapPin, Droplet, Contact, FlaskConical } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, FileText, Phone, Mail, User, MapPin, Droplet, Contact, FlaskConical, Stethoscope, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,7 @@ export async function PatientDashboard({ id }: PatientDashboardProps) {
     return notFound();
   }
 
-  const { patient, appointments, invoices, prescriptions, labOrders, clinicalNotes, role } = result.data;
+  const { patient, appointments, invoices, prescriptions, labOrders, clinicalNotes, treatments, role } = result.data;
 
   // Compute initials
   const initials = patient.full_name
@@ -168,6 +168,7 @@ export async function PatientDashboard({ id }: PatientDashboardProps) {
               <TabsTrigger value="prescriptions">Prescriptions ({prescriptions?.length || 0})</TabsTrigger>
               <TabsTrigger value="lab">Lab & Docs ({labOrders?.length || 0})</TabsTrigger>
               <TabsTrigger value="invoices">Billing & Invoices ({invoices.length})</TabsTrigger>
+              <TabsTrigger value="treatments">Treatments ({treatments?.length || 0})</TabsTrigger>
             </TabsList>
             
             {/* Appointments Tab Content */}
@@ -388,7 +389,106 @@ export async function PatientDashboard({ id }: PatientDashboardProps) {
                     )}
                   </CardContent>
                 </Card>
-            </TabsContent>
+             </TabsContent>
+
+             {/* Treatments Tab Content */}
+             <TabsContent value="treatments" className="space-y-4">
+               <Card className="border shadow-sm">
+                 <CardHeader className="flex flex-row items-center justify-between pb-2 bg-muted/10">
+                   <div className="space-y-1">
+                     <CardTitle>Treatments</CardTitle>
+                     <CardDescription>Clinical plans and session tracking</CardDescription>
+                   </div>
+                   <Button size="sm" variant="outline" asChild>
+                     <Link href={`/treatments/new?patient_id=${patient.id}`}>
+                       <Plus className="mr-2 h-4 w-4" /> Start New Treatment
+                     </Link>
+                   </Button>
+                 </CardHeader>
+                 <CardContent className="pt-6">
+                   {!treatments || treatments.length === 0 ? (
+                     <div className="flex flex-col items-center justify-center p-8 text-center bg-muted/20 border border-dashed rounded-lg">
+                       <Stethoscope className="h-10 w-10 text-muted-foreground mb-4 opacity-50" />
+                       <p className="text-muted-foreground text-sm">No treatments recorded for this patient.</p>
+                     </div>
+                   ) : (
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                       {treatments.map((t: any) => {
+                         const totalSessions = t.estimated_sessions || 1;
+                         const completedSessions = t.completed_sessions || 0;
+                         const progress = Math.min(100, Math.round((completedSessions / totalSessions) * 100));
+
+                         // Find last session date
+                         const completedSessionsList = (t.treatment_sessions || []).filter((s: any) => s.status === 'completed');
+                         let lastSessionDate = '-';
+                         if (completedSessionsList.length > 0) {
+                           const dates = completedSessionsList.map((s: any) => new Date(s.session_date).getTime());
+                           const maxDate = Math.max(...dates);
+                           lastSessionDate = new Date(maxDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                         }
+
+                         return (
+                           <Link key={t.id} href={`/treatments/${t.id}`} className="block">
+                             <div className="rounded-xl border bg-card hover:bg-muted/10 transition-all p-4 shadow-sm space-y-4 cursor-pointer">
+                               <div className="flex justify-between items-start">
+                                 <div className="space-y-1">
+                                   <h4 className="font-bold text-foreground hover:text-primary transition-colors text-sm">{t.title}</h4>
+                                   <p className="text-xs text-muted-foreground truncate max-w-[200px]" title={t.diagnosis || 'No Diagnosis'}>
+                                     {t.diagnosis || 'No Diagnosis'}
+                                   </p>
+                                 </div>
+                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide
+                                   ${t.status === 'planned' ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-300' : ''}
+                                   ${t.status === 'in_progress' ? 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/20 dark:text-blue-300' : ''}
+                                   ${t.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-300' : ''}
+                                   ${t.status === 'cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/20 dark:text-rose-300' : ''}
+                                 `}>
+                                   {t.status.replace('_', ' ')}
+                                 </span>
+                               </div>
+
+                               <div className="flex justify-between items-center text-xs font-semibold">
+                                 <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase border
+                                   ${t.treatment_type === 'multi' 
+                                     ? 'bg-purple-50 text-purple-700 border-purple-200/50 dark:bg-purple-950/20 dark:text-purple-300' 
+                                     : 'bg-slate-100 text-slate-700 border-slate-200/50 dark:bg-slate-900 dark:text-slate-300'}
+                                 `}>
+                                   {t.treatment_type === 'multi' ? 'Multi-Session' : 'Single Session'}
+                                 </span>
+                                 <span className="text-foreground font-bold">
+                                   Cost: {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(t.estimated_cost || 0)}
+                                 </span>
+                               </div>
+
+                               {t.treatment_type === 'multi' && (
+                                 <div className="space-y-1.5 pt-1">
+                                   <div className="flex justify-between text-[11px] text-muted-foreground font-semibold">
+                                     <span>{completedSessions} of {totalSessions} completed</span>
+                                     <span>{progress}%</span>
+                                   </div>
+                                   <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                                     <div 
+                                       className="bg-primary h-full rounded-full transition-all duration-300"
+                                       style={{ width: `${progress}%` }}
+                                     />
+                                   </div>
+                                 </div>
+                               )}
+
+                               <div className="flex justify-between text-[10px] text-muted-foreground font-bold pt-2 border-t">
+                                 <span>Last Session: {lastSessionDate}</span>
+                                 <span>Updated: {new Date(t.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                               </div>
+
+                             </div>
+                           </Link>
+                         );
+                       })}
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+             </TabsContent>
           </Tabs>
 
         </div>
