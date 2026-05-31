@@ -15,6 +15,8 @@ const step1Schema = z.object({
   fullName: z.string().min(2, "Doctor's full name is required."),
   specialty: z.string().min(1, 'Specialty is required.'),
   otherSpecialty: z.string().optional(),
+  letterhead_url: z.string().optional(),
+  signature_url: z.string().optional(),
 });
 
 const priceCatalogItemSchema = z.object({
@@ -75,6 +77,8 @@ export async function saveOnboardingStep1(data: z.infer<typeof step1Schema>) {
         phone: validatedData.phone,
         address: validatedData.address,
         primary_specialty: primarySpecialty,
+        letterhead_url: validatedData.letterhead_url || null,
+        signature_url: validatedData.signature_url || null,
         onboarding_step: 2,
         updated_at: new Date().toISOString(),
       })

@@ -63,6 +63,8 @@ const step1Schema = z.object({
   fullName: z.string().min(2, "Doctor's full name is required."),
   specialty: z.string().min(1, 'Specialty is required.'),
   otherSpecialty: z.string().optional(),
+  letterhead_url: z.string().optional(),
+  signature_url: z.string().optional(),
 });
 
 interface WizardProps {
@@ -108,6 +110,8 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
       fullName: initialData.fullName || '',
       specialty: initialData.specialty || '',
       otherSpecialty: '',
+      letterhead_url: initialData.letterhead_url || '',
+      signature_url: initialData.signature_url || '',
     },
   });
 
@@ -502,6 +506,28 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                           <FormMessage />
                         </FormItem>
                       )}
+                    />
+                  </div>
+
+                  <div className="w-full h-px bg-border my-6" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-foreground">Clinic Letterhead <span className="text-sm font-normal text-muted-foreground ml-2">(Optional)</span></h3>
+                    <LetterheadUpload 
+                      userId={userId}
+                      initialUrl={formStep1.getValues('letterhead_url')}
+                      onUploadComplete={(url) => formStep1.setValue('letterhead_url', url, { shouldDirty: true })}
+                    />
+                  </div>
+
+                  <div className="w-full h-px bg-border my-6" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-base font-semibold text-foreground">Doctor Digital Signature <span className="text-sm font-normal text-muted-foreground ml-2">(Optional)</span></h3>
+                    <SignatureUpload 
+                      userId={userId} 
+                      initialUrl={formStep1.getValues('signature_url')}
+                      onUploadComplete={(url) => formStep1.setValue('signature_url', url, { shouldDirty: true })}
                     />
                   </div>
                 </form>
