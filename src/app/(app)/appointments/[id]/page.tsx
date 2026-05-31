@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Appointment Details',
+};
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';

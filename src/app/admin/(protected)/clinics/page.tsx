@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Clinics | Admin',
+};
 import Link from 'next/link';
 import { Landmark, Plus, Search, ArrowRight, Settings, CalendarPlus, ShieldAlert, BadgeCheck } from 'lucide-react';
 

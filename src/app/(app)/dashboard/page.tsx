@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+};
 import { createClient } from '@/lib/supabase/server';
 import { BranchBreakdown } from '@/components/dashboard/branch-breakdown';
 import { cookies } from 'next/headers';

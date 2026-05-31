@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'My Profile | Settings',
+};
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

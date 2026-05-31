@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'System Config | Admin',
+};
 import { Settings, ShieldCheck, Database, Server } from 'lucide-react';
 
 import { createClient } from '@supabase/supabase-js';

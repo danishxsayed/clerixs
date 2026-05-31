@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Lab Catalog | Settings',
+};
 import { getLabCatalog } from '@/app/(app)/lab/actions';
 import { notFound } from 'next/navigation';
 import { LabSettingsTabs } from './components/lab-settings-tabs';

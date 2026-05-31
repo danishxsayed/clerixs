@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PricingClient } from './pricing-client';
 
 export const metadata = {
-  title: 'Pricing - Clerixs',
+  title: 'Pricing Plans',
   description: 'Simple, transparent pricing for modern clinic management.',
 };
 

@@ -37,7 +37,7 @@ import { AutoRenewalToggle } from './AutoRenewalToggle';
 import { DownloadInvoiceButton } from './DownloadInvoiceButton';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Subscription Management' };
+export const metadata = { title: 'Subscription & Billing | Settings' };
 
 export default async function SubscriptionSettingsPage({
   searchParams,

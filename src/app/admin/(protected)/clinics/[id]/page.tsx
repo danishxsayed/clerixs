@@ -1,8 +1,30 @@
 import * as React from 'react';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Landmark, CreditCard, User, Building, Activity, CalendarDays, Key, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 import { activateSubscriptionAction, extendTrialAction, suspendAccountAction, reactivateAccountAction, saveEnterpriseSettingsAction } from './actions';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { data: orgData } = await supabaseAdmin
+    .from('organizations')
+    .select('name')
+    .eq('id', id)
+    .single();
+
+  return {
+    title: orgData ? `${orgData.name} | Admin` : 'Clinic Details | Admin',
+  };
+}
 
 export default async function ClinicManagePage({
   params,

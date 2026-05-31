@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Admin Login',
+};
 import Image from 'next/image';
 import { adminLogin } from './actions';
 
@@ -14,8 +19,8 @@ export default async function AdminLoginPage({
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100 relative overflow-hidden">
         {/* Dynamic decorative backdrop grids */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] opacity-[0.03] pointer-events-none" 
-             style={{ backgroundImage: 'linear-gradient(#ef4444 1px, transparent 1px), linear-gradient(90deg, #ef4444 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] opacity-[0.03] pointer-events-none"
+          style={{ backgroundImage: 'linear-gradient(#ef4444 1px, transparent 1px), linear-gradient(90deg, #ef4444 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
         </div>
 
         <div className="flex flex-col items-center relative z-10">
@@ -23,8 +28,8 @@ export default async function AdminLoginPage({
           <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-white shadow-md mb-4 border border-slate-100 flex items-center justify-center">
             <Image src="/assets/logo.jpg" alt="Clerixs" fill className="object-contain p-1" />
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">CLERIXS</h2>
-          
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Clerixs</h2>
+
           {/* Red Badge */}
           <span className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider">
             Admin Panel

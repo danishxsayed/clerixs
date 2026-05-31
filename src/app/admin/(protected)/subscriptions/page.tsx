@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Subscriptions | Admin',
+};
 import { CreditCard, Landmark, ShieldCheck, Banknote, Activity, Clock, ShieldAlert, BadgeX } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase/admin';
 

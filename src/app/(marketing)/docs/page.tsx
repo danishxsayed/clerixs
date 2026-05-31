@@ -2072,6 +2072,16 @@ export default function DocsPage() {
   const [supportOpen, setSupportOpen] = React.useState(false);
   const [supportCategory, setSupportCategory] = React.useState<'Technical Support' | 'Sales Inquiry' | 'Billing & Subscription' | 'Feature Request' | 'Enterprise / Branches' | 'Bug Report' | 'Other'>('Technical Support');
 
+  React.useEffect(() => {
+    const currentChapter = DOCS_DATA.find(c => c.id === activeChapterId);
+    if (currentChapter) {
+      const cleanTitle = currentChapter.title.replace(/^\d+\.\s+/, '');
+      document.title = `${cleanTitle} | Docs | Clerixs`;
+    } else {
+      document.title = 'Documentation | Clerixs';
+    }
+  }, [activeChapterId]);
+
   // Search filter
   const filteredDocs = DOCS_DATA.map(chapter => {
     // If search query is empty, return chapter unchanged

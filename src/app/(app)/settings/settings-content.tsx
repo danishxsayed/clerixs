@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SettingsTabsClient } from './settings-tabs-client';
 import { ProfileForm } from './profile-form';
 import { OrganizationForm } from './organization-form';
 import { ChangePasswordForm } from './change-password-form';
@@ -48,7 +49,7 @@ export async function SettingsContent() {
   const { items: catalogItems } = await getCatalogItems();
 
   return (
-    <Tabs defaultValue="profile" className="w-full">
+    <SettingsTabsClient>
       <TabsList className="mb-4 overflow-x-auto flex-nowrap justify-start max-w-full bg-muted/50 p-1 border">
         <TabsTrigger value="profile">My Profile</TabsTrigger>
         <TabsTrigger value="clinic">Clinic Settings</TabsTrigger>
@@ -141,6 +142,6 @@ export async function SettingsContent() {
           <TemplatesTab />
         </div>
       </TabsContent>
-    </Tabs>
+    </SettingsTabsClient>
   );
 }

@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Support Tickets | Admin',
+};
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SupportTicketsClient } from './support-tickets-client';
 

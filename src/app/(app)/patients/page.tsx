@@ -1,4 +1,9 @@
 import * as React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Patients',
+};
 import { createClient } from '@/lib/supabase/server';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';

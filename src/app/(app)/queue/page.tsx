@@ -1,3 +1,8 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Live Queue',
+};
 import { createClient } from '@/lib/supabase/server';
 import { QueueClient } from './queue-client';
 import { redirect } from 'next/navigation';
