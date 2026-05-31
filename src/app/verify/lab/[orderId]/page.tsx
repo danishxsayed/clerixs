@@ -115,7 +115,7 @@ export default async function ReportVerifyPage({ params }: VerifyPageProps) {
            {/* Security Confirmation */}
            <div className="pt-10 border-t border-slate-100">
               <div className="flex items-center gap-6 opacity-30">
-                 <img src="/assets/logo.jpg" alt="Clerixs" className="h-8 filter grayscale" />
+                 <img src="/assets/logo.png" alt="Clerixs" className="h-8 filter grayscale" />
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
                     This document has been verified against the original records in the Clerixs Secure Database.<br />Digital Signature ID: {order.id.split('-')[0].toUpperCase()}
                  </p>

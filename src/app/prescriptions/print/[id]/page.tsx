@@ -125,7 +125,7 @@ export default async function PrescriptionPrintPage({ params }: PrintPageProps) 
         ) : (
           <div className="flex justify-between items-start border-b-2 border-primary/20 pb-6 mb-8 mt-6">
             <div className="flex items-center gap-4">
-              <img src="/assets/logo.jpg" alt="Clinic Logo" className="h-16 w-auto max-w-[150px] object-contain rounded-lg" />
+              <img src="/assets/logo.png" alt="Clinic Logo" className="h-16 w-auto max-w-[150px] object-contain rounded-lg" />
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-primary">
                   {clinic?.name || 'Medical Clinic'}

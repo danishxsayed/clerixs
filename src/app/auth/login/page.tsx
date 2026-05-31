@@ -38,7 +38,7 @@ export default async function LoginPage({
         <div className="relative z-10">
           <div className="flex items-center gap-3">
             <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white shadow-md">
-              <Image src="/assets/logo.jpg" alt="Clerixs" fill className="object-contain" />
+              <Image src="/assets/logo.png" alt="Clerixs" fill className="object-contain" />
             </div>
             <span className="text-2xl font-extrabold text-white tracking-tight">Clerixs</span>
           </div>

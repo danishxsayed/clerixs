@@ -209,7 +209,7 @@ export function SupportModal({ open, onOpenChange, initialCategory = 'Technical 
             <DialogHeader className="text-left">
               <div className="flex items-center gap-3">
                 <div className="relative h-7 w-7 overflow-hidden rounded-md bg-white p-0.5 shrink-0">
-                  <Image src="/assets/logo.jpg" alt="Clerixs" fill className="object-contain" />
+                  <Image src="/assets/logo.png" alt="Clerixs" fill className="object-contain" />
                 </div>
                 <DialogTitle className="text-white text-lg font-black tracking-tight">
                   {isSalesFlow ? 'Talk to our Sales Team' : 'How can we help you?'}

@@ -35,7 +35,7 @@ export default async function AdminLayout({
         {/* Header/Logo */}
         <div className="h-16 px-6 border-b border-white/5 flex items-center gap-3 relative z-10">
           <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-white/10 shrink-0 backdrop-blur-sm border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-            <Image src="/assets/logo.jpg" alt="Clerixs Logo" fill className="object-contain p-0.5" />
+            <Image src="/assets/logo.png" alt="Clerixs Logo" fill className="object-contain p-0.5" />
           </div>
           <span className="text-lg font-extrabold text-white tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">CLERIXS</span>
         </div>

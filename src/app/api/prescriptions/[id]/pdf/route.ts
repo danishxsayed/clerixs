@@ -136,7 +136,7 @@ export async function GET(
     // Text-based Fallback Header
     if (!letterheadLoaded) {
       console.log('Using text-based fallback header...');
-      const logoPath = path.join(process.cwd(), 'public', 'assets', 'logo.jpg');
+      const logoPath = path.join(process.cwd(), 'public', 'assets', 'logo.png');
       let logoAdded = false;
 
       if (fs.existsSync(logoPath)) {

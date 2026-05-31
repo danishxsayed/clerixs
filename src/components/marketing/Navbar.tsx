@@ -65,7 +65,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2 group transition-transform hover:scale-[1.02]">
           <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[10px]">
             <Image
-              src="/assets/logo.jpg"
+              src="/assets/logo.png"
               alt="Clerixs Logo"
               fill
               className="object-contain"

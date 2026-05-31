@@ -53,7 +53,7 @@ export function DownloadInvoiceButton({ invoice, orgId }: DownloadInvoiceButtonP
         <div style="padding: 40px; font-family: 'Helvetica', 'Arial', sans-serif; color: #1e293b; background-color: #ffffff; width: 700px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px;">
             <div style="display: flex; align-items: center;">
-              <img src="/assets/logo.jpg" style="height: 50px; width: auto; margin-right: 15px;" />
+              <img src="/assets/logo.png" style="height: 50px; width: auto; margin-right: 15px;" />
               <div>
                 <p style="margin: 0; color: #2563eb; font-size: 24px; font-weight: 800;">CLERIXS</p>
                 <p style="margin: 2px 0 0; color: #64748b; font-size: 11px;">Smart Clinic Platform</p>

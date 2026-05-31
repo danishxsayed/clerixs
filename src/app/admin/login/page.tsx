@@ -26,7 +26,7 @@ export default async function AdminLoginPage({
         <div className="flex flex-col items-center relative z-10">
           {/* Logo */}
           <div className="relative h-16 w-16 overflow-hidden rounded-2xl bg-white shadow-md mb-4 border border-slate-100 flex items-center justify-center">
-            <Image src="/assets/logo.jpg" alt="Clerixs" fill className="object-contain p-1" />
+            <Image src="/assets/logo.png" alt="Clerixs" fill className="object-contain p-1" />
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Clerixs</h2>
 

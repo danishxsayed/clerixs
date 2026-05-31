@@ -246,7 +246,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       "name": "Clerixs",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://clerixs.com/assets/logo.jpg"
+        "url": "https://clerixs.com/assets/logo.png"
       }
     }
   };
