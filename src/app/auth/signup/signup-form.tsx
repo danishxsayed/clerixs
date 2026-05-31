@@ -8,6 +8,29 @@ import { Mail, Lock, User } from 'lucide-react';
 import { signup } from '../actions';
 import { toast } from 'sonner';
 
+import { useFormStatus } from 'react-dom';
+import { Loader2 } from 'lucide-react';
+
+function SignupButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button 
+      type="submit" 
+      disabled={pending} 
+      className="w-full h-14 text-lg font-bold bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] rounded-xl flex items-center justify-center"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="h-5 w-5 animate-spin mr-2" />
+          Creating Account...
+        </>
+      ) : (
+        'Sign Up'
+      )}
+    </Button>
+  );
+}
+
 export function SignupForm() {
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState('');
@@ -100,9 +123,7 @@ export function SignupForm() {
         </div>
       </div>
       
-      <Button type="submit" className="w-full h-14 text-lg font-bold bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-[0.98] rounded-xl">
-        Sign Up
-      </Button>
+      <SignupButton />
     </form>
   );
 }

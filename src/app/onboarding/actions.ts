@@ -294,32 +294,42 @@ export async function completeOnboarding() {
       .single();
 
     if (targetPlan) {
+      // Check if organization already has an active subscription
+      const { data: existingSub } = await supabase
+        .from('organization_subscriptions')
+        .select('status, trial_ends_at')
+        .eq('organization_id', orgId)
+        .maybeSingle();
+
       const trialEndsAt = new Date();
       trialEndsAt.setDate(trialEndsAt.getDate() + 7);
-      const trialEndsAtIso = trialEndsAt.toISOString();
+      const trialEndsAtIso = existingSub?.trial_ends_at || trialEndsAt.toISOString();
+      const status = existingSub?.status || 'trialing';
 
-      const { error: subError } = await supabase
-        .from('organization_subscriptions')
-        .insert({
-          organization_id: orgId,
-          plan_id: targetPlan.id,
-          status: 'trialing',
-          trial_ends_at: trialEndsAtIso,
-          current_period_start: new Date().toISOString(),
-          current_period_end: trialEndsAtIso,
-        });
-        
-      if (subError) {
-        console.error('Failed to create trial subscription:', subError);
-      } else {
-        // Sync metadata to avoid redirect loop in middleware
-        await supabase.auth.updateUser({
-          data: {
-            sub_status: 'trialing',
-            sub_expires: trialEndsAtIso
-          }
-        });
+      if (!existingSub) {
+        const { error: subError } = await supabase
+          .from('organization_subscriptions')
+          .insert({
+            organization_id: orgId,
+            plan_id: targetPlan.id,
+            status: 'trialing',
+            trial_ends_at: trialEndsAtIso,
+            current_period_start: new Date().toISOString(),
+            current_period_end: trialEndsAtIso,
+          });
+          
+        if (subError) {
+          console.error('Failed to create trial subscription:', subError);
+        }
       }
+
+      // Always sync metadata to prevent redirect loops in middleware
+      await supabase.auth.updateUser({
+        data: {
+          sub_status: status,
+          sub_expires: trialEndsAtIso
+        }
+      });
     }
 
     const { error } = await supabase

@@ -25,7 +25,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { AvatarUpload } from '@/components/ui/avatar-upload';
 import { SignatureUpload } from '@/components/ui/signature-upload';
 import { LetterheadUpload } from '@/components/ui/letterhead-upload';
-import { Plus, Trash2, CheckCircle, Search, ArrowRight, User, BookOpen, LayoutDashboard } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Search, ArrowRight, User, BookOpen, LayoutDashboard, Loader2 } from 'lucide-react';
 import * as motion from 'framer-motion/client';
 
 const SPECIALTIES = [
@@ -52,6 +52,31 @@ const SPECIALTIES = [
   'Rheumatologist',
   'Other'
 ];
+
+const SPECIALTY_META: Record<string, { emoji: string; desc: string; bg: string; text: string; border: string }> = {
+  'General Physician': { emoji: '🩺', desc: 'Primary & family care', bg: 'bg-blue-50/50 hover:bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  'Dentist': { emoji: '🦷', desc: 'Teeth & oral healthcare', bg: 'bg-cyan-50/50 hover:bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+  'Dermatologist / Skin Doctor': { emoji: '✨', desc: 'Skin, hair & nails', bg: 'bg-pink-50/50 hover:bg-pink-50', text: 'text-pink-700', border: 'border-pink-200' },
+  'Hair Transplant Surgeon': { emoji: '💇‍♂️', desc: 'Hair restoration & transplant', bg: 'bg-amber-50/50 hover:bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  'Plastic Surgeon': { emoji: '🏥', desc: 'Reconstructive procedures', bg: 'bg-indigo-50/50 hover:bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+  'Cosmetic Surgeon': { emoji: '💄', desc: 'Aesthetic enhancement', bg: 'bg-fuchsia-50/50 hover:bg-fuchsia-50', text: 'text-fuchsia-700', border: 'border-fuchsia-200' },
+  'Orthopedic Doctor': { emoji: '🦴', desc: 'Bones, joints & muscles', bg: 'bg-emerald-50/50 hover:bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  'Gynecologist / Obstetrician': { emoji: '👶', desc: 'Women\'s health & pregnancy', bg: 'bg-rose-50/50 hover:bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
+  'Pediatrician': { emoji: '🧸', desc: 'Infants, kids & teens care', bg: 'bg-yellow-50/50 hover:bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  'Cardiologist': { emoji: '❤️', desc: 'Heart & cardiovascular', bg: 'bg-red-50/50 hover:bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+  'ENT Specialist': { emoji: '👂', desc: 'Ear, nose & throat care', bg: 'bg-sky-50/50 hover:bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' },
+  'Ophthalmologist / Eye Specialist': { emoji: '👁️', desc: 'Vision & eye medical care', bg: 'bg-teal-50/50 hover:bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' },
+  'Neurologist': { emoji: '🧠', desc: 'Brain & nervous system', bg: 'bg-violet-50/50 hover:bg-violet-50', text: 'text-violet-700', border: 'border-violet-200' },
+  'Endocrinologist / Diabetologist': { emoji: '🩸', desc: 'Hormones, glands & diabetes', bg: 'bg-orange-50/50 hover:bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  'Psychiatrist': { emoji: '💭', desc: 'Mental health & behaviors', bg: 'bg-purple-50/50 hover:bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+  'Urologist': { emoji: '💧', desc: 'Urinary tract & kidneys', bg: 'bg-blue-50/50 hover:bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  'Gastroenterologist': { emoji: '🍏', desc: 'Stomach & digestive system', bg: 'bg-lime-50/50 hover:bg-lime-50', text: 'text-lime-700', border: 'border-lime-200' },
+  'Pulmonologist': { emoji: '🫁', desc: 'Lungs & respiratory tract', bg: 'bg-cyan-50/50 hover:bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+  'Nephrologist': { emoji: '🧪', desc: 'Kidneys & renal therapies', bg: 'bg-emerald-50/50 hover:bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  'Oncologist': { emoji: '🎗️', desc: 'Cancer therapies & tumors', bg: 'bg-indigo-50/50 hover:bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+  'Rheumatologist': { emoji: '🤝', desc: 'Arthritis & autoimmune diseases', bg: 'bg-rose-50/50 hover:bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
+  'Other': { emoji: '➕', desc: 'Specify custom specialty', bg: 'bg-slate-50/50 hover:bg-slate-100', text: 'text-slate-700', border: 'border-slate-300' }
+};
 
 const step1Schema = z.object({
   name: z.string().min(2, 'Clinic name is required.'),
@@ -93,7 +118,15 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
   // Load step from database or local storage on mount
   React.useEffect(() => {
     if (initialData.onboardingStep) {
-      setStep(initialData.onboardingStep);
+      if (initialData.onboardingStep === 1) {
+        setStep(1);
+      } else if (initialData.onboardingStep === 2) {
+        setStep(3); // Map DB Step 2 to wizard Step 3 (Price Catalog)
+      } else if (initialData.onboardingStep === 3) {
+        setStep(4); // Map DB Step 3 to wizard Step 4 (Lab Catalog)
+      } else if (initialData.onboardingStep === 4) {
+        setStep(5); // Map DB Step 4 to wizard Step 5 (Celebration)
+      }
     }
   }, [initialData.onboardingStep]);
 
@@ -238,6 +271,22 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
     }
   }, [specialtySelected]);
 
+  const handleContinueToStep2 = async () => {
+    const isValid = await formStep1.trigger([
+      'name',
+      'phone',
+      'address',
+      'fullName',
+      'currency',
+      'timezone'
+    ]);
+    if (isValid) {
+      setStep(2);
+    } else {
+      toast.error('Please fill in all required clinic and doctor fields.');
+    }
+  };
+
   // Submit Step 1
   const onSubmitStep1 = (values: z.infer<typeof step1Schema>) => {
     startTransition(async () => {
@@ -248,7 +297,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
       }
       const actualSpecialty = values.specialty === 'Other' ? values.otherSpecialty || 'Other' : values.specialty;
       setSpecialtySelected(actualSpecialty);
-      setStep(2);
+      setStep(3);
     });
   };
 
@@ -260,7 +309,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
         toast.error(result.error);
         return;
       }
-      setStep(3);
+      setStep(4);
     });
   };
 
@@ -272,7 +321,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
         toast.error(result.error);
         return;
       }
-      setStep(3);
+      setStep(4);
     });
   };
 
@@ -284,7 +333,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
         toast.error(result.error);
         return;
       }
-      setStep(4);
+      setStep(5);
     });
   };
 
@@ -296,7 +345,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
         toast.error(result.error);
         return;
       }
-      setStep(4);
+      setStep(5);
     });
   };
 
@@ -330,9 +379,9 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
         <div className="mt-6 flex flex-col items-center">
            <div className="w-full max-w-md bg-muted rounded-full h-2 mb-2 overflow-hidden">
              <div className="bg-[#0285F4] h-2 rounded-full transition-all duration-500 ease-out" 
-                  style={{ width: `${(step / 4) * 100}%` }} />
+                  style={{ width: `${(step / 5) * 100}%` }} />
            </div>
-           <p className="text-sm font-medium text-muted-foreground">Step {step} of 4 {step === 4 && '— Complete!'}</p>
+           <p className="text-sm font-medium text-muted-foreground">Step {step} of 5 {step === 5 && '— Complete!'}</p>
         </div>
       </div>
 
@@ -383,7 +432,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <FormField
                       control={formStep1.control}
                       name="fullName"
@@ -397,54 +446,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={formStep1.control}
-                      name="specialty"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Doctor&apos;s Specialty <span className="text-red-500">*</span></FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select specialty" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]">
-                              <div className="p-2 border-b flex items-center gap-2">
-                                <Search className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <Input 
-                                  placeholder="Search specialties..." 
-                                  value={specialtySearch} 
-                                  onChange={(e) => setSpecialtySearch(e.target.value)} 
-                                  className="h-8 text-xs bg-slate-50 border-none shadow-none focus-visible:ring-0" 
-                                />
-                              </div>
-                              {filteredSpecialties.map(spec => (
-                                <SelectItem key={spec} value={spec}>{spec}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
-
-                  {selectedSpecialty === 'Other' && (
-                    <FormField
-                      control={formStep1.control}
-                      name="otherSpecialty"
-                      render={({ field }) => (
-                        <FormItem className="animate-in fade-in slide-in-from-top-2 duration-300">
-                          <FormLabel>Specify Specialty <span className="text-red-500">*</span></FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your medical specialty" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
 
                   <FormField
                     control={formStep1.control}
@@ -534,14 +536,105 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
               </Form>
             </CardContent>
             <CardFooter className="px-6 py-5 bg-muted/10 border-t flex justify-end">
-              <Button type="submit" form="step1-form" size="lg" disabled={isPending}>
-                {isPending ? 'Saving...' : 'Save & Continue'}
+              <Button type="button" onClick={handleContinueToStep2} size="lg">
+                Continue
               </Button>
             </CardFooter>
           </>
         )}
 
         {step === 2 && (
+          <>
+            <CardHeader className="border-b bg-muted/20 px-6 py-5">
+              <CardTitle>Select Your Medical Specialty</CardTitle>
+              <CardDescription>We will use this to pre-configure your service catalog and laboratory parameters.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 py-8">
+              <div className="relative mb-6">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Search medical specialties..." 
+                  value={specialtySearch}
+                  onChange={(e) => setSpecialtySearch(e.target.value)}
+                  className="pl-10 h-12 bg-white text-slate-900 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 rounded-xl shadow-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-1 pb-4">
+                {filteredSpecialties.map(spec => {
+                  const meta = SPECIALTY_META[spec] || SPECIALTY_META['Other'];
+                  const isSelected = selectedSpecialty === spec;
+                  return (
+                    <button
+                      key={spec}
+                      type="button"
+                      onClick={() => {
+                        formStep1.setValue('specialty', spec, { shouldDirty: true, shouldValidate: true });
+                        setSpecialtySelected(spec);
+                      }}
+                      className={`relative text-left p-5 rounded-2xl border transition-all cursor-pointer ${
+                        isSelected 
+                          ? 'border-blue-500 bg-blue-50/40 shadow-sm ring-2 ring-blue-500/10' 
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-3xl shrink-0">{meta.emoji}</span>
+                        {isSelected && (
+                          <span className="absolute top-4 right-4 h-5 w-5 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">✓</span>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-sm leading-tight mb-1">{spec}</h4>
+                      <p className="text-xs text-slate-500 font-medium leading-snug">{meta.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedSpecialty === 'Other' && (
+                <div className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Label className="font-bold text-slate-700 text-sm">Specify Custom Medical Specialty <span className="text-red-500">*</span></Label>
+                  <Input 
+                    placeholder="e.g. Pediatric Dentist, Cosmetic Dermatologist" 
+                    value={formStep1.watch('otherSpecialty') || ''}
+                    onChange={(e) => {
+                      formStep1.setValue('otherSpecialty', e.target.value, { shouldDirty: true, shouldValidate: true });
+                    }}
+                    className="h-12 bg-white text-slate-900 border-slate-200 mt-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500 rounded-xl shadow-none"
+                  />
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="px-6 py-5 bg-muted/10 border-t flex justify-between">
+              <Button variant="ghost" onClick={() => setStep(1)} disabled={isPending}>
+                Back
+              </Button>
+              <Button 
+                onClick={async () => {
+                  const isValid = await formStep1.trigger(['specialty', 'otherSpecialty']);
+                  if (isValid) {
+                    onSubmitStep1(formStep1.getValues());
+                  } else {
+                    toast.error('Please select a specialty or specify your custom one.');
+                  }
+                }} 
+                disabled={isPending || !selectedSpecialty} 
+                size="lg"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  'Continue to Pricing'
+                )}
+              </Button>
+            </CardFooter>
+          </>
+        )}
+
+        {step === 3 && (
           <>
             <CardHeader className="border-b bg-muted/20 px-6 py-5">
               <CardTitle>Set up your service pricing</CardTitle>
@@ -570,7 +663,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                               updated[index].name = e.target.value;
                               setPriceItems(updated);
                             }}
-                            className="h-9 text-slate-900 border-slate-200"
+                            className="h-9 text-slate-900 border-slate-200 shadow-none"
                           />
                         </td>
                         <td className="px-6 py-3">
@@ -603,7 +696,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                               updated[index].price = Number(e.target.value);
                               setPriceItems(updated);
                             }}
-                            className="h-9 text-slate-900 border-slate-200"
+                            className="h-9 text-slate-900 border-slate-200 shadow-none"
                           />
                         </td>
                         <td className="px-6 py-3 text-right">
@@ -649,16 +742,23 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                 Skip for now
               </button>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setStep(1)} disabled={isPending}>Back</Button>
+                <Button variant="ghost" onClick={() => setStep(2)} disabled={isPending}>Back</Button>
                 <Button onClick={onSubmitStep2} size="lg" disabled={isPending}>
-                  {isPending ? 'Saving...' : 'Save & Continue'}
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save & Continue'
+                  )}
                 </Button>
               </div>
             </CardFooter>
           </>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <>
             <CardHeader className="border-b bg-muted/20 px-6 py-5">
               <CardTitle>Configure your lab tests</CardTitle>
@@ -688,7 +788,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                               updated[index].name = e.target.value;
                               setLabItems(updated);
                             }}
-                            className="h-9 text-slate-900 border-slate-200"
+                            className="h-9 text-slate-900 border-slate-200 shadow-none"
                           />
                         </td>
                         <td className="px-6 py-3">
@@ -700,7 +800,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                               updated[index].category = e.target.value;
                               setLabItems(updated);
                             }}
-                            className="h-9 text-slate-900 border-slate-200"
+                            className="h-9 text-slate-900 border-slate-200 shadow-none"
                           />
                         </td>
                         <td className="px-6 py-3">
@@ -733,7 +833,7 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                               updated[index].price = Number(e.target.value);
                               setLabItems(updated);
                             }}
-                            className="h-9 text-slate-900 border-slate-200"
+                            className="h-9 text-slate-900 border-slate-200 shadow-none"
                           />
                         </td>
                         <td className="px-6 py-3 text-right">
@@ -780,16 +880,23 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
                 Skip — I don&apos;t run a lab
               </Button>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => setStep(2)} disabled={isPending}>Back</Button>
+                <Button variant="ghost" onClick={() => setStep(3)} disabled={isPending}>Back</Button>
                 <Button onClick={onSubmitStep3} size="lg" disabled={isPending}>
-                  {isPending ? 'Save & Continue' : 'Save & Continue'}
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save & Continue'
+                  )}
                 </Button>
               </div>
             </CardFooter>
           </>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <div className="p-8 text-center flex flex-col items-center">
             {/* Celebrate animation */}
             <div className="bg-gradient-to-br from-[#0285F4] to-[#04E19E] p-8 rounded-full shadow-2xl mb-8 animate-[pulse_2s_ease-in-out_infinite] text-white">
@@ -828,19 +935,34 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
 
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mb-8">
-              <Button variant="outline" onClick={onFinishOnboarding} className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group">
+              <Button 
+                variant="outline" 
+                onClick={onFinishOnboarding} 
+                disabled={isPending}
+                className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group"
+              >
                 <div className="h-8 w-8 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
                   <User className="h-4 w-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700 flex items-center gap-1">Add first patient <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" /></span>
               </Button>
-              <Button variant="outline" onClick={onFinishOnboarding} className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group">
+              <Button 
+                variant="outline" 
+                onClick={onFinishOnboarding} 
+                disabled={isPending}
+                className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group"
+              >
                 <div className="h-8 w-8 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
                   <BookOpen className="h-4 w-4" />
                 </div>
                 <span className="text-xs font-bold text-slate-700 flex items-center gap-1">Book appointment <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" /></span>
               </Button>
-              <Button variant="outline" onClick={onFinishOnboarding} className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group">
+              <Button 
+                variant="outline" 
+                onClick={onFinishOnboarding} 
+                disabled={isPending}
+                className="h-24 bg-white hover:bg-slate-50 border border-slate-200 rounded-3xl flex flex-col justify-center gap-1 hover:shadow-md transition-all group"
+              >
                 <div className="h-8 w-8 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
                   <LayoutDashboard className="h-4 w-4" />
                 </div>
@@ -848,8 +970,15 @@ export function OnboardingWizard({ userId, initialData }: WizardProps) {
               </Button>
             </div>
 
-            <Button onClick={onFinishOnboarding} size="lg" className="w-full h-14 text-base font-bold shadow-lg shadow-blue-500/20 rounded-2xl cursor-pointer">
-              Go to Dashboard
+            <Button onClick={onFinishOnboarding} size="lg" disabled={isPending} className="w-full h-14 text-base font-bold shadow-lg shadow-blue-500/20 rounded-2xl cursor-pointer flex items-center justify-center">
+              {isPending ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Finalizing Workspace...
+                </>
+              ) : (
+                'Go to Dashboard'
+              )}
             </Button>
           </div>
         )}
