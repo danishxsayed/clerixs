@@ -70,7 +70,7 @@ export function StaffInviteForm({ onSuccess }: { onSuccess?: () => void }) {
       }
 
       if (result.token) {
-        setInviteLink(`${window.location.origin}/invite?token=${result.token}`);
+        setInviteLink(`${window.location.origin}/auth/invite?token=${result.token}`);
       }
       form.reset();
       router.refresh();

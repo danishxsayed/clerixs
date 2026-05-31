@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import { headers } from 'next/headers';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -114,8 +115,13 @@ export async function inviteStaff(data: z.infer<typeof inviteSchema>) {
     // 6. Send Invitation Email using Resend
     const inviterName = profile?.full_name || 'A clinic administrator';
     const clinicName = org?.name || 'their clinic';
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const inviteUrl = `${siteUrl}/invite?token=${token}`;
+    
+    // Resolve siteUrl dynamically from request headers
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+    const siteUrl = `${protocol}://${host}`;
+    const inviteUrl = `${siteUrl}/auth/invite?token=${token}`;
 
     const { error: emailError } = await resend.emails.send({
       from: 'Clerixs <noreply@clerixs.com>',
