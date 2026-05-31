@@ -57,8 +57,8 @@ export async function signup(formData: FormData) {
               full_name: fullName
           },
           emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') 
-            ? 'http://localhost:3000' 
-            : 'https://clerixs.vercel.app'
+            ? 'http://localhost:3000/auth/login' 
+            : 'https://clerixs.vercel.app/auth/login'
       }
     })
     authError = error;
@@ -72,7 +72,7 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  return redirect(`/auth/signup?success=${encodeURIComponent('Registration successful! Please check your inbox and verify your email address.')}`)
 }
 
 export async function signout() {
@@ -153,8 +153,8 @@ export async function acceptInvite(formData: FormData) {
                 is_staff_invite: 'true'
             },
             emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost') 
-              ? 'http://localhost:3000' 
-              : 'https://clerixs.vercel.app'
+              ? 'http://localhost:3000/auth/login' 
+              : 'https://clerixs.vercel.app/auth/login'
         }
       })
       signUpDataResult = signUpData;

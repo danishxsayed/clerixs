@@ -18,9 +18,9 @@ import { SignupForm } from './signup-form';
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ message: string }>;
+  searchParams: Promise<{ message?: string; success?: string }>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const { message, success } = await searchParams;
 
   return (
     <div className="flex min-h-screen w-full bg-white light overflow-hidden">
@@ -85,12 +85,25 @@ export default async function SignupPage({
           </div>
 
           <div className="space-y-6">
-            <SignupForm />
+            {success ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-xl bg-emerald-50 p-6 text-sm text-emerald-800 text-center border border-emerald-200 font-bold space-y-2"
+              >
+                <p>Registration successful! Please check your inbox and verify your email address before logging in.</p>
+                <p className="text-xs text-emerald-600 font-normal">If you don&apos;t see the email, please check your spam/junk folder.</p>
+              </motion.div>
+            ) : (
+              <>
+                <SignupForm />
 
-            {resolvedSearchParams?.message && (
-              <div className="text-sm text-red-600 text-center font-bold bg-red-50 p-4 rounded-xl border border-red-100 mt-4">
-                {resolvedSearchParams.message}
-              </div>
+                {message && (
+                  <div className="text-sm text-red-600 text-center font-bold bg-red-50 p-4 rounded-xl border border-red-100 mt-4">
+                    {message}
+                  </div>
+                )}
+              </>
             )}
 
             <div className="text-center text-sm text-slate-600 pt-4">
