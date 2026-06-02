@@ -40,29 +40,32 @@ export default async function InvoiceViewPage({
       {/* Inject custom print isolation styling */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body {
+          /* Force page and all wrapping layout containers to print cleanly */
+          html, body, div[class*="h-screen"], div[class*="flex-1"], main {
+            height: auto !important;
+            overflow: visible !important;
+            min-height: 0 !important;
             background: white !important;
-            color: black !important;
+            padding: 0 !important;
+            margin: 0 !important;
           }
-          /* Hide everything in the document by default */
-          body * {
-            visibility: hidden;
+          
+          /* Hide parent layout sidebars, topbars, or other controls in print */
+          aside, header, nav, .print\\:hidden, [class*="print:hidden"] {
+            display: none !important;
           }
-          /* Show only the invoice document and its children */
-          #invoice-document, #invoice-document * {
-            visibility: visible;
-          }
-          /* Align container at the absolute top-left without borders or shadows */
+          
+          /* Position the invoice document at the top for clean A4 printing */
           #invoice-document {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 0;
             border: none !important;
             box-shadow: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+            overflow: visible !important;
           }
+          
           /* Fix browser print engine scaling bug for letterhead image */
           .print-letterhead {
             width: 100% !important;
