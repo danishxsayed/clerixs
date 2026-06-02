@@ -37,6 +37,42 @@ export default async function InvoiceViewPage({
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto w-full pb-20">
       
+      {/* Inject custom print isolation styling */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          /* Hide everything in the document by default */
+          body * {
+            visibility: hidden;
+          }
+          /* Show only the invoice document and its children */
+          #invoice-document, #invoice-document * {
+            visibility: visible;
+          }
+          /* Align container at the absolute top-left without borders or shadows */
+          #invoice-document {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border: none !important;
+            box-shadow: none !important;
+          }
+          /* Fix browser print engine scaling bug for letterhead image */
+          .print-letterhead {
+            width: 100% !important;
+            height: auto !important;
+            max-height: none !important;
+            display: block !important;
+          }
+        }
+      ` }} />
+      
       {/* Action Controls */}
       <div className="flex items-center justify-between mb-4 print:hidden">
         <Link href="/billing" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground">
