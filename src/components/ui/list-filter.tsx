@@ -24,12 +24,13 @@ interface ListFilterProps {
   groups: FilterGroup[];
   onClear?: () => void;
   showDatePicker?: boolean;
+  defaultValues?: Record<string, string>;
 }
 
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { FeatureLock } from '@/components/subscription/FeatureLock';
 
-export function ListFilter({ groups, onClear, showDatePicker }: ListFilterProps) {
+export function ListFilter({ groups, onClear, showDatePicker, defaultValues }: ListFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = React.useState(false);
@@ -37,7 +38,7 @@ export function ListFilter({ groups, onClear, showDatePicker }: ListFilterProps)
 
   // Parse current active filters
   const activeFilters = groups.reduce((acc, group) => {
-    acc[group.id] = searchParams.get(group.id) || '';
+    acc[group.id] = searchParams.get(group.id) || defaultValues?.[group.id] || '';
     return acc;
   }, {} as Record<string, string>);
 

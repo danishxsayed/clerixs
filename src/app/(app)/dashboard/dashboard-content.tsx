@@ -41,6 +41,7 @@ interface DashboardContentProps {
   orgId?: string;
   date?: string;
   isLoading?: boolean;
+  activeFilter?: string;
   children?: React.ReactNode;
 }
 
@@ -61,6 +62,7 @@ export function DashboardContent({
   orgId = '',
   date = '',
   isLoading = false,
+  activeFilter = 'month',
   children
 }: DashboardContentProps) {
   
@@ -121,7 +123,7 @@ export function DashboardContent({
         </div>
         <div className="flex items-center gap-2">
            <React.Suspense fallback={<div className="h-10 w-24 bg-muted animate-pulse rounded-md" />}>
-             <ListFilter groups={filterGroups} showDatePicker />
+             <ListFilter groups={filterGroups} defaultValues={{ filter: activeFilter }} showDatePicker />
            </React.Suspense>
         </div>
       </div>

@@ -154,7 +154,11 @@ export default async function DashboardPage({
       .eq('organization_id', orgId)
       .eq('is_active', true);
     if (selectedBranchId && selectedBranchId !== 'all') patientsQuery = patientsQuery.eq('branch_id', selectedBranchId);
-    if (startDate) patientsQuery = patientsQuery.gte('created_at', startDate.toISOString());
+    if (date) {
+      patientsQuery = patientsQuery.gte('created_at', `${date}T00:00:00.000Z`).lte('created_at', `${date}T23:59:59.999Z`);
+    } else if (startDate) {
+      patientsQuery = patientsQuery.gte('created_at', startDate.toISOString());
+    }
     const { count: patientsCount } = await patientsQuery;
     totalPatients = patientsCount || 0;
 
@@ -165,7 +169,11 @@ export default async function DashboardPage({
       .eq('organization_id', orgId)
       .eq('status', 'completed');
     if (selectedBranchId && selectedBranchId !== 'all') treatmentsQuery = treatmentsQuery.eq('branch_id', selectedBranchId);
-    if (startDate) treatmentsQuery = treatmentsQuery.gte('created_at', startDate.toISOString());
+    if (date) {
+      treatmentsQuery = treatmentsQuery.gte('created_at', `${date}T00:00:00.000Z`).lte('created_at', `${date}T23:59:59.999Z`);
+    } else if (startDate) {
+      treatmentsQuery = treatmentsQuery.gte('created_at', startDate.toISOString());
+    }
     const { count: treatmentsCount } = await treatmentsQuery;
     completedTreatments = treatmentsCount || 0;
 
@@ -175,7 +183,11 @@ export default async function DashboardPage({
       .select('amount')
       .eq('organization_id', orgId);
     if (selectedBranchId && selectedBranchId !== 'all') cashflowQuery = cashflowQuery.eq('branch_id', selectedBranchId);
-    if (startDate) cashflowQuery = cashflowQuery.gte('payment_date', startDate.toISOString().split('T')[0]);
+    if (date) {
+      cashflowQuery = cashflowQuery.eq('payment_date', date);
+    } else if (startDate) {
+      cashflowQuery = cashflowQuery.gte('payment_date', startDate.toISOString().split('T')[0]);
+    }
     const { data: cashflowPayments } = await cashflowQuery;
     cashflow = cashflowPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
 
@@ -301,6 +313,7 @@ export default async function DashboardPage({
       orgId={orgId}
       date={date}
       isLoading={!orgId}
+      activeFilter={filter}
     >
       {orgId && (
         <div className="mt-6 col-span-full">
