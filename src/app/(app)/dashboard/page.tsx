@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Dashboard',
 };
@@ -147,7 +149,12 @@ export default async function DashboardPage({
       startDate = new Date(now.getFullYear(), 0, 1);
     }
 
-    // 1. Fetch patients count
+    const targetDate = date ? new Date(date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+
+    // 1. Fetch patients count query setup
     let patientsQuery = supabase
       .from('patients')
       .select('*', { count: 'exact', head: true })
@@ -159,10 +166,8 @@ export default async function DashboardPage({
     } else if (startDate) {
       patientsQuery = patientsQuery.gte('created_at', startDate.toISOString());
     }
-    const { count: patientsCount } = await patientsQuery;
-    totalPatients = patientsCount || 0;
 
-    // 2. Fetch completed treatments count
+    // 2. Fetch completed treatments count query setup
     let treatmentsQuery = supabase
       .from('treatments')
       .select('*', { count: 'exact', head: true })
@@ -174,10 +179,8 @@ export default async function DashboardPage({
     } else if (startDate) {
       treatmentsQuery = treatmentsQuery.gte('created_at', startDate.toISOString());
     }
-    const { count: treatmentsCount } = await treatmentsQuery;
-    completedTreatments = treatmentsCount || 0;
 
-    // 3. Cashflow metric
+    // 3. Cashflow metric query setup
     let cashflowQuery = supabase
       .from('payments')
       .select('amount')
@@ -188,27 +191,96 @@ export default async function DashboardPage({
     } else if (startDate) {
       cashflowQuery = cashflowQuery.gte('payment_date', startDate.toISOString().split('T')[0]);
     }
-    const { data: cashflowPayments } = await cashflowQuery;
-    cashflow = cashflowPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
 
-    // 4. Chart payments data (Last 6 months)
-    const monthlyRevenueMap: Record<string, number> = {};
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-        monthlyRevenueMap[monthName] = 0;
-    }
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+    // 4. Chart payments query setup
     let chartPaymentsQuery = supabase
       .from('payments')
       .select('amount, payment_date')
       .eq('organization_id', orgId)
       .gte('payment_date', sixMonthsAgo.split('T')[0]);
     if (selectedBranchId && selectedBranchId !== 'all') chartPaymentsQuery = chartPaymentsQuery.eq('branch_id', selectedBranchId);
-    const { data: chartPayments } = await chartPaymentsQuery;
 
-    if (chartPayments) {
-      chartPayments.forEach((payment) => {
+    // 5. Fetch appointments count and list query setup
+    let realTodaysAppointmentsQuery = supabase
+      .from('appointments')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('appointment_date', targetDate);
+    if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsQuery = realTodaysAppointmentsQuery.eq('branch_id', selectedBranchId);
+
+    let realTodaysAppointmentsListQuery = supabase
+      .from('appointments')
+      .select('id, start_time, chief_complaint, status, patients(full_name)')
+      .eq('organization_id', orgId)
+      .eq('appointment_date', targetDate)
+      .order('start_time', { ascending: true })
+      .limit(5);
+    if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsListQuery = realTodaysAppointmentsListQuery.eq('branch_id', selectedBranchId);
+
+    // 6. Fetch Active Treatments Metrics query setup
+    const activeCountQuery = supabase
+      .from('treatments')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'in_progress');
+
+    const dueCountQuery = supabase
+      .from('treatment_sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'scheduled')
+      .eq('session_date', todayStr);
+
+    const idleCountQuery = supabase
+      .from('treatments')
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', orgId)
+      .eq('status', 'in_progress')
+      .lt('updated_at', sevenDaysAgo);
+
+    // Execute all queries concurrently to dramatically improve performance
+    const [
+      patientsRes,
+      treatmentsRes,
+      cashflowRes,
+      chartPaymentsRes,
+      appointmentsCountRes,
+      appointmentsListRes,
+      activeCountRes,
+      dueCountRes,
+      idleCountRes
+    ] = await Promise.all([
+      patientsQuery,
+      treatmentsQuery,
+      cashflowQuery,
+      chartPaymentsQuery,
+      realTodaysAppointmentsQuery,
+      realTodaysAppointmentsListQuery,
+      activeCountQuery,
+      dueCountQuery,
+      idleCountQuery
+    ]);
+
+    // Assign query results
+    totalPatients = patientsRes.count || 0;
+    completedTreatments = treatmentsRes.count || 0;
+    cashflow = cashflowRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+    realTodaysAppointments = appointmentsCountRes.count || 0;
+    realTodaysAppointmentsList = appointmentsListRes.data || [];
+    inProgressCount = activeCountRes.count || 0;
+    dueTodayCount = dueCountRes.count || 0;
+    needsAttentionCount = idleCountRes.count || 0;
+
+    // Process monthly revenue map
+    const monthlyRevenueMap: Record<string, number> = {};
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+        monthlyRevenueMap[monthName] = 0;
+    }
+
+    if (chartPaymentsRes.data) {
+      chartPaymentsRes.data.forEach((payment) => {
           if (payment.payment_date) {
                const d = new Date(payment.payment_date);
                const monthName = d.toLocaleDateString('en-US', { month: 'short' });
@@ -222,60 +294,6 @@ export default async function DashboardPage({
         month,
         revenue: monthlyRevenueMap[month]
     }));
-
-    // 5. Fetch appointments count and list
-    const targetDate = date ? new Date(date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-    let realTodaysAppointmentsQuery = supabase
-      .from('appointments')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('appointment_date', targetDate);
-    if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsQuery = realTodaysAppointmentsQuery.eq('branch_id', selectedBranchId);
-    const { count: realTodaysAppointmentsCount } = await realTodaysAppointmentsQuery;
-    realTodaysAppointments = realTodaysAppointmentsCount || 0;
-
-    let realTodaysAppointmentsListQuery = supabase
-      .from('appointments')
-      .select('id, start_time, chief_complaint, status, patients(full_name)')
-      .eq('organization_id', orgId)
-      .eq('appointment_date', targetDate)
-      .order('start_time', { ascending: true })
-      .limit(5);
-    if (selectedBranchId && selectedBranchId !== 'all') realTodaysAppointmentsListQuery = realTodaysAppointmentsListQuery.eq('branch_id', selectedBranchId);
-    const { data: realTodaysAppointmentsListData } = await realTodaysAppointmentsListQuery;
-    realTodaysAppointmentsList = realTodaysAppointmentsListData || [];
-
-    // ==========================================
-    // Fetch Active Treatments Metrics
-    // ==========================================
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    // A. Treatments in progress count
-    const { count: activeCount } = await supabase
-      .from('treatments')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('status', 'in_progress');
-    inProgressCount = activeCount || 0;
-
-    // B. Sessions due today count
-    const { count: dueCount } = await supabase
-      .from('treatment_sessions')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('status', 'scheduled')
-      .eq('session_date', todayStr);
-    dueTodayCount = dueCount || 0;
-
-    // C. Needs attention count (No updates in 7+ days)
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { count: idleCount } = await supabase
-      .from('treatments')
-      .select('id', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .eq('status', 'in_progress')
-      .lt('updated_at', sevenDaysAgo);
-    needsAttentionCount = idleCount || 0;
 
   } catch (error) {
     console.error('Error fetching dashboard data, applying safe defaults:', error);
