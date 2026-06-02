@@ -19,7 +19,7 @@ export default async function InvoiceViewPage({
     .select(`
       *,
       patients ( full_name, phone, address, email ),
-      organizations ( name, slug, currency, letterhead_url ),
+      organizations ( name, slug, currency, letterhead_url, signature_url ),
       branches ( name, address_line1, address_line2, city, state, pincode, phone, email, gstin ),
       invoice_items ( * ),
       payments ( * )
@@ -217,6 +217,29 @@ export default async function InvoiceViewPage({
               <p className="text-sm text-zinc-600 whitespace-pre-wrap">{invoice.notes}</p>
             </div>
           )}
+
+          {/* Footer / Signature block */}
+          <div className="mt-16 pt-8 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-8">
+            <div className="text-xs text-zinc-400">
+              <p>This is a computer-generated document and does not require a physical stamp inside Clerixs networks.</p>
+              <p className="mt-1">Generated: {new Date().toLocaleString()}</p>
+            </div>
+            
+            <div className="text-center flex flex-col items-center self-end sm:self-auto">
+              <div className="border-b border-zinc-300 w-48 mb-2 pb-2 h-16 flex items-end justify-center relative">
+                {invoice.organizations?.signature_url ? (
+                  <img 
+                    src={invoice.organizations.signature_url} 
+                    alt="Authorized Signature" 
+                    className="absolute bottom-0 max-h-14 max-w-[180px] object-contain mix-blend-multiply" 
+                  />
+                ) : (
+                  <span className="text-zinc-300 text-xs italic pb-1">Not Electronically Signed</span>
+                )}
+              </div>
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Authorized Signature</p>
+            </div>
+          </div>
 
         </div>
       </div>
