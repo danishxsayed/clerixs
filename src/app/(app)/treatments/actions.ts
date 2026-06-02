@@ -456,12 +456,13 @@ export async function generateTreatmentInvoice(treatmentId: string) {
 
   // Determine items to insert into the invoice
   let invoiceItems: { description: string; quantity: number; unit_price: number }[] = [];
+  const treatmentCost = Number(treatment.final_cost) || Number(treatment.estimated_cost) || 0;
 
   if (treatment.treatment_type === 'single') {
     invoiceItems.push({
       description: `Treatment Procedure: ${treatment.title}`,
       quantity: 1,
-      unit_price: Number(treatment.estimated_cost) || 0,
+      unit_price: treatmentCost,
     });
   } else {
     // Multi session -> invoice completed but uninvoiced sessions or all completed sessions
@@ -475,11 +476,11 @@ export async function generateTreatmentInvoice(treatmentId: string) {
         });
       });
     } else {
-      // Fallback to estimated cost item if no sessions are logged yet
+      // Fallback to estimated/final cost item if no sessions are logged yet
       invoiceItems.push({
         description: `Treatment Procedure Estimate: ${treatment.title}`,
         quantity: 1,
-        unit_price: Number(treatment.estimated_cost) || 0,
+        unit_price: treatmentCost,
       });
     }
   }

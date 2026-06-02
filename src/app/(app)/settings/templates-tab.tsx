@@ -200,7 +200,7 @@ export function TemplatesTab() {
                 <TableRow key={template.id} className="hover:bg-slate-50/50 transition-colors">
                   <TableCell>
                     <div className="flex flex-col space-y-1">
-                      <span className="font-bold text-slate-900">{template.name}</span>
+                      <span className="font-bold text-slate-900 dark:text-zinc-100">{template.name}</span>
                       {template.diagnosis && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
                           <Stethoscope className="h-3.5 w-3.5" />
@@ -211,7 +211,7 @@ export function TemplatesTab() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                       <span className="text-sm font-medium text-slate-700">
+                       <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                          {Array.isArray(template.medicines) ? template.medicines.length : 0} Meds
                        </span>
                        <div className="flex -space-x-1">
@@ -229,7 +229,7 @@ export function TemplatesTab() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         {template.created_by?.profiles?.full_name || 'System'}
                       </span>
                       <span className="text-[10px] text-muted-foreground uppercase font-semibold">
@@ -240,7 +240,7 @@ export function TemplatesTab() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
-                        <MoreVertical className="h-4 w-4 text-slate-700" />
+                        <MoreVertical className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => startEdit(template)} className="cursor-pointer">

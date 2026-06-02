@@ -23,6 +23,7 @@ const invoiceItemSchema = z.object({
 
 const invoiceSchema = z.object({
   patient_id: z.string().min(1, 'Patient selection is required.'),
+  treatment_id: z.string().optional().nullable(),
   appointment_id: z.string().optional().nullable(),
   issue_date: z.string().min(1, 'Issue date is required.'),
   due_date: z.string().optional(),
@@ -151,6 +152,7 @@ export function InvoiceEditForm({
     resolver: zodResolver(invoiceSchema) as any,
     defaultValues: {
       patient_id: invoice.patient_id || '',
+      treatment_id: invoice.treatment_id || '',
       appointment_id: invoice.appointment_id || '',
       issue_date: invoice.issue_date ? new Date(invoice.issue_date).toISOString().slice(0, 10) : '',
       due_date: invoice.due_date ? new Date(invoice.due_date).toISOString().slice(0, 10) : '',
@@ -230,6 +232,8 @@ export function InvoiceEditForm({
       <div className={`p-6 space-y-6 ${isReadOnly ? 'pt-16' : ''}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-2 lg:col-span-2">
+            <input type="hidden" {...register('appointment_id')} />
+            <input type="hidden" {...register('treatment_id')} />
             <Label htmlFor="patient_id">Bill To (Patient) <span className="text-destructive">*</span></Label>
             <select 
               id="patient_id" 
@@ -383,7 +387,7 @@ export function InvoiceEditForm({
               <span>CGST (2.5%):</span>
               <span>{formatCurrency(totals.cgst)}</span>
             </div>
-            <div className="border-t pt-2 mt-2 flex justify-between items-center font-bold text-base text-zinc-900">
+            <div className="border-t pt-2 mt-2 flex justify-between items-center font-bold text-base text-zinc-900 dark:text-zinc-100">
               <span>Total:</span>
               <span>{formatCurrency(totals.total)}</span>
             </div>

@@ -262,15 +262,15 @@ export function DashboardContent({
           <CardContent>
             <div className="space-y-4">
               {mockRecentActivity.map((activity, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                <div key={i} className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                   <div className="flex gap-4 items-start">
                     <div className="h-2 w-2 rounded-full bg-blue-500 mt-2 shrink-0" />
                     <div>
-                      <p className="text-sm font-bold text-slate-900">{activity.action}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100">{activity.action}</p>
                       <p className="text-xs text-muted-foreground">{activity.description}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md shrink-0">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md shrink-0">
                     {activity.time}
                   </span>
                 </div>
