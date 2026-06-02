@@ -79,10 +79,10 @@ export function PatientQueueCard({
   };
 
   const statusStyles = {
-    waiting: 'border-l-4 border-l-slate-300 bg-white hover:border-l-slate-400',
-    in_consultation: 'border-blue-500 bg-blue-50 shadow-[0_0_15px_rgba(59,130,246,0.2)] dark:bg-blue-900/10',
-    completed: 'opacity-60 bg-slate-50 border-slate-200 grayscale-[0.5]',
-    skipped: 'border-l-4 border-l-orange-400 bg-orange-50/30'
+    waiting: 'border-l-4 border-l-slate-300 bg-white dark:bg-zinc-900 hover:border-l-slate-400',
+    in_consultation: 'border-blue-500 bg-blue-50 dark:bg-blue-950/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]',
+    completed: 'opacity-60 bg-slate-50 dark:bg-zinc-900/40 border-slate-200 dark:border-zinc-800 grayscale-[0.5]',
+    skipped: 'border-l-4 border-l-orange-400 bg-orange-50/30 dark:bg-orange-950/10'
   };
 
   const isCompleted = entry.status === 'completed';
@@ -111,7 +111,7 @@ export function PatientQueueCard({
               {entry.patient_name || entry.patients?.full_name}
             </p>
             {entry.is_walkin && (
-              <Badge variant="secondary" className="text-[8px] sm:text-[10px] py-0 px-1 h-3 sm:h-4 bg-orange-100 text-orange-700 border-orange-200 uppercase font-bold tracking-tighter shrink-0">
+              <Badge variant="secondary" className="text-[8px] sm:text-[10px] py-0 px-1 h-3 sm:h-4 bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-900/50 uppercase font-bold tracking-tighter shrink-0">
                 Walk-in
               </Badge>
             )}
@@ -150,7 +150,7 @@ export function PatientQueueCard({
                    <Button 
                      size="icon" 
                      variant="ghost" 
-                     className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-slate-400 hover:text-slate-600"
+                     className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                      onClick={() => handleReorder('up')}
                    >
                      <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -158,7 +158,7 @@ export function PatientQueueCard({
                    <Button 
                      size="icon" 
                      variant="ghost" 
-                     className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-slate-400 hover:text-slate-600"
+                     className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300"
                      onClick={() => handleReorder('down')}
                    >
                      <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -168,7 +168,7 @@ export function PatientQueueCard({
                
                <DropdownMenu>
                  <DropdownMenuTrigger render={
-                    <Button size="icon" variant="ghost" className="h-5 w-5 sm:h-7 sm:w-7 rounded-full">
+                    <Button size="icon" variant="ghost" className="h-5 w-5 sm:h-7 sm:w-7 rounded-full text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300">
                       <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                  } />

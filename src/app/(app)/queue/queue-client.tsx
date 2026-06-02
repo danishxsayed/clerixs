@@ -129,11 +129,11 @@ export function QueueClient({
   }, [organizationId]);
 
   const doctorColors = [
-    'border-t-blue-500 bg-blue-50/30',
-    'border-t-emerald-500 bg-emerald-50/30',
-    'border-t-purple-500 bg-purple-50/30',
-    'border-t-orange-500 bg-orange-50/30',
-    'border-t-pink-500 bg-pink-50/30',
+    'border-t-blue-500 bg-blue-50/30 dark:bg-blue-950/10',
+    'border-t-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/10',
+    'border-t-purple-500 bg-purple-50/30 dark:bg-purple-950/10',
+    'border-t-orange-500 bg-orange-50/30 dark:bg-orange-950/10',
+    'border-t-pink-500 bg-pink-50/30 dark:bg-pink-950/10',
   ];
 
   return (
@@ -166,7 +166,7 @@ export function QueueClient({
                 "border-t-4 shadow-sm h-full flex flex-col min-w-0",
                 doctorColors[index % doctorColors.length]
               )}>
-                <CardHeader className="py-4 px-5 border-b bg-white/50">
+                <CardHeader className="py-4 px-5 border-b bg-white/50 dark:bg-zinc-900/50">
                   <CardTitle className="text-lg flex items-center justify-between min-w-0 gap-2">
                     <span className="truncate flex-1">Dr. {doctor.profiles.full_name}</span>
                     <span className="text-xs bg-muted px-2 py-1 rounded-full font-normal shrink-0">
