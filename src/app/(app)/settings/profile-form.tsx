@@ -157,7 +157,7 @@ export function ProfileForm({ profile }: { profile: any }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Doctor&apos;s Specialty <span className="text-red-500">*</span></FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select specialty" />

@@ -305,9 +305,9 @@ export function PrescriptionForm({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+      <div className="flex items-center justify-between mb-6 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-slate-200">
+          <Badge variant="outline" className="bg-white dark:bg-slate-950 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800">
             Smart Prescribe
           </Badge>
           <p className="text-xs text-muted-foreground font-medium">Use templates to save time</p>
@@ -317,7 +317,7 @@ export function PrescriptionForm({
             type="button" 
             variant="outline" 
             size="sm" 
-            className="h-9 bg-white hover:bg-slate-50 text-slate-700 font-semibold"
+            className="h-9 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 font-semibold"
             onClick={() => setOpenLoadTemplate(true)}
           >
             <FileText className="h-4 w-4 mr-2 text-primary" />
@@ -327,7 +327,7 @@ export function PrescriptionForm({
             type="button" 
             variant="outline" 
             size="sm" 
-            className="h-9 bg-white hover:bg-slate-50 text-slate-700 font-semibold"
+            className="h-9 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 font-semibold"
             onClick={() => {
               const values = form.getValues();
               if (!values.diagnosis && (!values.medicines || values.medicines.length === 0)) {
@@ -372,14 +372,14 @@ export function PrescriptionForm({
               control={form.control}
               name="diagnosis"
               render={({ field, fieldState }) => (
-                <FormItem className="bg-white p-5 rounded-xl border shadow-sm" id="diagnosis-field">
+                <FormItem className="bg-white dark:bg-slate-950/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm" id="diagnosis-field">
                   <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Clinical Diagnosis</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="e.g. Acute Pharyngitis" 
                       className={cn(
-                        "mt-2 text-md h-12",
-                        fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200"
+                        "mt-2 text-md h-12 bg-transparent text-slate-900 dark:text-slate-100",
+                        fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200 dark:border-slate-800"
                       )} 
                       {...field} 
                     />
@@ -394,16 +394,16 @@ export function PrescriptionForm({
             />
 
             <div className={cn(
-              "bg-white p-5 rounded-xl border shadow-sm transition-colors duration-200",
-              form.formState.errors.medicines && "border-red-500"
+              "bg-white dark:bg-slate-950/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm transition-colors duration-200",
+              form.formState.errors.medicines ? "border-red-500" : "border-slate-200 dark:border-slate-800/80"
             )} id="medicines-field">
-              <div className="flex items-center justify-between mb-4 border-b pb-4">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Medications Rx</h3>
               </div>
 
               <div className="space-y-4">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="relative group flex flex-col gap-4 p-5 bg-slate-50 border rounded-xl shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-all hover:bg-slate-100/50">
+                  <div key={field.id} className="relative group flex flex-col gap-4 p-5 bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800/60 rounded-xl shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/50">
                     {/* Header line for the row with internal delete button */}
                     <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       {fields.length > 1 && (
@@ -426,7 +426,7 @@ export function PrescriptionForm({
                         name={`medicines.${index}.medicine_name`}
                         render={({ field: _field, fieldState }) => (
                           <FormItem className="md:col-span-2">
-                            <FormLabel className="text-xs font-medium text-slate-500">Drug Name</FormLabel>
+                            <FormLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Drug Name</FormLabel>
                             <AutocompleteField index={index} hasError={!!fieldState.error} />
                             {fieldState.error && (
                               <p className="text-xs font-bold text-red-500 mt-1">
@@ -443,11 +443,11 @@ export function PrescriptionForm({
                         name={`medicines.${index}.dosage`}
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-medium text-slate-500">Dosage</FormLabel>
+                            <FormLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Dosage</FormLabel>
                             <FormControl>
                               <Input 
                                 placeholder="e.g. 500mg" 
-                                className={cn(fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200")} 
+                                className={cn(fieldState.error ? "border-red-500 focus-visible:ring-red-500" : "border-slate-200 dark:border-slate-800")} 
                                 {...field} 
                               />
                             </FormControl>
@@ -466,12 +466,12 @@ export function PrescriptionForm({
                         name={`medicines.${index}.duration_days`}
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel className="text-xs font-medium text-slate-500">Duration (Days)</FormLabel>
+                            <FormLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Duration (Days)</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number" 
                                 min="1" 
-                                className={cn(fieldState.error && "border-destructive focus-visible:ring-destructive")} 
+                                className={cn(fieldState.error ? "border-destructive focus-visible:ring-destructive" : "border-slate-200 dark:border-slate-800")} 
                                 {...field} 
                               />
                             </FormControl>
@@ -488,7 +488,7 @@ export function PrescriptionForm({
                         name={`medicines.${index}.frequency`}
                         render={() => (
                           <FormItem className="md:col-span-2">
-                            <FormLabel className="text-xs font-medium text-slate-500">Frequency Schedule</FormLabel>
+                            <FormLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Frequency Schedule</FormLabel>
                             <FrequencyToggles index={index} />
                             <FormMessage />
                           </FormItem>
@@ -501,9 +501,9 @@ export function PrescriptionForm({
                         name={`medicines.${index}.notes`}
                         render={({ field }) => (
                           <FormItem className="md:col-span-2">
-                            <FormLabel className="text-xs font-medium text-slate-500">Food / Special Instructions</FormLabel>
+                            <FormLabel className="text-xs font-medium text-slate-500 dark:text-slate-400">Food / Special Instructions</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g. After meals" {...field} />
+                              <Input placeholder="e.g. After meals" className="border-slate-200 dark:border-slate-800" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -518,7 +518,7 @@ export function PrescriptionForm({
                  <Button
                     type="button"
                     variant="outline"
-                    className="w-full border-dashed border-2 bg-transparent hover:border-primary hover:bg-primary/5 shadow-sm"
+                    className="w-full border-dashed border-2 border-slate-200 dark:border-slate-800 bg-transparent hover:border-primary hover:bg-primary/5 shadow-sm"
                     onClick={() => append({ medicine_name: '', dosage: '', frequency: '1-0-1', duration_days: 5, notes: '' })}
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Another Medicine
@@ -535,10 +535,10 @@ export function PrescriptionForm({
               control={form.control}
               name="instructions"
               render={({ field }) => (
-                <FormItem className="bg-white p-5 rounded-xl border shadow-sm">
+                <FormItem className="bg-white dark:bg-slate-950/40 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
                     <FormLabel className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">General Advice / Next Steps</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Drink plenty of fluids. Review after 5 days." className="min-h-[100px] resize-none mt-2" {...field} />
+                    <Textarea placeholder="Drink plenty of fluids. Review after 5 days." className="min-h-[100px] resize-none mt-2 border-slate-200 dark:border-slate-800" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

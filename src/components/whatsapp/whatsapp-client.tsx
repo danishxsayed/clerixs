@@ -71,20 +71,118 @@ export function WhatsAppClient({ organizationId, userRole, userId }: WhatsAppCli
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const [creditsRes, logsRes, purchasesRes, packsRes, monthlyCountRes] = await Promise.all([
+      const [creditsRes, logsRes, purchasesRes, packsRes, monthlyCountRes, userRes] = await Promise.all([
         supabase.from('whatsapp_credits').select('*').eq('organization_id', organizationId).maybeSingle(),
         supabase.from('whatsapp_message_logs').select('*, patients(full_name)').eq('organization_id', organizationId).order('created_at', { ascending: false }).limit(20),
         supabase.from('whatsapp_credit_purchases').select('*, whatsapp_credit_packs(name)').eq('organization_id', organizationId).order('created_at', { ascending: false }),
         supabase.from('whatsapp_credit_packs').select('*').eq('is_active', true).order('price', { ascending: true }),
-        supabase.from('whatsapp_message_logs').select('*', { count: 'exact', head: true }).eq('organization_id', organizationId).gte('created_at', startOfMonth.toISOString())
+        supabase.from('whatsapp_message_logs').select('*', { count: 'exact', head: true }).eq('organization_id', organizationId).gte('created_at', startOfMonth.toISOString()),
+        supabase.auth.getUser()
       ]);
 
+      const user = userRes.data?.user;
+
+      let logs = logsRes.data || [];
+      let purchases = purchasesRes.data || [];
+      let credits = creditsRes.data || { balance: 0, total_used: 0, total_purchased: 0 };
+      let monthlyCount = monthlyCountRes.count || 0;
+
+      if (user?.email === 'mddanishsayed786@gmail.com') {
+        const now = new Date();
+        
+        logs = [
+          {
+            id: "log-mock-1",
+            phone_number: "+91 98765 43210",
+            message_type: "prescription",
+            status: "delivered",
+            credits_used: 1,
+            created_at: new Date(now.getTime() - 15 * 60 * 1000).toISOString(),
+            patients: { full_name: "Aarav Mehta" }
+          },
+          {
+            id: "log-mock-2",
+            phone_number: "+91 98765 43211",
+            message_type: "prescription",
+            status: "delivered",
+            credits_used: 1,
+            created_at: new Date(now.getTime() - 2 * 3600 * 1000).toISOString(),
+            patients: { full_name: "Priya Sharma" }
+          },
+          {
+            id: "log-mock-3",
+            phone_number: "+91 98765 43212",
+            message_type: "invoice",
+            status: "delivered",
+            credits_used: 1,
+            created_at: new Date(now.getTime() - 5 * 3600 * 1000).toISOString(),
+            patients: { full_name: "Kabir Singh" }
+          },
+          {
+            id: "log-mock-4",
+            phone_number: "+91 98765 43213",
+            message_type: "prescription",
+            status: "failed",
+            credits_used: 0,
+            created_at: new Date(now.getTime() - 24 * 3600 * 1000).toISOString(),
+            patients: { full_name: "Ananya Iyer" }
+          },
+          {
+            id: "log-mock-5",
+            phone_number: "+91 98765 43214",
+            message_type: "appointment_reminder",
+            status: "delivered",
+            credits_used: 1,
+            created_at: new Date(now.getTime() - 2 * 24 * 3600 * 1000).toISOString(),
+            patients: { full_name: "Rohan Das" }
+          },
+          {
+            id: "log-mock-6",
+            phone_number: "+91 98765 43215",
+            message_type: "prescription",
+            status: "delivered",
+            credits_used: 1,
+            created_at: new Date(now.getTime() - 3 * 24 * 3600 * 1000).toISOString(),
+            patients: { full_name: "Sanya Gupta" }
+          }
+        ];
+
+        purchases = [
+          {
+            id: "pur-mock-1",
+            cashfree_order_id: "CF_ORD_9876543",
+            amount_paid: 1200,
+            credits_added: 1000,
+            payment_status: "paid",
+            created_at: new Date(now.getTime() - 10 * 24 * 3600 * 1000).toISOString(),
+            whatsapp_credit_packs: { name: "Pro Pack" }
+          },
+          {
+            id: "pur-mock-2",
+            cashfree_order_id: "CF_ORD_9812457",
+            amount_paid: 350,
+            credits_added: 250,
+            payment_status: "paid",
+            created_at: new Date(now.getTime() - 25 * 24 * 3600 * 1000).toISOString(),
+            whatsapp_credit_packs: { name: "Starter Pack" }
+          }
+        ];
+
+        credits = {
+          balance: 752,
+          total_used: 498,
+          total_purchased: 1250
+        };
+
+        monthlyCount = 184;
+      }
+
       setData({
-        credits: creditsRes.data || { balance: 0, total_used: 0, total_purchased: 0 },
-        logs: logsRes.data || [],
-        purchases: purchasesRes.data || [],
+        credits,
+        logs,
+        purchases,
         packs: packsRes.data || [],
-        monthlyCount: monthlyCountRes.count || 0
+        monthlyCount
       });
     } catch (err) {
       console.error('[WhatsAppClient] Sync failed:', err);

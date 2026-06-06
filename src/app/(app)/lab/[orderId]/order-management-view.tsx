@@ -47,8 +47,8 @@ const WorkflowStep = ({
         className={cn(
           "h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all",
           isCompleted ? "bg-green-600 border-green-600 text-white" : 
-          isActive ? "bg-white border-blue-600 text-blue-600 shadow-sm" : 
-          "bg-white border-muted text-muted-foreground"
+          isActive ? "bg-background border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 shadow-sm" : 
+          "bg-background border-muted text-muted-foreground"
         )}
       >
         {isCompleted ? <Check className="h-4 w-4 text-white" /> : <div className="h-2 w-2 rounded-full bg-current" />}
@@ -182,7 +182,7 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
   if (order.is_external) {
     return (
       <Card className="max-w-2xl mx-auto mt-12 p-12 text-center space-y-6">
-        <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-blue-600">
+        <div className="h-16 w-16 bg-blue-100 dark:bg-blue-950/40 rounded-full flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400">
            <FileText className="h-8 w-8" />
         </div>
         <h3 className="text-2xl font-bold">External Lab Report</h3>
@@ -267,7 +267,9 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
                  <Button 
                    className={cn(
                      "w-full gap-2",
-                     sampleStatus === 'pending' ? "bg-orange-600 hover:bg-orange-700" : "bg-white text-foreground border shadow-none"
+                     sampleStatus === 'pending' 
+                       ? "bg-orange-600 hover:bg-orange-700 text-white" 
+                       : "bg-background hover:bg-muted text-foreground border shadow-none"
                    )}
                    onClick={handleUpdateSample}
                    disabled={loadingSample}
@@ -307,18 +309,27 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                 className={cn(
                   "p-4 rounded-xl border flex gap-4 items-start shadow-sm",
-                  order.status === 'submitted' ? "bg-blue-50 border-blue-100" : "bg-red-50 border-red-100"
+                  order.status === 'submitted' 
+                    ? "bg-blue-50 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30" 
+                    : "bg-red-50 border-red-100 dark:bg-red-950/20 dark:border-red-900/30"
                 )}
               >
                 <div className="mt-1">
-                  {order.status === 'submitted' ? <Activity className="h-5 w-5 text-blue-600" /> : <AlertTriangle className="h-5 w-5 text-red-600" />}
+                  {order.status === 'submitted' 
+                    ? <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" /> 
+                    : <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />}
                 </div>
                 <div className="space-y-1">
-                  <h5 className={cn("text-sm font-bold", order.status === 'submitted' ? "text-blue-900" : "text-red-900")}>
+                  <h5 className={cn(
+                    "text-sm font-bold", 
+                    order.status === 'submitted' 
+                      ? "text-blue-900 dark:text-blue-400" 
+                      : "text-red-900 dark:text-red-400"
+                  )}>
                     {order.status === 'submitted' ? 'Review Submission' : 'Revision Feedback'}
                   </h5>
                   {order.doctor_comments && (
-                    <p className="text-sm text-slate-700 italic border-l-2 border-red-200 pl-3 py-1">"{order.doctor_comments}"</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 italic border-l-2 border-red-200 dark:border-red-900/50 pl-3 py-1">&quot;{order.doctor_comments}&quot;</p>
                   )}
                 </div>
               </motion.div>
@@ -343,7 +354,7 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
                          return (
                            <div key={param.id} className={cn(
                              "px-6 py-5 flex items-center justify-between gap-6",
-                             isAbnormal ? "bg-red-50/50" : ""
+                             isAbnormal ? "bg-red-50/50 dark:bg-red-950/20" : ""
                            )}>
                              <div className="flex-1">
                                <div className="text-sm font-semibold flex items-center gap-2">
@@ -390,15 +401,15 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
           <AnimatePresence>
             {showReviewActions && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
-                <Card className="border-blue-200 bg-blue-50/20">
+                <Card className="border-blue-200 dark:border-blue-900/30 bg-blue-50/20 dark:bg-blue-950/10">
                   <CardHeader className="py-4">
-                    <CardTitle className="text-sm font-bold flex items-center gap-2 text-blue-800 uppercase tracking-widest">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2 text-blue-800 dark:text-blue-400 uppercase tracking-widest">
                       <CheckCircle className="h-4 w-4" /> Medical Interpretation
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <textarea 
-                      className="w-full h-24 rounded-lg border border-blue-200 p-3 text-sm focus:ring-blue-500 font-outfit" 
+                      className="w-full h-24 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-background text-foreground p-3 text-sm focus:ring-blue-500 font-outfit" 
                       placeholder="Add medical notes or instructions..."
                       value={doctorComments}
                       onChange={(e) => setDoctorComments(e.target.value)}
@@ -406,7 +417,7 @@ export function OrderManagementView({ order, tests, userRole }: { order: any, te
                     <div className="flex gap-4">
                        <Button 
                          variant="outline" 
-                         className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                         className="flex-1 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20"
                          onClick={handleRequestRevision}
                          disabled={isApproving || isRevising}
                        >

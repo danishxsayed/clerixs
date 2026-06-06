@@ -218,7 +218,7 @@ export function PrescriptionList({
                       size="sm" 
                       onClick={() => handleSendWhatsApp(px)}
                       disabled={isSending === px.id}
-                      className="border-green-200 hover:border-green-500 hover:bg-green-50 text-green-700"
+                      className="border-green-200 dark:border-green-900/50 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 text-green-700 dark:text-green-400"
                     >
                       {isSending === px.id ? (
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />

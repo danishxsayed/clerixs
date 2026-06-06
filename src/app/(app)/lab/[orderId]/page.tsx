@@ -84,7 +84,7 @@ export default async function LabOrderDetailPage({ params }: { params: Promise<{
   return (
     <div className="flex-1 space-y-6 max-w-5xl mx-auto w-full pb-12">
       <div className="flex items-center gap-4 border-b pb-6">
-        <Link href="/lab" className="p-2 rounded-md bg-white hover:bg-muted transition-colors border shadow-sm flex items-center justify-center">
+        <Link href="/lab" className="p-2 rounded-md bg-background hover:bg-muted text-foreground transition-colors border shadow-sm flex items-center justify-center">
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>

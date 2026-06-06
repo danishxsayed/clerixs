@@ -114,26 +114,26 @@ export function SaveTemplateModal({
               )}
             />
 
-            <div className="rounded-xl border bg-slate-50 p-4 space-y-3">
-              <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Template Preview</h4>
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4 space-y-3">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Template Preview</h4>
               
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-slate-700">Diagnosis</p>
-                <p className="text-xs text-slate-600 italic">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-350">Diagnosis</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 italic">
                   {prescriptionData.diagnosis || 'No diagnosis provided'}
                 </p>
               </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-slate-200">
-                <p className="text-xs font-semibold text-slate-700">Medicines ({prescriptionData.medicines.length})</p>
+              <div className="space-y-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-350">Medicines ({prescriptionData.medicines.length})</p>
                 <div className="flex flex-wrap gap-1">
                   {prescriptionData.medicines.map((med, i) => (
-                    <span key={i} className="text-[10px] bg-white border px-1.5 py-0.5 rounded-md text-slate-500">
+                    <span key={i} className="text-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded-md text-slate-500 dark:text-slate-400">
                       {med.medicine_name}
                     </span>
                   ))}
                   {prescriptionData.medicines.length === 0 && (
-                    <p className="text-[10px] text-slate-400 italic">No medicines added</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 italic">No medicines added</p>
                   )}
                 </div>
               </div>

@@ -145,23 +145,23 @@ export function TemplatesTab() {
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-slate-500" />
           <Input 
             placeholder="Search templates by name or diagnosis..." 
-            className="pl-9 bg-white"
+            className="pl-9 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-950 transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="bg-white" onClick={fetchTemplates}>
+        <Button variant="outline" className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300" onClick={fetchTemplates}>
           Refresh
         </Button>
       </div>
 
-      <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 overflow-hidden shadow-sm">
         <Table>
-          <TableHeader className="bg-slate-50/50">
-            <TableRow>
+          <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+            <TableRow className="hover:bg-transparent">
               <TableHead className="w-[40%]">Template Name</TableHead>
               <TableHead>Medicines</TableHead>
               <TableHead className="text-center">Usage</TableHead>
@@ -180,14 +180,14 @@ export function TemplatesTab() {
                 </TableCell>
               </TableRow>
             ) : filteredTemplates.length === 0 ? (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={5} className="h-64 text-center">
                   <div className="flex flex-col items-center justify-center space-y-3">
-                    <div className="bg-slate-100 p-4 rounded-full">
-                      <FileText className="h-8 w-8 text-slate-400" />
+                    <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-full">
+                      <FileText className="h-8 w-8 text-slate-400 dark:text-slate-500" />
                     </div>
                     <div className="space-y-1">
-                      <p className="font-medium">No templates found</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100">No templates found</p>
                       <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                         Templates you save during a prescription will appear here for management.
                       </p>
@@ -197,7 +197,7 @@ export function TemplatesTab() {
               </TableRow>
             ) : (
               filteredTemplates.map((template) => (
-                <TableRow key={template.id} className="hover:bg-slate-50/50 transition-colors">
+                <TableRow key={template.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-200 dark:border-slate-800">
                   <TableCell>
                     <div className="flex flex-col space-y-1">
                       <span className="font-bold text-slate-900 dark:text-zinc-100">{template.name}</span>
@@ -216,13 +216,13 @@ export function TemplatesTab() {
                        </span>
                        <div className="flex -space-x-1">
                          {Array.isArray(template.medicines) && template.medicines.slice(0, 2).map((_: any, i: number) => (
-                           <div key={i} className="h-4 w-4 rounded-full border-2 border-white bg-primary/20" />
+                           <div key={i} className="h-4 w-4 rounded-full border-2 border-white dark:border-slate-950 bg-primary/20" />
                          ))}
                        </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 rounded-lg text-amber-700 border border-amber-100/50">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 dark:bg-amber-950/20 rounded-lg text-amber-700 dark:text-amber-400 border border-amber-100/50 dark:border-amber-900/30">
                       <TrendingUp className="h-3.5 w-3.5" />
                       <span className="text-xs font-bold leading-none">{template.usage_count}</span>
                     </div>
@@ -239,7 +239,7 @@ export function TemplatesTab() {
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+                      <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
                         <MoreVertical className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

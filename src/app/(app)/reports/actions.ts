@@ -10,6 +10,39 @@ export async function getBasicReportMetrics(dateFilter: string = 'this-month') {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
+  if (user.email === 'mddanishsayed786@gmail.com') {
+    let multiplier = 1;
+    if (dateFilter === 'this-week') {
+      multiplier = 0.25;
+    } else if (dateFilter === 'last-3-months') {
+      multiplier = 3;
+    } else if (dateFilter === 'last-6-months') {
+      multiplier = 6;
+    } else if (dateFilter.includes('_')) {
+      const [startStr, endStr] = dateFilter.split('_');
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      const diffDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)));
+      multiplier = diffDays / 30;
+    }
+
+    return {
+      success: true,
+      data: {
+        revenue: { current: Math.round(142500 * multiplier), change: 12.5 },
+        patients: { current: Math.round(42 * multiplier), change: 8.4 },
+        appointments: { current: Math.round(168 * multiplier), change: 15.2 },
+        topTreatments: [
+          { name: 'Root Canal Therapy', count: Math.round(48 * multiplier) },
+          { name: 'Dental Implants', count: Math.round(32 * multiplier) },
+          { name: 'Teeth Whitening', count: Math.round(24 * multiplier) },
+          { name: 'Composite Filling', count: Math.round(18 * multiplier) },
+          { name: 'Dental Scaling', count: Math.round(12 * multiplier) }
+        ]
+      }
+    };
+  }
+
   const { data: membership } = await supabase
     .from('organization_memberships')
     .select('organization_id')
@@ -127,6 +160,111 @@ export async function getAdvancedReportMetrics(dateFilter: string = 'last-6-mont
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
+
+  if (user.email === 'mddanishsayed786@gmail.com') {
+    const now = new Date();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    // Revenue Trend: return monthly points based on range duration
+    const monthlyRevenue = [];
+    const pointsCount = dateFilter === 'last-3-months' ? 3 : 6;
+    for (let i = pointsCount - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthName = monthNames[d.getMonth()];
+      const year = d.getFullYear();
+      const baseRevenue = 110000;
+      const step = 12000;
+      const randomOffset = Math.floor(Math.sin((pointsCount - 1 - i) * 1.5) * 8000) + Math.floor(Math.random() * 4000);
+      const revenue = baseRevenue + (pointsCount - 1 - i) * step + randomOffset;
+      monthlyRevenue.push({ month: `${monthName} ${year}`, revenue });
+    }
+
+    let multiplier = 1;
+    if (dateFilter === 'this-week') {
+      multiplier = 0.25;
+    } else if (dateFilter === 'last-3-months') {
+      multiplier = 3;
+    } else if (dateFilter === 'last-6-months') {
+      multiplier = 6;
+    } else if (dateFilter.includes('_')) {
+      const [startStr, endStr] = dateFilter.split('_');
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      const diffDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)));
+      multiplier = diffDays / 30;
+    }
+
+    const outstandingPayments = [
+      {
+        id: "inv-mock-1",
+        invoice_number: "INV-001024",
+        patient_name: "Aarav Mehta",
+        amount_due: 4500,
+        issue_date: new Date(now.getTime() - 15 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() - 2 * 24 * 3600 * 1000).toISOString(),
+        status: "issued",
+        days_overdue: 2
+      },
+      {
+        id: "inv-mock-2",
+        invoice_number: "INV-001029",
+        patient_name: "Priya Sharma",
+        amount_due: 12000,
+        issue_date: new Date(now.getTime() - 10 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() - 5 * 24 * 3600 * 1000).toISOString(),
+        status: "partially_paid",
+        days_overdue: 5
+      },
+      {
+        id: "inv-mock-3",
+        invoice_number: "INV-001035",
+        patient_name: "Kabir Singh",
+        amount_due: 8500,
+        issue_date: new Date(now.getTime() - 3 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() + 4 * 24 * 3600 * 1000).toISOString(),
+        status: "issued",
+        days_overdue: 0
+      }
+    ];
+
+    const patientRetention = [
+      { name: 'New Patients', value: Math.round(35 * multiplier), fill: 'var(--color-new)' },
+      { name: 'Returning Patients', value: Math.round(78 * multiplier), fill: 'var(--color-returning)' }
+    ];
+
+    const appointmentStatus = [
+      { name: 'Completed', value: Math.round(112 * multiplier), fill: 'hsl(var(--chart-2))' },
+      { name: 'Scheduled', value: Math.round(28 * multiplier), fill: 'hsl(var(--chart-1))' },
+      { name: 'Cancelled', value: Math.round(8 * multiplier), fill: 'hsl(var(--destructive))' },
+      { name: 'No Show', value: Math.round(5 * multiplier), fill: 'hsl(var(--muted-foreground))' }
+    ];
+
+    const staffRevenue = [
+      { name: 'Dr. Danish Sayed', revenue: Math.round(185000 * multiplier) },
+      { name: 'Dr. Devendra Sharma', revenue: Math.round(124000 * multiplier) },
+      { name: 'Dr. Ramesh Sharma', revenue: Math.round(62000 * multiplier) }
+    ];
+
+    const topTreatmentsByRevenue = [
+      { name: 'Dental Implants', revenue: Math.round(160000 * multiplier) },
+      { name: 'Root Canal Therapy', revenue: Math.round(110000 * multiplier) },
+      { name: 'Teeth Whitening', revenue: Math.round(55000 * multiplier) },
+      { name: 'Invisalign / Braces', revenue: Math.round(32000 * multiplier) },
+      { name: 'Composite Filling', revenue: Math.round(14000 * multiplier) }
+    ];
+
+    return {
+      success: true,
+      data: {
+        monthlyRevenue,
+        outstandingPayments,
+        patientRetention,
+        appointmentStatus,
+        staffRevenue,
+        topTreatmentsByRevenue
+      }
+    };
+  }
 
   const { data: membership } = await supabase
     .from('organization_memberships')
@@ -348,6 +486,63 @@ export async function getPatientsExportData(dateFilter: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
 
+  if (user.email === 'mddanishsayed786@gmail.com') {
+    const now = new Date();
+    const mockPatients = [
+      {
+        patient_code: "PT-1001",
+        full_name: "Aarav Mehta",
+        phone: "9876543210",
+        email: "aarav.mehta@gmail.com",
+        date_of_birth: "1990-05-15",
+        gender: "Male",
+        blood_group: "O+",
+        created_at: new Date(now.getTime() - 25 * 24 * 3600 * 1000).toISOString()
+      },
+      {
+        patient_code: "PT-1002",
+        full_name: "Priya Sharma",
+        phone: "9876543211",
+        email: "priya.sharma@yahoo.com",
+        date_of_birth: "1988-11-22",
+        gender: "Female",
+        blood_group: "A+",
+        created_at: new Date(now.getTime() - 20 * 24 * 3600 * 1000).toISOString()
+      },
+      {
+        patient_code: "PT-1003",
+        full_name: "Kabir Singh",
+        phone: "9876543212",
+        email: "kabir.singh@outlook.com",
+        date_of_birth: "1995-02-10",
+        gender: "Male",
+        blood_group: "B+",
+        created_at: new Date(now.getTime() - 15 * 24 * 3600 * 1000).toISOString()
+      },
+      {
+        patient_code: "PT-1004",
+        full_name: "Ananya Iyer",
+        phone: "9876543213",
+        email: "ananya.iyer@gmail.com",
+        date_of_birth: "1992-08-30",
+        gender: "Female",
+        blood_group: "AB+",
+        created_at: new Date(now.getTime() - 10 * 24 * 3600 * 1000).toISOString()
+      },
+      {
+        patient_code: "PT-1005",
+        full_name: "Rohan Das",
+        phone: "9876543214",
+        email: "rohan.das@hotmail.com",
+        date_of_birth: "1985-04-18",
+        gender: "Male",
+        blood_group: "O-",
+        created_at: new Date(now.getTime() - 5 * 24 * 3600 * 1000).toISOString()
+      }
+    ];
+    return { success: true, data: mockPatients };
+  }
+
   const { data: membership } = await supabase
     .from('organization_memberships')
     .select('organization_id')
@@ -376,6 +571,46 @@ export async function getInvoicesExportData(dateFilter: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Unauthorized' };
+
+  if (user.email === 'mddanishsayed786@gmail.com') {
+    const now = new Date();
+    const mockInvoices = [
+      {
+        invoice_number: "INV-001024",
+        issue_date: new Date(now.getTime() - 15 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() - 2 * 24 * 3600 * 1000).toISOString(),
+        status: "issued",
+        total_amount: 15000,
+        amount_paid: 10500,
+        discount_amount: 0,
+        patients: { full_name: "Aarav Mehta", patient_code: "PT-1001" },
+        profiles: { full_name: "Danish Sayed" }
+      },
+      {
+        invoice_number: "INV-001029",
+        issue_date: new Date(now.getTime() - 10 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() - 5 * 24 * 3600 * 1000).toISOString(),
+        status: "partially_paid",
+        total_amount: 25000,
+        amount_paid: 13000,
+        discount_amount: 2000,
+        patients: { full_name: "Priya Sharma", patient_code: "PT-1002" },
+        profiles: { full_name: "Devendra Sharma" }
+      },
+      {
+        invoice_number: "INV-001035",
+        issue_date: new Date(now.getTime() - 3 * 24 * 3600 * 1000).toISOString(),
+        due_date: new Date(now.getTime() + 4 * 24 * 3600 * 1000).toISOString(),
+        status: "issued",
+        total_amount: 8500,
+        amount_paid: 0,
+        discount_amount: 0,
+        patients: { full_name: "Kabir Singh", patient_code: "PT-1003" },
+        profiles: { full_name: "Danish Sayed" }
+      }
+    ];
+    return { success: true, data: mockInvoices };
+  }
 
   const { data: membership } = await supabase
     .from('organization_memberships')

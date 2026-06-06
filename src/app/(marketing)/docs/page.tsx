@@ -12,7 +12,9 @@ import {
   ArrowLeft, 
   HelpCircle, 
   Laptop,
-  ExternalLink
+  ExternalLink,
+  Link2,
+  Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SupportModal } from '@/components/support/support-modal';
@@ -48,6 +50,46 @@ export default function DocsPage() {
   const [supportOpen, setSupportOpen] = React.useState(false);
   const [supportCategory, setSupportCategory] = React.useState<'Technical Support' | 'Sales Inquiry' | 'Billing & Subscription' | 'Feature Request' | 'Enterprise / Branches' | 'Bug Report' | 'Other'>('Technical Support');
   const [pendingScrollTarget, setPendingScrollTarget] = React.useState<string | null>(null);
+  const [feedback, setFeedback] = React.useState<'yes' | 'no' | null>(null);
+  const [copiedSectionId, setCopiedSectionId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setFeedback(null);
+  }, [activeChapterId]);
+
+  React.useEffect(() => {
+    // Handle initial hash routing
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const matchedChapter = DOCS_DATA.find(c => c.id === hash);
+        if (matchedChapter) {
+          setActiveChapterId(hash);
+          setPendingScrollTarget('top');
+          return;
+        }
+        for (const chapter of DOCS_DATA) {
+          const matchedSection = chapter.sections.find(s => s.id === hash);
+          if (matchedSection) {
+            setActiveChapterId(chapter.id);
+            setPendingScrollTarget(hash);
+            break;
+          }
+        }
+      }
+    }
+  }, []);
+
+  const handleCopyLink = (secId: string) => {
+    if (typeof window !== 'undefined') {
+      const url = `${window.location.origin}${window.location.pathname}#${secId}`;
+      navigator.clipboard.writeText(url);
+      setCopiedSectionId(secId);
+      setTimeout(() => {
+        setCopiedSectionId(null);
+      }, 2000);
+    }
+  };
 
   React.useEffect(() => {
     const currentChapter = DOCS_DATA.find(c => c.id === activeChapterId);
@@ -285,13 +327,31 @@ export default function DocsPage() {
             <div className="max-w-3xl w-full mx-auto space-y-8 flex-1">
               
               {/* Header Title Block */}
-              <div className="border-b pb-6 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider">
-                  <BookOpen className="h-4 w-4" />
-                  Documentation Guide
+              <div className="border-b pb-6 space-y-2 group/header flex justify-between items-end">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider">
+                    <BookOpen className="h-4 w-4" />
+                    Documentation Guide
+                  </div>
+                  <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-1">{currentChapter.title}</h2>
+                  <p className="text-slate-500 text-sm leading-relaxed max-w-2xl">{currentChapter.desc}</p>
                 </div>
-                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mt-1">{currentChapter.title}</h2>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-2xl">{currentChapter.desc}</p>
+                <button
+                  type="button"
+                  onClick={() => handleCopyLink(currentChapter.id)}
+                  className="opacity-0 group-hover/header:opacity-100 transition-opacity p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-blue-600 flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer"
+                  title="Copy link to this chapter"
+                >
+                  {copiedSectionId === currentChapter.id ? (
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100 flex items-center gap-1">
+                      Copied!
+                    </span>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4" /> Share Chapter
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* Dynamic Chapter Sections Rendering */}
@@ -302,9 +362,23 @@ export default function DocsPage() {
                     id={section.id} 
                     className="space-y-4 pt-4 first:pt-0 scroll-mt-20 border-b border-slate-100 pb-8 last:border-none"
                   >
-                    <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2 group">
                       <span className="w-1 h-6 bg-blue-600 rounded-full shrink-0" />
                       {section.heading}
+                      <button
+                        type="button"
+                        onClick={() => handleCopyLink(section.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-blue-600 focus:opacity-100 cursor-pointer"
+                        title="Copy link to this section"
+                      >
+                        {copiedSectionId === section.id ? (
+                          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-0.5 animate-pulse">
+                            Copied!
+                          </span>
+                        ) : (
+                          <Link2 className="h-4 w-4" />
+                        )}
+                      </button>
                     </h3>
                     <div className="text-slate-700 text-sm leading-relaxed space-y-4 font-normal">
                       {section.content}
@@ -316,11 +390,33 @@ export default function DocsPage() {
               {/* Simple Navigation footer */}
               <div className="pt-10 border-t flex justify-between items-center gap-4 text-xs text-slate-400">
                 <p>Clerixs Platform Guide v1.0 • May 2026</p>
-                <div className="flex items-center gap-1">
-                  Was this helpful? 
-                  <Button variant="ghost" size="sm" className="h-6 px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-800">Yes</Button>
-                  /
-                  <Button variant="ghost" size="sm" className="h-6 px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-800">No</Button>
+                <div className="flex items-center gap-1.5 transition-all duration-300 min-h-[24px]">
+                  {feedback ? (
+                    <span className="text-emerald-600 font-semibold flex items-center gap-1 animate-pulse">
+                      ✓ Thanks for your feedback!
+                    </span>
+                  ) : (
+                    <>
+                      Was this helpful? 
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-800 cursor-pointer font-bold animate-fade-in"
+                        onClick={() => setFeedback('yes')}
+                      >
+                        Yes
+                      </Button>
+                      /
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 px-2 hover:bg-slate-100 text-slate-500 hover:text-slate-800 cursor-pointer font-bold animate-fade-in"
+                        onClick={() => setFeedback('no')}
+                      >
+                        No
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

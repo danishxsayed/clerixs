@@ -38,12 +38,26 @@
 - **Interactive Carousel**: Built a motion-enhanced testimonial system with auto-play and manual navigation.
 - **Mobile Optimization**: Refined the footer grid and hero centering for a perfect mobile experience.
 
+## Completed Milestones (June 2026)
+
+### 📚 Documentation & Sharing Features
+- **Asset Attachment**: Replaced all 32 screenshot placeholders in the documentation with actual mockups.
+- **Deep-linking & Copy tools**: Built link-copying overlays (using Lucide `Link2` and `Share2`) next to all sections and chapters, and implemented client-side window hash routing.
+- **Dynamic Feedback**: Implemented a dynamic feedback widget ("Was this helpful?") with instant confirmation messages.
+- **Divider cleanup**: Removed 141 raw `<p>---</p>` divider rows to clean up typography flow.
+- **Sign-up Sizing**: Made the sign-up screenshot full-width (removed `max-w-md` constraints).
+
+### 🛠 UI, Dark Mode & Analytics Mocking
+- **Lab Dark Mode**: Fixed dark mode compatibility issues in the Lab Order Management UI.
+- **Report Mock Data**: Injected basic & advanced report charts mock data for `mddanishsayed786@gmail.com`.
+- **WhatsApp Logs**: Added mock data for WhatsApp history delivery logs.
+- **Payment Cleanup**: Removed redundant screenshot options from "Recording a Payment" section.
+
 ## Active Technical Debt / Known Issues
 - **Performance**: High-volume clinics may experience slight lag in on-demand storage calculation.
     - *Candidate Fix*: Move to a trigger-updated `storage_stats` cache table.
 - **Queue Archive**: `pg_cron` needs to be enabled in Supabase dashboard for the daily reset migration to function automatically.
 
 ## Next Steps
-1. **Lab Report Printing**: Refine the PDF generation for medical lab results.
-2. **SEO Fine-tuning**: Add meta tags and OG images for the new marketing pages.
-3. **Analytics Integration**: Add tracking for the new landing page CTA conversions.
+1. **SEO Fine-tuning**: Add meta tags and OG images for the new marketing pages.
+2. **Analytics Integration**: Add tracking for the new landing page CTA conversions.

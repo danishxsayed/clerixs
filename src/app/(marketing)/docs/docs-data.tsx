@@ -33,6 +33,29 @@ export const ScreenshotPlaceholder = ({ text }: { text: string }) => (
   </div>
 );
 
+export const DocScreenshot = ({ 
+  src, 
+  alt, 
+  url, 
+  className = "w-full h-auto object-cover",
+  wrapperClassName = "w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6"
+}: { 
+  src: string; 
+  alt: string; 
+  url?: string;
+  className?: string;
+  wrapperClassName?: string;
+}) => (
+  <div className={wrapperClassName}>
+    {url && <BrowserHeader url={url} />}
+    <img 
+      src={src} 
+      alt={alt} 
+      className={className}
+    />
+  </div>
+);
+
 export const MockDashboardScreenshot = () => (
   <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
     <BrowserHeader url="app.clerixs.com/dashboard" />
@@ -45,7 +68,7 @@ export const MockDashboardScreenshot = () => (
 );
 
 export const MockSignUpScreenshot = () => (
-  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6 max-w-md mx-auto">
+  <div className="w-full border rounded-xl overflow-hidden shadow-sm bg-slate-50 border-slate-200 my-6">
     <BrowserHeader url="app.clerixs.com/auth/signup" />
     <img 
       src="/assets/sign-up.png" 
@@ -271,7 +294,6 @@ export const DOCS_DATA = [
             <p>No installation. No hardware. Just open a browser and you are ready.</p>
             <p><strong>Clerixs is used by:</strong></p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Dental clinics</li><li>Endocrinology & diabetes clinics</li><li>Aesthetics & dermatology practices</li><li>Paediatric clinics</li><li>Orthopaedic clinics</li><li>Any outpatient clinic in India</li></ul>
-            <p>---</p>
           </div>
         )
       },
@@ -299,7 +321,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Internet Explorer does not work with Clerixs. Always use Chrome for the best experience. Keep your browser updated.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -317,7 +338,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Use your clinic's email address (e.g., drsharma@sharmadental.com) so your staff recognise invitation emails as coming from a trusted sender.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -326,7 +346,7 @@ export const DOCS_DATA = [
         heading: 'How to Log In',
         content: (
           <div className="space-y-4">
-            <ScreenshotPlaceholder text="Clerixs login page with the tagline 'Login to your account!'" />
+            <DocScreenshot src="/assets/login.png" alt="Clerixs login page" url="app.clerixs.com/auth/login" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open <strong>app.clerixs.com</strong>.</li><li>The page shows <strong>Login to your account!</strong></li><li>Enter your <strong>Email</strong> and <strong>Password</strong>.</li><li>Tick <strong>Remember me</strong> if you want to stay logged in on this device.</li><li>Click <strong>Login</strong>.</li></ol>
             <p><strong>Forgot your password?</strong></p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Forgot Password ?</strong> on the login page.</li><li>Enter your email address.</li><li>Check your inbox for a reset link (valid for 1 hour).</li><li>Click the link and set a new password.</li></ol>
@@ -337,7 +357,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> If the reset email does not arrive within 5 minutes, check your Spam or Promotions folder.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -356,7 +375,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Use the trial period to set up your Price Catalog, Lab Catalog, and invite all your staff so you are fully operational from day one.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -366,7 +384,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>After signing up, Clerixs guides you through a five-step setup wizard to configure your clinic workspace. Complete these steps to get your practice ready before inviting your team.</p>
-            <ScreenshotPlaceholder text="Onboarding wizard showing step progress indicator" />
+            <DocScreenshot src="/assets/onboarding-Wizard.png" alt="Onboarding wizard" url="app.clerixs.com/onboarding" />
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Step 1 — Clinic & Doctor Details</h4>
             <p>Enter the foundational details of your clinic and the primary doctor. These will be used across your prescriptions, invoices, and reports.</p>
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
@@ -416,7 +434,6 @@ export const DOCS_DATA = [
             <p>From here, select one of three quick actions to jump straight into your workflow:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li><strong>Add first patient</strong> — Create your first patient record.</li><li><strong>Book appointment</strong> — Schedule a patient in the calendar.</li><li><strong>Explore dashboard</strong> — Go straight to your main dashboard overview.</li></ol>
             <p>Click <strong>Go to Dashboard</strong> to finalise your workspace and begin.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -473,7 +490,6 @@ export const DOCS_DATA = [
   </table>
 </div>
             <p>Below the cards, you see today's date, a greeting (<em>Good morning, [Name]!</em>), and a <strong>Filters</strong> button to adjust the date range shown.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -494,7 +510,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Next: <a href="02-patients.md" className="text-blue-600 hover:underline font-semibold">02 — Patient Management</a></em></p>
           </div>
         )
@@ -513,8 +528,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>The <strong>Patients</strong> section is your clinic's complete patient database. Every person treated at your clinic must have a patient profile before you can book appointments, write prescriptions, or raise invoices for them.</p>
             <p>Go to <strong>Patients</strong> in the left sidebar to open the patient list.</p>
-            <ScreenshotPlaceholder text="Patients list page showing the table with Name, Code, Phone, Email, Status, Actions columns and the Add Patient and Import buttons" />
-            <p>---</p>
+            <DocScreenshot src="/assets/patients.png" alt="Patients List" url="app.clerixs.com/patients" />
           </div>
         )
       },
@@ -553,7 +567,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Two patients cannot share the same phone number. If you try to register a patient whose number is already in the system, Clerixs will show an error.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -564,7 +577,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Every patient is automatically assigned a unique <strong>Patient Code</strong> in the format <strong>PT-XXXX</strong> — for example, <strong>PT-1001</strong> or <strong>PT-1045</strong>.</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Codes are assigned in order as patients are registered.</li><li>You cannot change a patient code.</li><li>Use the code to find patients instantly using global search (Ctrl+K).</li><li>The code appears on every prescription, lab report, and invoice so staff can cross-reference records without confusion.</li></ul>
-            <p>---</p>
           </div>
         )
       },
@@ -584,7 +596,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Global search is the fastest way to navigate Clerixs. Learn <strong>Ctrl+K</strong> on your first day — it saves time on every patient visit.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -611,7 +622,6 @@ export const DOCS_DATA = [
   </table>
 </div>
             <p>The number in brackets shows how many records exist in each tab. It updates automatically.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -628,7 +638,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Changing a patient's name updates it across all linked prescriptions, invoices, and lab reports automatically. Make sure you are editing the correct patient before saving.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -654,7 +663,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Use medical notes for non-prescription observations — for example, "Patient complained of knee pain during follow-up. Referred for X-ray." This keeps a clear record separate from the prescription history.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -680,7 +688,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Clerixs will skip any row where the phone number already exists in your database. Duplicate phone numbers are not imported.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -690,7 +697,6 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Appointments</strong> tab.</li><li>All past and upcoming appointments are listed — date, time, doctor, treatment, and status.</li><li>Click <strong>Add Appointment</strong> inside this tab to book a new appointment for this patient (the patient field will be pre-filled).</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -700,7 +706,6 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Prescriptions</strong> tab.</li><li>All prescriptions are listed, newest first — with date, doctor name, and medicine count.</li><li>Click <strong>View</strong> to open a prescription or <strong>Print PDF</strong> to reprint it.</li><li>Click <strong>New Prescription</strong> to write a new prescription for this patient.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -710,7 +715,6 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Billing & Invoices</strong> tab.</li><li>All invoices are listed with status, date, and amount.</li><li>Click any invoice to open it or print a copy.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -731,7 +735,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="01-getting-started.md" className="text-blue-600 hover:underline font-semibold">01 — Getting Started</a> | Next: <a href="03-appointments.md" className="text-blue-600 hover:underline font-semibold">03 — Appointments</a></em></p>
           </div>
         )
@@ -751,7 +754,6 @@ export const DOCS_DATA = [
             <p><strong>Appointments</strong> is where you book, view, and manage all scheduled patient visits. Every appointment is linked to a patient, a date and time, a treatment type, and optionally a doctor.</p>
             <p>Click <strong>Appointments</strong> in the left sidebar to open the appointments list.</p>
             <MockAddAppointmentScreenshot />
-            <p>---</p>
           </div>
         )
       },
@@ -761,7 +763,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Appointments</strong> in the left sidebar.</li><li>Click <strong>Add Appointment</strong> (top right).</li><li>Fill in the booking form:</li></ol>
-            <ScreenshotPlaceholder text="Add Appointment form with all fields visible" />
+            <DocScreenshot src="/assets/New-Appointment.png" alt="Add Appointment form" url="app.clerixs.com/appointments" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -783,7 +785,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">You can also book appointments directly from a patient's profile. Open the patient → click the <strong>Appointments</strong> tab → click <strong>Add Appointment</strong>. The patient field is pre-filled automatically — saves time at the front desk.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -800,7 +801,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Always schedule follow-ups before the patient leaves the clinic. It is much harder to get patients to self-schedule later.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -823,7 +823,6 @@ export const DOCS_DATA = [
   </table>
 </div>
             <p>Use the <strong>date filter</strong> at the top of the table to view appointments for a specific day, week, or range.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -844,7 +843,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -854,7 +852,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>In the appointment list, find the appointment.</li><li>Click <strong>Open menu</strong> (the ⋮ icon in the Actions column).</li><li>A small menu appears with these options:</li></ol>
-            <ScreenshotPlaceholder text="Open menu dropdown showing Mark Completed, View Details, Delete options" />
+            <DocScreenshot src="/assets/Appointment-Status.png" alt="Appointment Status dropdown" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -874,7 +872,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> <strong>Delete</strong> permanently removes the appointment with no way to recover it. If a patient cancels, use <strong>View Details</strong> to update the status to Cancelled instead. Cancellation keeps the record; deletion removes it entirely.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -884,7 +881,6 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Open menu (⋮)</strong> next to the appointment.</li><li>Select <strong>View Details</strong>.</li><li>The appointment detail page opens — update any field: date, time, patient, treatment, or doctor.</li><li>Click <strong>Save Changes</strong> (or the equivalent save button on that page).</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -902,7 +898,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Assigning a doctor helps the Queue system automatically route the patient to the right consultation room when they check in.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -920,7 +915,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> The double-booking check only applies when a doctor is assigned. If both appointments are left as <em>Unassigned</em>, Clerixs will allow them at the same time. Always assign a doctor when booking.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -941,7 +935,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="02-patients.md" className="text-blue-600 hover:underline font-semibold">02 — Patient Management</a> | Next: <a href="04-queue.md" className="text-blue-600 hover:underline font-semibold">04 — Queue Management</a></em></p>
           </div>
         )
@@ -962,7 +955,6 @@ export const DOCS_DATA = [
             <p>Every device logged into Clerixs sees the same queue updating live. When the receptionist adds a patient, the doctor's screen updates instantly — no refreshing needed.</p>
             <p>Click <strong>Queue</strong> in the left sidebar to open the Live Waiting Room.</p>
             <MockWaitingRoomScreenshot />
-            <p>---</p>
           </div>
         )
       },
@@ -973,7 +965,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>A <strong>walk-in patient</strong> is someone who arrives at the clinic without a prior appointment.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Queue</strong> in the left sidebar.</li><li>Click <strong>Add Walk-in</strong> (top right of the page).</li><li>The <strong>Add Walk-in Patient</strong> dialog opens.</li></ol>
-            <ScreenshotPlaceholder text="Add Walk-in Patient dialog showing the patient search field, Create Patient Profile checkbox, Assign to Doctor dropdown, and the Confirm & Add to Queue button" />
+            <DocScreenshot src="/assets/Walk-In-Patient.png" alt="Add Walk-in Patient" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>In the <strong>Patient Search / Name</strong> field, type the patient's name. Results appear as you type.</li><li>Click the correct patient name in the dropdown to select them.</li><li>If the patient is <strong>not registered yet</strong>, tick the <strong>Create Patient Profile</strong> checkbox. Enter their name and phone number — Clerixs registers them automatically.</li><li>In the <strong>Assign to Doctor</strong> dropdown, select which doctor the patient should see.</li><li>Click <strong>Confirm & Add to Queue</strong>.</li></ol>
             <p>The patient appears in the waiting room under the assigned doctor's section immediately. A toast notification confirms: <em>Patient added to queue successfully.</em></p>
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
@@ -983,7 +975,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">If a patient calls ahead to say they are on the way, you can add them to the queue before they arrive so the doctor is ready.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -995,7 +986,6 @@ export const DOCS_DATA = [
             <p>When a patient arrives for a booked appointment:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Queue</strong>.</li><li>Look for their name in the check-in section (appointments scheduled for today appear here).</li><li>Click <strong>Check In</strong> next to their name.</li></ol>
             <p>They are added to the waiting room immediately.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1017,7 +1007,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1046,7 +1035,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Use <strong>Skip</strong> when a patient needs more time to prepare (fill a form, visit the restroom, etc.) and you want to call the next patient without losing their place.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1064,7 +1052,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> The queue only updates live when the browser tab is <strong>open and active</strong>. If a staff member's screen is locked or the browser is closed, they will miss live updates until they log back in.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1081,7 +1068,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Patients who are still <strong>Waiting</strong> or <strong>In Consultation</strong> at midnight are <strong>not automatically cleared</strong>. A staff member must manually click <strong>Complete</strong> or <strong>Remove</strong> before midnight to keep the next day's queue clean. Make it a habit to clear the queue before closing the clinic each day.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1102,7 +1088,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="03-appointments.md" className="text-blue-600 hover:underline font-semibold">03 — Appointments</a> | Next: <a href="05-prescriptions.md" className="text-blue-600 hover:underline font-semibold">05 — Prescriptions</a></em></p>
           </div>
         )
@@ -1121,7 +1106,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>The <strong>Prescriptions</strong> feature lets doctors write digital prescriptions directly in Clerixs. Every prescription is saved permanently to the patient's profile, can be printed as a professional PDF, and can be sent to the patient via WhatsApp in one click.</p>
             <p>Prescriptions include your clinic's letterhead, the doctor's digital signature, patient details, diagnosis, medicines, frequency, and advice — all formatted professionally without any manual design work.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1131,14 +1115,13 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Prescriptions</strong> tab.</li><li>Click <strong>New Prescription</strong>.</li></ol>
-            <ScreenshotPlaceholder text="Patient profile Prescriptions tab with the New Prescription button visible" />
+            <DocScreenshot src="/assets/Patient-profile-Prescriptions-tab.png" alt="Prescriptions tab" url="app.clerixs.com/patients" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>A dialog appears: <strong>Choose Prescription Template</strong>.</li></ol>
-            <ScreenshotPlaceholder text="Choose Prescription Template dialog showing Start Blank, Recently Used section, and All Clinic Templates section" />
+            <DocScreenshot src="/assets/Choose-Prescription-Template.png" alt="Choose Prescription Template" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Start Blank</strong> to write a fresh prescription with no pre-filled medicines.</li></ol>
             <p>— OR —</p>
             <p>Click a saved template to load a pre-written prescription (see <a href="#using-prescription-templates" className="text-blue-600 hover:underline font-semibold">Using Templates</a> below).</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>The prescription form opens.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -1184,7 +1167,7 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <ScreenshotPlaceholder text="A filled medicine row showing drug name, dosage, duration, and the three frequency toggle buttons — Morn (active), Aft (inactive), Ngt (active)" />
+            <DocScreenshot src="/assets/Prescription.png" alt="Filled medicine row" />
             <p><strong>Adding more medicines:</strong></p>
             <p>Click <strong>Add Another Medicine</strong> to add a second (or third, fourth…) medicine row.</p>
             <p><strong>Frequency toggles explained:</strong></p>
@@ -1205,7 +1188,6 @@ export const DOCS_DATA = [
             <p>A free-text field for non-medicine instructions. Use it for:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Dietary advice (<em>Avoid sugar and fried foods</em>)</li><li>Lifestyle changes (<em>Walk 30 minutes daily</em>)</li><li>Activity restrictions (<em>Bed rest for 3 days</em>)</li><li>Follow-up instructions (<em>Return in 10 days</em>)</li><li>Referrals (<em>Refer to cardiologist for further evaluation</em>)</li></ul>
             <p>This field is optional but highly recommended — it makes the prescription a complete clinical document.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1215,9 +1197,8 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>When you type in the <strong>Drug Name</strong> field, Clerixs searches its built-in Indian medicines database and shows matching results in a dropdown.</p>
-            <ScreenshotPlaceholder text="Medicine search dropdown showing results as the doctor types 'Amox'" />
+            <DocScreenshot src="/assets/Medicine-Autocomplete.png" alt="Medicine Autocomplete" />
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Type at least <strong>3 characters</strong> for best results.</li><li>The autocomplete searches both <strong>generic names</strong> (e.g., Amoxicillin) and <strong>brand names</strong> (e.g., Amoxil, Mox).</li><li>Click any result to fill the field.</li></ul>
-            <p>---</p>
           </div>
         )
       },
@@ -1229,7 +1210,6 @@ export const DOCS_DATA = [
             <p>If a medicine is not in the autocomplete list:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings</strong> in the left sidebar.</li><li>Find the <strong>Prescription</strong> or <strong>Medicine Catalog</strong> section.</li><li>Click <strong>Add Medicine</strong>.</li><li>Enter the medicine name, form (tablet / syrup / injection / cream / etc.), and default dosage.</li><li>Click <strong>Save</strong>.</li></ol>
             <p>The medicine is now available in all prescription forms across your clinic.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1241,7 +1221,7 @@ export const DOCS_DATA = [
             <p>Clerixs has a built-in voice input to speed up prescription writing.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click inside any text field — Clinical Diagnosis, General Advice, or the Drug Name field.</li><li><strong>Hold Ctrl+Shift</strong> (Windows/Linux) — your browser's microphone activates.</li><li>Speak clearly at a normal pace.</li><li>Release <strong>Ctrl+Shift</strong> when you finish speaking.</li></ol>
             <p>Your speech is transcribed directly into the field.</p>
-            <ScreenshotPlaceholder text="Voice-to-text indicator showing the microphone is active in the Clinical Diagnosis field" />
+            <DocScreenshot src="/assets/Voice-to-Text.png" alt="Voice-to-Text" />
             <div className="bg-amber-50 border border-amber-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
   <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
   <div>
@@ -1256,7 +1236,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Doctors who use voice-to-text for diagnosis and advice report writing prescriptions in half the time compared to typing.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1270,7 +1249,6 @@ export const DOCS_DATA = [
             <p>The printed prescription includes:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Your <strong>clinic letterhead</strong> (the image you uploaded in Settings)</li><li><strong>Patient Details</strong> — name, code, age, gender</li><li><strong>Prescription Details</strong> — Rx number, date, doctor's name</li><li><strong>⚕ Clinical Diagnosis</strong></li><li><strong>Medications Rx</strong> — formatted medicine table with dosage, frequency, and duration</li><li><strong>General Advice / Next Steps</strong> (if filled)</li><li><strong>Authorised Signature</strong> — the doctor's digital signature image</li><li>Footer: <em>This is a computer-generated document and does not require a physical stamp inside Clerixs networks.</em></li></ul>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Print PDF</strong> (top right of the print page) to open your browser's print dialog.</li><li>In the print dialog, select <strong>Save as PDF</strong> to save a digital copy, or select your printer to print on paper.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -1282,7 +1260,6 @@ export const DOCS_DATA = [
             <p>If you write similar prescriptions often (e.g., for hypertension follow-ups, seasonal fever, diabetes protocol), save them as templates for one-click reuse.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Fill in the prescription form completely.</li><li>Before clicking Generate Prescription, click <strong>Save as Template</strong>.</li><li>Give the template a clear name — e.g., <em>HTN Follow-Up</em>, <em>Cold & Cough Adult</em>, <em>Diabetic Protocol Q3</em>.</li><li>Click <strong>Save</strong>.</li></ol>
             <p>Templates are saved to your clinic and are available to <strong>all doctors</strong> at your clinic.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1301,7 +1278,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Templates auto-fill medicines and dosages. Do not generate the prescription without reviewing every field — the loaded medicines are a starting point, not a final prescription.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1319,7 +1295,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Each WhatsApp send uses <strong>1 WhatsApp Credit</strong>. Monitor your credit balance in the left sidebar. See <a href="12-whatsapp.md" className="text-blue-600 hover:underline font-semibold">WhatsApp Integration</a> for details.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1331,7 +1306,6 @@ export const DOCS_DATA = [
             <p>All prescriptions are saved permanently to the patient's profile. They never expire or disappear.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile → <strong>Prescriptions</strong> tab.</li><li>Every prescription is listed — date, prescribing doctor, number of medicines.</li><li>Click <strong>View</strong> to reopen any prescription.</li><li>Click <strong>Print PDF</strong> to reprint.</li><li>Click the <strong>WhatsApp</strong> button to resend.</li></ol>
             <p>Prescriptions <strong>cannot be deleted</strong> — this preserves a complete, auditable clinical record.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1352,7 +1326,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="04-queue.md" className="text-blue-600 hover:underline font-semibold">04 — Queue Management</a> | Next: <a href="06-lab.md" className="text-blue-600 hover:underline font-semibold">06 — Lab Dashboard</a></em></p>
           </div>
         )
@@ -1373,7 +1346,6 @@ export const DOCS_DATA = [
             <p>It tracks every lab order through four stages: <strong>Ordered → Collected → Submitted → Completed</strong>.</p>
             <p>Click <strong>Lab Dashboard</strong> in the left sidebar to open it.</p>
             <MockLabDashboardScreenshot />
-            <p>---</p>
           </div>
         )
       },
@@ -1408,7 +1380,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1419,7 +1390,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Lab orders are created from the <strong>patient's profile</strong>, not from the Lab Dashboard directly.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Lab & Docs</strong> tab.</li><li>Click <strong>Order Lab Test</strong>.</li></ol>
-            <ScreenshotPlaceholder text="Lab order creation form showing Sample Type options, Technician Notes field, Selected Tests area with Browse Catalog button, and Order Summary section" />
+            <DocScreenshot src="/assets/Creating-a-Lab-Order-for-a-patient.png" alt="Creating a Lab Order" url="app.clerixs.com/lab/new" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>On the lab order form, fill in:</li></ol>
             <p><strong>Sample Type</strong> — click one of the six options:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li><strong>Blood (Serum/Plasma)</strong></li><li><strong>Urine</strong></li><li><strong>Saliva / Swab</strong></li><li><strong>Stool</strong></li><li><strong>Tissue / Biopsy</strong></li><li><strong>Other</strong></li></ul>
@@ -1432,7 +1403,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> You must add <strong>at least one test</strong> before clicking <strong>Confirm Lab Order</strong>. If no tests are selected, Clerixs shows the error: <em>Please add at least one test before confirming the order.</em></p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1456,7 +1426,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Add your clinic's standard tests to the Lab Catalog in Settings before you start using the lab feature. See <a href="10-settings.md#lab-catalog" className="text-blue-600 hover:underline font-semibold">Lab Catalog Settings</a>.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1466,7 +1435,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Every lab order moves through four stages. Each stage requires an action from staff.</p>
-            <ScreenshotPlaceholder text="Lab order detail page showing the stage progress bar: ORDERED → COLLECTED → SUBMITTED → COMPLETED, with action buttons below" />
+            <DocScreenshot src="/assets/Four-Stages-of-a-Lab-Order.png" alt="Four Stages of a Lab Order" url="app.clerixs.com/lab/orders" />
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Stage 1 — ORDERED</h4>
             <p>The doctor has placed the order. The lab technician has not yet collected the sample.</p>
             <p><strong>Action:</strong> The lab technician opens the order and clicks <strong>Collect Sample</strong>.</p>
@@ -1480,7 +1449,6 @@ export const DOCS_DATA = [
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Stage 4 — COMPLETED</h4>
             <p>The report is finalised and locked. The patient can now receive their report.</p>
             <p><strong>Action:</strong> Print the report or share it with the patient.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1490,8 +1458,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open a lab order that is in <strong>Collected</strong> stage. Click <strong>Manage Details</strong> from the Lab Dashboard.</li><li>Scroll to the <strong>Test Parameters</strong> section.</li><li>For each test in the order, enter the <strong>result value</strong> in the input field.</li><li>Clerixs automatically compares your result against the <strong>normal reference range</strong> set in your Lab Catalog.</li><li>Click <strong>Submit Results</strong>.</li></ol>
-            <ScreenshotPlaceholder text="Test Parameters section showing result input fields with reference ranges and an abnormal flag (warning triangle) on one result" />
-            <p>---</p>
+            <DocScreenshot src="/assets/lab-Test-Results.png" alt="Lab Test Results" />
           </div>
         )
       },
@@ -1503,7 +1470,6 @@ export const DOCS_DATA = [
             <p>When a result is outside the normal range, Clerixs shows a <strong>⚠️ warning triangle</strong> next to that value.</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li><strong>High result</strong> (above normal range) — flagged in red.</li><li><strong>Low result</strong> (below normal range) — flagged in orange.</li><li><strong>Normal result</strong> — shown in black with no flag.</li></ul>
             <p>The doctor sees these flags clearly when reviewing and can take appropriate clinical action.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1520,7 +1486,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Once you click <strong>Approve & Finalize Report</strong>, the results are <strong>locked and cannot be edited</strong>. If a correction is needed, click <strong>Request Revision</strong> instead — this sends the order back to the lab technician.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1531,7 +1496,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>If a result is incorrect or incomplete:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the lab order in <strong>Submitted</strong> stage.</li><li>Click <strong>Request Revision</strong>.</li><li>The order status goes back to <strong>Collected</strong> so the technician can update the results.</li><li>The technician corrects the values and clicks <strong>Submit Results</strong> again.</li><li>The doctor reviews the corrected report and clicks <strong>Approve & Finalize Report</strong>.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -1544,7 +1508,6 @@ export const DOCS_DATA = [
             <p>The lab report PDF includes:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Your clinic's letterhead</li><li>Patient name and code</li><li>Order date and order ID</li><li>All test names, result values, normal reference ranges, and units</li><li>Abnormal value flags clearly marked</li><li>Finalisation date</li></ul>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Press <strong>Ctrl+P</strong> to print or choose <strong>Save as PDF</strong> in the print dialog.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -1556,8 +1519,7 @@ export const DOCS_DATA = [
             <p>For tests done at an outside laboratory (e.g., a reference lab), you can attach the external report to the patient's profile.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile → <strong>Lab & Docs</strong> tab.</li><li>Click <strong>Upload External</strong>.</li><li>Select the PDF or image file from your device.</li><li>Add a label — e.g., <em>MRI Report — May 2026</em> or <em>External Blood Work — Apollo Lab</em>.</li><li>Click <strong>Upload</strong>.</li></ol>
             <p>The file is saved permanently to the patient's Lab & Docs tab and can be downloaded by any staff member at any time.</p>
-            <ScreenshotPlaceholder text="Lab & Docs tab showing a mix of Clerixs-created lab orders and an uploaded external report" />
-            <p>---</p>
+            <DocScreenshot src="/assets/Uploading-External-Lab-Reports.png" alt="Uploading External Lab Reports" />
           </div>
         )
       },
@@ -1568,7 +1530,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>All lab orders — both created in Clerixs and uploaded externally — appear in the patient's <strong>Lab & Docs</strong> tab.</p>
             <p>Each entry shows the date, order ID, test names, sample type, and current status. Click <strong>Manage Details</strong> to open any order.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1589,7 +1550,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="05-prescriptions.md" className="text-blue-600 hover:underline font-semibold">05 — Prescriptions</a> | Next: <a href="07-billing.md" className="text-blue-600 hover:underline font-semibold">07 — Billing & Invoices</a></em></p>
           </div>
         )
@@ -1608,8 +1568,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>The <strong>Billing</strong> section is where you create invoices for patients, record payments, and track your clinic's revenue. Every invoice is linked to a patient and can be printed as a professional PDF.</p>
             <p>Click <strong>Billing</strong> in the left sidebar to open the billing list.</p>
-            <ScreenshotPlaceholder text="Billing list page showing the invoices table and New Invoice button" />
-            <p>---</p>
+            <DocScreenshot src="/assets/Billing-&-Invoices.png" alt="Billing and Invoices" url="app.clerixs.com/billing" />
           </div>
         )
       },
@@ -1628,7 +1587,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">You can also create an invoice directly from a patient's profile. Open the patient → <strong>Billing & Invoices</strong> tab → <strong>New Invoice</strong>. The patient field is pre-filled.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1645,7 +1603,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> If an item does not appear in the search, it has not been added to your Price Catalog yet. Go to <strong>Settings → Price Catalog</strong> to add it first, then come back to create the invoice. See <a href="10-settings.md#price-catalog" className="text-blue-600 hover:underline font-semibold">Price Catalog</a>.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1675,7 +1632,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Medical consultation fees are generally <strong>GST-exempt</strong> under Indian law. Apply GST only to non-exempt services. Consult your accountant for guidance specific to your clinic type.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1692,7 +1648,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> The discount cannot exceed the invoice total. If you enter a discount larger than the invoice amount, Clerixs will show an error: <em>Discount cannot exceed invoice total of ₹XXX.</em></p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1713,7 +1668,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1724,7 +1678,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>When a patient pays (in full or in part):</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the invoice — find it in the <strong>Billing</strong> list or in the patient's <strong>Billing & Invoices</strong> tab.</li><li>Click <strong>Record Payment</strong>.</li><li>Fill in the payment details:</li></ol>
-            <ScreenshotPlaceholder text="Record Payment dialog showing amount, payment mode, and date fields" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -1747,7 +1700,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">For UPI payments, note the UPI transaction ID in the payment remarks field. This helps during audits.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1757,11 +1709,10 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open any issued invoice.</li><li>Click <strong>Print / Download PDF</strong> (top right of the invoice).</li><li>The invoice PDF opens in a new browser tab.</li></ol>
-            <ScreenshotPlaceholder text="Invoice PDF showing clinic name, patient details, line items table, GST breakdown, total, and payment status" />
+            <DocScreenshot src="/assets/Downloading-an-Invoice-PDF.png" alt="Invoice PDF" />
             <p>The PDF includes:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Clinic name and logo</li><li>Invoice number (format: <strong>INV-000123</strong>)</li><li>Patient name and address</li><li>All line items with quantities and prices</li><li>GST breakdown (CGST + SGST)</li><li>Discount applied</li><li>Total amount payable</li><li>Payment status and amount received</li><li>Balance outstanding (if partially paid)</li></ul>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Press <strong>Ctrl+P</strong> to print or save as PDF.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -1772,7 +1723,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Clerixs generates invoice numbers automatically in the format <strong>INV-XXXXXX</strong> — for example, <strong>INV-000001</strong>, <strong>INV-000045</strong>.</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Numbers are assigned sequentially in order.</li><li>You cannot change or choose an invoice number.</li><li>This format is audit-friendly and meets Indian accounting standards.</li></ul>
-            <p>---</p>
           </div>
         )
       },
@@ -1784,7 +1734,6 @@ export const DOCS_DATA = [
             <p>All invoices are saved permanently in the <strong>Billing</strong> section. Use the search and filter tools to find any invoice:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Search by patient name or patient code</li><li>Filter by status (Draft, Issued, Partially Paid, Paid)</li><li>Filter by date range</li></ul>
             <p>You can also see a patient's complete billing history from their profile → <strong>Billing & Invoices</strong> tab.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1805,7 +1754,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="06-lab.md" className="text-blue-600 hover:underline font-semibold">06 — Lab Dashboard</a> | Next: <a href="08-staff.md" className="text-blue-600 hover:underline font-semibold">08 — Staff Management</a></em></p>
           </div>
         )
@@ -1825,7 +1773,6 @@ export const DOCS_DATA = [
             <p>The <strong>Staff</strong> section lets you invite your clinic team — doctors, receptionists, and lab technicians — to Clerixs. Each staff member gets their own login and sees only what their role allows.</p>
             <p>Click <strong>Staff</strong> in the left sidebar to open the staff list.</p>
             <MockInviteMemberScreenshot />
-            <p>---</p>
           </div>
         )
       },
@@ -1835,7 +1782,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Staff</strong> in the left sidebar.</li><li>Click <strong>Invite Member</strong> (top right).</li><li>The <strong>Invite to Clinic workspace</strong> dialog opens.</li></ol>
-            <ScreenshotPlaceholder text="Invite to Clinic workspace dialog showing Email Address field, Role dropdown set to 'doctor', Primary Branch dropdown, Send Invite and Close buttons" />
+            <DocScreenshot src="/assets/Inviting-a-Staff-Member.png" alt="Invite Staff Member" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Fill in the invitation form:</li></ol>
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
@@ -1858,7 +1805,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Ask the staff member to check their <strong>Spam</strong> or <strong>Promotions</strong> folder if the email does not arrive within 5 minutes. Invitation emails sometimes land there.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1889,7 +1835,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Always assign the most restrictive role that covers a staff member's actual job. This protects patient privacy and prevents accidental changes to data outside their responsibilities.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1908,7 +1853,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> The invitation link expires after <strong>48 hours</strong>. If the staff member does not activate their account within 48 hours, you need to send a new invitation from the Staff page.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1937,7 +1881,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> If you reach your staff limit, the <strong>Invite Member</strong> button will be disabled and you will see a prompt to upgrade your plan. Go to <strong>Settings → Subscription</strong> to upgrade. See <a href="11-subscription.md" className="text-blue-600 hover:underline font-semibold">Subscription & Billing</a>.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1948,7 +1891,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click <strong>Staff</strong> in the sidebar.</li><li>Find the staff member in the list.</li><li>Click <strong>Open menu (⋮)</strong> next to their name.</li><li>Select <strong>Edit Role</strong>.</li><li>Choose the new role from the dropdown.</li><li>Save the change.</li></ol>
             <p>The role change takes effect immediately — the staff member sees the updated permissions on their next page load.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -1967,7 +1909,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Deactivation is reversible — you can reactivate a staff member later if needed. However, a deactivated account still counts against your staff plan limit until permanently removed.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -1988,7 +1929,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="07-billing.md" className="text-blue-600 hover:underline font-semibold">07 — Billing & Invoices</a> | Next: <a href="09-reports.md" className="text-blue-600 hover:underline font-semibold">09 — Reports & Analytics</a></em></p>
           </div>
         )
@@ -2010,7 +1950,6 @@ export const DOCS_DATA = [
             <MockBasicReportsScreenshot />
             <p>Clerixs has two levels of reports:</p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li><strong>Basic Reports</strong> — available on all plans.</li><li><strong>Advanced Reports</strong> — available on <strong>Pro and Enterprise plans only</strong>.</li></ul>
-            <p>---</p>
           </div>
         )
       },
@@ -2020,7 +1959,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Basic Reports give you the essential numbers for day-to-day clinic management.</p>
-            <ScreenshotPlaceholder text="Basic Reports tab showing revenue chart, patient registrations chart, appointment status breakdown, and top treatments list" />
+            <DocScreenshot src="/assets/Basic-Reports.png" alt="Basic Reports" url="app.clerixs.com/reports" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -2033,7 +1972,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2043,7 +1981,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Advanced Reports give you deeper business insights.</p>
-            <ScreenshotPlaceholder text="Advanced Reports tab showing Revenue by Doctor chart, outstanding payments table, and month-on-month trend graph" />
+            <DocScreenshot src="/assets/Advanced-Reports.png" alt="Advanced Reports" url="app.clerixs.com/reports?tab=advanced" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -2063,7 +2001,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Advanced Reports are not visible on the Basic plan. If you see a lock icon, your plan does not include this feature. Go to <strong>Settings → Subscription</strong> to upgrade to Pro.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2085,7 +2022,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">At the end of each month, set the date range to that month and export a report for your records. This is much faster than manual accounting.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2105,7 +2041,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> The Export button is not available on the Basic plan.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2123,7 +2058,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Check the Outstanding Payments report weekly. Follow up with patients who have a pending balance. A short SMS or call at the right time significantly improves collections.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2144,7 +2078,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="08-staff.md" className="text-blue-600 hover:underline font-semibold">08 — Staff Management</a> | Next: <a href="10-settings.md" className="text-blue-600 hover:underline font-semibold">10 — Settings</a></em></p>
           </div>
         )
@@ -2163,8 +2096,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Click <strong>Settings</strong> in the left sidebar to open the settings page.</p>
             <p>Settings is divided into several sections — scroll down to see all of them.</p>
-            <ScreenshotPlaceholder text="Settings page showing all sections: My Profile at top, then Clinic Settings, Price Catalog, Lab Catalog, Prescription Templates below" />
-            <p>---</p>
+            <DocScreenshot src="/assets/Opening Settings.png" alt="Opening Settings" url="app.clerixs.com/settings" />
           </div>
         )
       },
@@ -2174,7 +2106,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>The <strong>My Profile</strong> section is where you update your personal name, phone, and password.</p>
-            <ScreenshotPlaceholder text="My Profile section showing the full_name field, phone field, and the new_password / confirm_password fields" />
+            <DocScreenshot src="/assets/My-Profile.png" alt="My Profile Settings" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>In the <strong>full_name</strong> field (placeholder: <em>Your Name</em>), update your display name.</li><li>In the <strong>phone</strong> field (placeholder: <em>e.g. +91 9876543210</em>), add or update your mobile number.</li><li>To change your password, enter your new password in <strong>new_password</strong> and repeat it in <strong>confirm_password</strong>.</li><li>Click <strong>Save Changes</strong>.</li></ol>
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
   <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
@@ -2183,7 +2115,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Your display name appears in the greeting on the dashboard (<em>Good morning, [Name]!</em>) and on all prescriptions you generate. Use your full professional name.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2193,7 +2124,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p><strong>Clinic Settings</strong> controls how your clinic appears on all printed documents — prescriptions, invoices, and lab reports.</p>
-            <ScreenshotPlaceholder text="Clinic Settings section showing all fields — clinic name, logo, signature, letterhead, currency, timezone, GST number" />
+            <DocScreenshot src="/assets/Clinic-Settings.png" alt="Clinic Settings" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -2227,7 +2158,6 @@ export const DOCS_DATA = [
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Adding Your GST Number</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Find the <strong>GST Number</strong> field.</li><li>Enter your 15-character GSTIN (e.g., <em>27AAAAA0000A1Z5</em>).</li><li>Click <strong>Save</strong>.</li></ol>
             <p>Once your GSTIN is saved, it appears on all issued invoices automatically.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2237,7 +2167,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>The <strong>Price Catalog</strong> is your clinic's list of treatments and services — with prices. These items appear in the <strong>Billing</strong> section when you create an invoice.</p>
-            <ScreenshotPlaceholder text="Price Catalog section showing a list of treatments with their prices, the Add Item button, and edit/delete icons per row" />
+            <DocScreenshot src="/assets/Price Catalog.png" alt="Price Catalog Settings" />
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Adding a Treatment or Service</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Scroll to <strong>Price Catalog</strong> in Settings.</li><li>Click <strong>Add Item</strong>.</li><li>Fill in:</li></ol>
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
@@ -2278,7 +2208,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Set up your complete Price Catalog before you start billing. It makes invoice creation much faster — instead of typing treatment names and prices manually each time, you just search and click.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2288,7 +2217,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>The <strong>Lab Catalog</strong> is your clinic's list of diagnostic tests. These tests appear when doctors create lab orders.</p>
-            <ScreenshotPlaceholder text="Lab Catalog section showing tests grouped by category, with Add Test and Packages buttons" />
+            <DocScreenshot src="/assets/Lab Catalog.png" alt="Lab Catalog Settings" />
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Adding a Custom Test</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Scroll to <strong>Lab Catalog</strong> in Settings.</li><li>Click <strong>Add Test</strong>.</li><li>Fill in:</li></ol>
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
@@ -2316,7 +2245,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Create packages for your clinic's most common test combinations. It reduces the time doctors spend clicking individual tests for each order.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2326,7 +2254,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>The <strong>Prescription Templates</strong> section shows all saved prescription templates your clinic has created.</p>
-            <ScreenshotPlaceholder text="Prescription Templates section showing template list with Edit and Delete buttons per template" />
+            <DocScreenshot src="/assets/Prescription Templates.png" alt="Prescription Templates Settings" />
             <div className="overflow-x-auto border rounded-xl shadow-sm bg-white my-4">
   <table className="w-full text-sm text-left">
     <thead className="bg-slate-50 text-slate-700 font-bold border-b">
@@ -2353,7 +2281,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Templates can also be created directly while writing a prescription — click <strong>Save as Template</strong> during prescription creation. You do not need to build them in Settings manually.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2374,7 +2301,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="09-reports.md" className="text-blue-600 hover:underline font-semibold">09 — Reports & Analytics</a> | Next: <a href="11-subscription.md" className="text-blue-600 hover:underline font-semibold">11 — Subscription & Billing</a></em></p>
           </div>
         )
@@ -2404,7 +2330,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2417,7 +2342,6 @@ export const DOCS_DATA = [
             <p><strong>How the trial works:</strong></p>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Day 1–7: Full Pro access.</li><li>Day 5: Clerixs sends a reminder email.</li><li>Day 7 (end of trial): If you have not subscribed, your account moves to read-only mode. You can view existing records but cannot add new patients, appointments, prescriptions, or invoices.</li></ul>
             <p>Your data is <strong>never deleted</strong> when a trial expires. Subscribe at any time to regain full access.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2435,7 +2359,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Annual billing is available and gives you approximately 2 months free compared to paying monthly. Look for the <strong>Annual</strong> toggle on the upgrade page.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2448,7 +2371,6 @@ export const DOCS_DATA = [
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li><strong>Basic plan</strong>: 5 GB total.</li><li><strong>Pro plan</strong>: 10 GB total.</li></ul>
             <p>Your current usage appears in the <strong>left sidebar</strong> at the bottom — for example: <em>USED: 0.4 GB / TOTAL: 10 GB</em>.</p>
             <p>When you approach your storage limit, Clerixs sends a warning email. You can free up space by deleting old uploaded files, or upgrade your plan for more storage.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2458,7 +2380,6 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings → Subscription</strong>.</li><li>Scroll to <strong>Billing History</strong>.</li><li>All past subscription payments are listed — date, plan, amount.</li><li>Click <strong>Download Invoice</strong> next to any payment to get a GST-compliant receipt for your accounts.</li></ol>
-            <p>---</p>
           </div>
         )
       },
@@ -2477,7 +2398,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> After 90 days of non-renewal, your data is permanently deleted. Export your patient list and important records before the 90-day window closes.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2495,7 +2415,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Update your payment details before they expire — if the auto-renewal charge fails, your account may switch to read-only mode until payment is completed.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2506,7 +2425,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Log in to <strong>app.clerixs.com</strong> with your credentials.</li><li>You will see a <strong>subscription required</strong> banner.</li><li>Click <strong>Upgrade Now</strong> and choose a plan.</li><li>Complete payment — your account is fully restored immediately.</li></ol>
             <p>All your data — patients, appointments, prescriptions, invoices — is exactly as you left it.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2527,7 +2445,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="10-settings.md" className="text-blue-600 hover:underline font-semibold">10 — Settings</a> | Next: <a href="12-whatsapp.md" className="text-blue-600 hover:underline font-semibold">12 — WhatsApp Integration</a></em></p>
           </div>
         )
@@ -2546,7 +2463,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Clerixs's WhatsApp integration lets you send a patient's prescription PDF directly to their WhatsApp number in one click. The patient receives a message with a link to view and download their prescription — no app installation needed on the clinic's side.</p>
             <p>This feature is used directly from the patient's Prescriptions tab. You do not need to open WhatsApp on your phone or desktop — Clerixs handles the sending automatically.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2556,7 +2472,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click the <strong>Prescriptions</strong> tab.</li><li>Find the prescription you want to send.</li><li>Click the <strong>WhatsApp</strong> icon (WhatsApp logo button) next to that prescription.</li></ol>
-            <ScreenshotPlaceholder text="Prescriptions tab showing a prescription row with the WhatsApp icon button highlighted" />
+            <DocScreenshot src="/assets/Sending a Prescription via WhatsApp.png" alt="Sending Prescription via WhatsApp" />
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>A dialog appears showing the patient's saved phone number.</li><li>Verify the number is correct.</li><li>Click <strong>Send via WhatsApp</strong>.</li></ol>
             <p>The patient receives a WhatsApp message within seconds. It contains a secure link to view and download their prescription PDF.</p>
             <div className="bg-amber-50 border border-amber-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
@@ -2573,7 +2489,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">If a patient changes their number, update it in their profile (<strong>Edit Patient</strong>) before sending any WhatsApp messages.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2596,7 +2511,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Buy credits in advance — do not wait until they run out. Running out mid-day means you cannot send prescriptions to patients who need them right away.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2606,8 +2520,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Click <strong>WhatsApp</strong> in the left sidebar to see a log of all WhatsApp messages sent from your clinic — date, patient, message type, and delivery status.</p>
-            <ScreenshotPlaceholder text="WhatsApp section showing the message history table" />
-            <p>---</p>
+            <DocScreenshot src="/assets/Viewing WhatsApp Message History.png" alt="Viewing WhatsApp Message History" />
           </div>
         )
       },
@@ -2628,7 +2541,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="11-subscription.md" className="text-blue-600 hover:underline font-semibold">11 — Subscription & Billing</a> | Next: <a href="13-branches.md" className="text-blue-600 hover:underline font-semibold">13 — Branches</a></em></p>
           </div>
         )
@@ -2648,7 +2560,6 @@ export const DOCS_DATA = [
             <p><strong>Branches</strong> let you run multiple clinic locations — each with its own staff, patients, appointments, and billing — from a single Clerixs account. Each branch has its own separate data. Staff at Branch A cannot see Branch B's patients.</p>
             <p>Your first location is created automatically and called <strong>Headquarters</strong> by default.</p>
             <p>The <strong>Branches</strong> section is visible in the left sidebar to clinic owners. However, the ability to create and activate additional branches is controlled by the Clerixs admin team — you cannot add a new branch on your own without admin approval.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2669,7 +2580,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Do not attempt to create a branch without admin activation. The branch will appear in the list but will not have functioning credentials or staff login access until the admin panel enables it.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2679,7 +2589,7 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Once your branch is activated, a <strong>branch selector dropdown</strong> appears at the top of the left sidebar (visible to clinic owners only).</p>
-            <ScreenshotPlaceholder text="Sidebar showing the branch selector dropdown open, listing all branches and an 'All Branches' option" />
+            <DocScreenshot src="/assets/Switching Between Branches.png" alt="Switching Between Branches" />
             <p>To switch branches:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Click the branch selector at the top of the sidebar.</li><li>Choose from the list:</li></ol>
             <ul className="list-disc pl-6 space-y-2 text-slate-600"><li>Select a specific branch to see only that location's data.</li><li>Select <strong>All Branches</strong> to see combined data across all locations.</li></ul>
@@ -2691,7 +2601,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Staff members do not see the branch selector. They always see only their assigned branch. The dropdown is visible to clinic owners only.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2709,7 +2618,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> If a staff member is assigned to the wrong branch, they will not see the correct patients or appointments. Go to <strong>Staff</strong> → click <strong>Open menu (⋮)</strong> next to their name → <strong>Edit Role</strong> to fix the branch assignment.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2737,7 +2645,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">If the same patient visits two branches, they must be registered separately at each location. Patient records do not transfer automatically between branches.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2748,7 +2655,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>When <strong>All Branches</strong> is selected in the branch selector, the <strong>Reports</strong> section shows combined data for all locations.</p>
             <p>To see data for one specific branch, select that branch before opening Reports.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2769,7 +2675,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="12-whatsapp.md" className="text-blue-600 hover:underline font-semibold">12 — WhatsApp Integration</a> | Next: <a href="14-shortcuts.md" className="text-blue-600 hover:underline font-semibold">14 — Keyboard Shortcuts</a></em></p>
           </div>
         )
@@ -2788,7 +2693,6 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Keyboard shortcuts let you open features, save forms, and navigate Clerixs without using your mouse. Learning even a few shortcuts saves significant time during a busy clinic day.</p>
             <p>Clerixs supports shortcuts on both Windows/Linux (using <strong>Ctrl</strong>) and Mac (using <strong>Cmd ⌘</strong>).</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2798,10 +2702,9 @@ export const DOCS_DATA = [
         content: (
           <div className="space-y-4">
             <p>Click <strong>⌨️ Shortcuts ⌘/</strong> at the bottom of the left sidebar to open the keyboard shortcuts overlay at any time.</p>
-            <ScreenshotPlaceholder text="Bottom of left sidebar showing the '⌨️ Shortcuts ⌘/' link" />
-            <ScreenshotPlaceholder text="Keyboard shortcuts overlay showing the full list of shortcuts in a modal" />
+            <DocScreenshot src="/assets/bottom-Shortcuts.png" alt="Shortcuts link" />
+            <DocScreenshot src="/assets/All Shortcuts.png" alt="All Shortcuts" />
             <p>The overlay lists every available shortcut grouped by category. Press <strong>Escape</strong> to close it.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -2862,7 +2765,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2873,7 +2775,7 @@ export const DOCS_DATA = [
           <div className="space-y-4">
             <p>Global Search is the fastest way to navigate Clerixs.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Press <strong>Ctrl + K</strong> (Windows) or <strong>⌘ + K</strong> (Mac) from anywhere in the app.</li><li>A search bar appears in the centre of the screen.</li><li>Start typing a patient name, appointment, or feature name.</li><li>Results appear instantly as you type.</li><li>Use the <strong>↑ ↓ arrow keys</strong> to move between results.</li><li>Press <strong>Enter</strong> to open the selected result.</li><li>Press <strong>Escape</strong> to close Global Search without navigating.</li></ol>
-            <ScreenshotPlaceholder text="Global Search overlay open, showing search results for a patient name typed in the search bar" />
+            <DocScreenshot src="/assets/Global Search (Ctrl + K : ⌘ + K).png" alt="Global Search" />
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
   <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
   <div>
@@ -2881,7 +2783,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Use Global Search instead of clicking the sidebar every time. Typing a patient's first name and pressing Enter is much faster than clicking Patients → searching → clicking the patient row.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2906,7 +2807,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Voice-to-text works best for dictating free-text areas like advice and diagnosis notes. For medicine names, use the <strong>Search medicine...</strong> autocomplete field — it is faster and avoids spelling errors.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2947,7 +2847,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -2968,7 +2867,6 @@ export const DOCS_DATA = [
     </tbody>
   </table>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="13-branches.md" className="text-blue-600 hover:underline font-semibold">13 — Branches</a> | Next: <a href="15-faq.md" className="text-blue-600 hover:underline font-semibold">15 — Troubleshooting & FAQ</a></em></p>
           </div>
         )
@@ -2990,16 +2888,13 @@ export const DOCS_DATA = [
             <p><strong>Fix:</strong></p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Look for a <strong>popup blocked</strong> icon in your browser's address bar (top right).</li><li>Click it and select <strong>Always allow popups from app.clerixs.com</strong>.</li><li>Try generating the prescription again — the PDF will open in a new tab.</li></ol>
             <p>If you do not see a popup blocked icon, try a different browser. Clerixs works best on <strong>Google Chrome</strong> and <strong>Microsoft Edge</strong>.</p>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">The prescription PDF shows "Not available" instead of my clinic letterhead.</h4>
             <p>Your clinic letterhead has not been uploaded yet, or it was uploaded in the wrong format.</p>
             <p><strong>Fix:</strong></p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings</strong> → <strong>Clinic Settings</strong>.</li><li>Upload a PNG or JPG letterhead image. Recommended size: <strong>1200 × 300 pixels</strong>.</li><li>Click <strong>Save</strong>.</li><li>Generate a new prescription — the letterhead now appears on the PDF.</li></ol>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Can I edit a prescription after generating it?</h4>
             <p>No. Once a prescription is generated (PDF created), it is locked. This protects the medical record.</p>
             <p>If you made a mistake, create a new prescription for the same patient with the corrected information. You can use the original as a reference — it remains visible in the patient's <strong>Prescriptions</strong> tab.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -3021,7 +2916,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Invitation links expire after <strong>48 hours</strong>. If the staff member did not activate within that time, resend the invitation — the old link no longer works.</p>
   </div>
 </div>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">How do I reset my password?</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>app.clerixs.com</strong> and click <strong>Forgot Password ?</strong> on the login page.</li><li>Enter your registered email address.</li><li>Click the reset link sent to your email.</li><li>Set a new password.</li><li>Log in with your new password.</li></ol>
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-r-xl my-4 flex items-start gap-3">
@@ -3031,11 +2925,9 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">If you do not receive the password reset email within 5 minutes, check your Spam folder and search for an email from <strong>noreply@clerixs.com</strong>.</p>
   </div>
 </div>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">A staff member left the clinic. How do I remove their access immediately?</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Staff</strong> in the left sidebar.</li><li>Click <strong>Open menu (⋮)</strong> next to their name.</li><li>Select <strong>Deactivate</strong>.</li><li>Confirm the action.</li></ol>
             <p>Their login is blocked immediately. All records they created (prescriptions, lab results, appointments) are preserved — only their login access is removed.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -3049,7 +2941,6 @@ export const DOCS_DATA = [
             <p>To restore full access:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Log in to <strong>app.clerixs.com</strong>.</li><li>Click <strong>Upgrade Now</strong> on the subscription banner.</li><li>Select a plan and complete payment.</li></ol>
             <p>Everything is restored immediately — patients, prescriptions, invoices — exactly as you left them.</p>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">I cancelled my subscription. How long do I have to export my data?</h4>
             <p>You have <strong>90 days</strong> from the cancellation date before your data is permanently deleted.</p>
             <p>During those 90 days, your account is in read-only mode. You can view and export all records.</p>
@@ -3064,16 +2955,13 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Do not wait until day 89. Export immediately after cancelling to be safe.</p>
   </div>
 </div>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">My payment failed and my account is in read-only mode. What do I do?</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings → Subscription</strong>.</li><li>Click <strong>Update Payment Method</strong>.</li><li>Enter your new card or UPI details.</li><li>Click <strong>Retry Payment</strong>.</li></ol>
             <p>Your account is restored to full access as soon as the payment succeeds.</p>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Can I switch from monthly billing to annual billing?</h4>
             <p>Yes. Annual billing gives you approximately 2 months free.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings → Subscription</strong>.</li><li>Click <strong>Upgrade Plan</strong>.</li><li>Toggle <strong>Annual</strong> (instead of Monthly) on the upgrade page.</li><li>Complete payment.</li></ol>
             <p>Your billing cycle switches to annual from the next renewal date.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -3086,7 +2974,6 @@ export const DOCS_DATA = [
             <p>Patient records are tied to the branch they were registered in. There is no automatic transfer between branches.</p>
             <p>To make a patient available at another branch, register them again at that branch. Their history from the original branch is not copied — each branch keeps a separate record.</p>
             <p>For Enterprise accounts with a special requirement for patient transfer, contact <strong>enterprise@clerixs.com</strong>.</p>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">A patient's phone number is wrong. Can I update it?</h4>
             <p>Yes.</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Open the patient's profile.</li><li>Click <strong>Open menu (⋮)</strong> → <strong>Edit Patient</strong>.</li><li>Update the phone number (format: <strong>+91 XXXXXXXXXX</strong>).</li><li>Click <strong>Save Patient</strong>.</li></ol>
@@ -3097,7 +2984,6 @@ export const DOCS_DATA = [
     <p className="text-amber-800 text-xs mt-1">️ <strong>Warning:</strong> Update the phone number before sending any WhatsApp messages. Messages go to the number saved in the profile — if it's wrong, the message reaches the wrong person.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -3120,7 +3006,6 @@ export const DOCS_DATA = [
   </table>
 </div>
             <p>Always keep your browser updated to the latest version for the best experience.</p>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">Can I use Clerixs on my phone?</h4>
             <p>Clerixs is designed for <strong>tablets and desktops</strong>. It works on mobile browsers but some features — particularly prescription writing and lab result entry — are easier on a larger screen.</p>
             <p>For the best mobile experience, use a tablet (iPad, Android tablet) in landscape mode.</p>
@@ -3131,7 +3016,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">Receptionists can comfortably use Clerixs on a phone for quick tasks like checking the queue or booking appointments. Doctors writing full prescriptions should use a laptop or tablet.</p>
   </div>
 </div>
-            <p>---</p>
           </div>
         )
       },
@@ -3143,11 +3027,9 @@ export const DOCS_DATA = [
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">A patient says they did not receive the WhatsApp message.</h4>
             <p>Check the following in order:</p>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li><strong>Phone number format</strong> — Open the patient profile and verify the number includes the country code: <strong>+91 XXXXXXXXXX</strong>. Without +91, the message cannot be delivered.</li><li><strong>WhatsApp active on that number</strong> — The patient must have WhatsApp installed and active on that phone number.</li><li><strong>Credit balance</strong> — Check the left sidebar for your WhatsApp credit balance. If it shows zero, you cannot send messages until you top up.</li><li><strong>Message history</strong> — Click <strong>WhatsApp</strong> in the left sidebar. Find the message in the history table and check the delivery status column.</li></ol>
-            <p>---</p>
             <h4 className="font-bold text-slate-900 text-sm mt-6 mb-2">My WhatsApp credit balance reached zero mid-day. What do I do?</h4>
             <ol className="list-decimal pl-6 space-y-2 text-slate-600"><li>Go to <strong>Settings</strong>.</li><li>Find the <strong>WhatsApp Credits</strong> section.</li><li>Click <strong>Buy Credits</strong> and select a credit pack.</li><li>Complete payment — credits are added immediately.</li></ol>
             <p>You can resume sending prescriptions right away.</p>
-            <p>---</p>
           </div>
         )
       },
@@ -3176,7 +3058,6 @@ export const DOCS_DATA = [
     <p className="text-blue-800 text-xs mt-1">When reporting a bug, include: what you were trying to do, what happened instead, which browser you are using, and a screenshot. This helps the support team resolve your issue faster.</p>
   </div>
 </div>
-            <p>---</p>
             <p><em>Previous: <a href="14-shortcuts.md" className="text-blue-600 hover:underline font-semibold">14 — Keyboard Shortcuts</a></em></p>
           </div>
         )
