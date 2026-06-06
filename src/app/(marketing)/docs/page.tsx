@@ -200,7 +200,7 @@ export default function DocsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b bg-white/95 px-4 md:px-8 backdrop-blur-md shadow-sm">
         <div className="flex items-center gap-3 shrink-0">
@@ -260,7 +260,7 @@ export default function DocsPage() {
         
         {/* Left Navigation Sidebar */}
         <aside className={cn(
-          "fixed inset-y-16 left-0 z-30 w-72 bg-white border-r flex flex-col transition-all duration-300 md:sticky md:top-16 md:h-[calc(100vh-4rem)] shrink-0 overflow-y-auto shadow-lg md:shadow-none",
+          "fixed inset-y-16 left-0 z-30 w-72 bg-white border-r flex flex-col transition-all duration-300 md:sticky md:top-0 md:h-full shrink-0 overflow-y-auto shadow-lg md:shadow-none",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}>
           {/* Mobile Search input inside drawer */}
@@ -423,7 +423,7 @@ export default function DocsPage() {
           </main>
 
           {/* Right Outline Sidebar (On This Page outline) - hidden on tablet/mobile screens */}
-          <aside className="w-64 border-l bg-slate-50 p-6 overflow-y-auto shrink-0 hidden lg:block h-[calc(100vh-4rem)] sticky top-16 select-none">
+          <aside className="w-64 border-l bg-slate-50 p-6 overflow-y-auto shrink-0 hidden lg:block h-full select-none">
             <div className="space-y-4">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">On This Page</p>
               <nav className="space-y-2">

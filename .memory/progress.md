@@ -46,6 +46,7 @@
 - **Dynamic Feedback**: Implemented a dynamic feedback widget ("Was this helpful?") with instant confirmation messages.
 - **Divider cleanup**: Removed 141 raw `<p>---</p>` divider rows to clean up typography flow.
 - **Sign-up Sizing**: Made the sign-up screenshot full-width (removed `max-w-md` constraints).
+- **Sticky sidebars layout**: Configured `h-screen overflow-hidden` on the main page wrapper and `h-full` on both sidebars, locking them to the viewport so only the central document text pane scrolls.
 
 ### 🛠 UI, Dark Mode & Analytics Mocking
 - **Lab Dark Mode**: Fixed dark mode compatibility issues in the Lab Order Management UI.
