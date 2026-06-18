@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 import { Plus } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { getSessionUser, getSessionProfile, getSessionMembership } from '@/lib/supabase/server';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { ListFilter } from '@/components/ui/list-filter';
@@ -20,36 +20,21 @@ export default async function BillingPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = await createClient();
   const resolvedSearchParams = await searchParams;
-  
+
   const query = resolvedSearchParams?.query?.toString() || '';
   const statusFilter = resolvedSearchParams?.status?.toString() || 'All';
   const dateFilter = resolvedSearchParams?.date?.toString() || '';
   const page = parseInt(resolvedSearchParams?.page?.toString() || '1', 10);
   const itemsPerPage = 50;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use cached helpers — deduplicated with layout's queries, zero extra DB round-trips
+  const [user, profile] = await Promise.all([getSessionUser(), getSessionProfile()]);
   if (!user) redirect('/auth/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('default_organization_id')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile?.default_organization_id) {
-    redirect('/dashboard');
-  }
+  if (!profile?.default_organization_id) redirect('/dashboard');
 
   const orgId = profile.default_organization_id;
-
-  const { data: membership } = await supabase
-    .from('organization_memberships')
-    .select('role')
-    .eq('organization_id', orgId)
-    .eq('profile_id', user.id)
-    .single();
+  const membership = await getSessionMembership(orgId);
 
   if (membership?.role !== 'org_owner' && membership?.role !== 'receptionist') {
     redirect('/dashboard');

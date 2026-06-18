@@ -3,45 +3,25 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Live Queue',
 };
-import { createClient } from '@/lib/supabase/server';
+import { createClient, getSessionUser, getSessionProfile } from '@/lib/supabase/server';
 import { QueueClient } from './queue-client';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
 export default async function QueuePage() {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  // Cached — deduplicated with layout
+  const [user, profile] = await Promise.all([getSessionUser(), getSessionProfile()]);
   if (!user) redirect('/auth/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('default_organization_id')
-    .eq('id', user.id)
-    .single();
-
   if (!profile?.default_organization_id) redirect('/dashboard');
 
-  // Fetch active doctors (staff with role 'doctor' or 'org_owner')
-  const { data: doctors } = await supabase
-    .from('organization_memberships')
-    .select(`
-      id,
-      role,
-      profiles (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('organization_id', profile.default_organization_id)
-    .eq('status', 'active')
-    .in('role', ['doctor', 'org_owner']);
+  const orgId = profile.default_organization_id;
 
-  // Fetch today's queue entries
+  // Fetch doctors and queue entries in parallel — only real extra data this page needs
   const today = new Date().toISOString().split('T')[0];
   const cookieStore = await cookies();
   const selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value;
+
+  const supabase = await createClient();
 
   let queueQuery = supabase
     .from('queue_entries')
@@ -54,7 +34,7 @@ export default async function QueuePage() {
       ),
       appointment_id
     `)
-    .eq('organization_id', profile.default_organization_id)
+    .eq('organization_id', orgId)
     .gte('created_at', `${today}T00:00:00Z`)
     .order('queue_position', { ascending: true });
 
@@ -62,7 +42,15 @@ export default async function QueuePage() {
     queueQuery = queueQuery.eq('branch_id', selectedBranchId);
   }
 
-  const { data: initialEntries } = await queueQuery;
+  const [{ data: doctors }, { data: initialEntries }] = await Promise.all([
+    supabase
+      .from('organization_memberships')
+      .select(`id, role, profiles (id, full_name, avatar_url)`)
+      .eq('organization_id', orgId)
+      .eq('status', 'active')
+      .in('role', ['doctor', 'org_owner']),
+    queueQuery,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -73,10 +61,10 @@ export default async function QueuePage() {
         </div>
       </div>
 
-      <QueueClient 
-        initialDoctors={doctors || []} 
-        initialEntries={initialEntries || []} 
-        organizationId={profile.default_organization_id}
+      <QueueClient
+        initialDoctors={doctors || []}
+        initialEntries={initialEntries || []}
+        organizationId={orgId}
       />
     </div>
   );

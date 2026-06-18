@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Lab Dashboard',
 };
-import { createClient } from '@/lib/supabase/server';
+import { createClient, getSessionUser, getSessionProfile, getSessionMembership } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FlaskConical, TestTube, CheckCircle } from 'lucide-react';
@@ -17,27 +17,23 @@ export default async function LabDashboardPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = await createClient();
   const resolvedSearchParams = await searchParams;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Cached — deduplicated with layout
+  const [user, profile] = await Promise.all([getSessionUser(), getSessionProfile()]);
   if (!user) return notFound();
+  if (!profile?.default_organization_id) return notFound();
 
-  // Get Org ID and Role
-  const { data: membership } = await supabase
-    .from('organization_memberships')
-    .select('organization_id, role')
-    .eq('profile_id', user.id)
-    .eq('status', 'active')
-    .single();
-
+  const orgId = profile.default_organization_id;
+  const membership = await getSessionMembership(orgId);
   if (!membership || membership.role === 'receptionist') return notFound();
 
-  // Fetch Summary Stats (Always fast, can stay in page)
+  // Fetch Summary Stats
+  const supabase = await createClient();
   const { data: labOrders } = await supabase
     .from('lab_orders')
     .select('status')
-    .eq('organization_id', membership.organization_id);
+    .eq('organization_id', orgId);
 
   const pendingCollection = labOrders?.filter(o => o.status === 'ordered')?.length || 0;
   const processing = labOrders?.filter(o => o.status === 'sample_collected' || o.status === 'processing')?.length || 0;
@@ -95,7 +91,7 @@ export default async function LabDashboardPage({
 
         <Suspense fallback={<LabSkeleton />}>
           <LabOrderList 
-            orgId={membership.organization_id} 
+            orgId={orgId}
           />
         </Suspense>
       </div>

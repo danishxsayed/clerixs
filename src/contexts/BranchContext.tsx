@@ -24,22 +24,59 @@ interface BranchContextProps {
 
 const BranchContext = createContext<BranchContextProps | undefined>(undefined);
 
-export const BranchProvider = ({ 
+export const BranchProvider = ({
   children,
   organizationId,
-  userRole
-}: { 
+  userRole,
+  initialBranches = [],
+}: {
   children: ReactNode;
   organizationId: string;
   userRole: string;
+  /** Pre-fetched branches from the server layout — skips the client-side fetch entirely */
+  initialBranches?: Branch[];
 }) => {
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const [branches, setBranches] = useState<Branch[]>(initialBranches);
   const [currentBranch, setCurrentBranchState] = useState<Branch | null>(null);
-  const [loading, setLoading] = useState(true);
+  // If server gave us branches, start as not-loading; otherwise show loading until client fetches
+  const [loading, setLoading] = useState(initialBranches.length === 0);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
+    // If branches were provided by the server, just resolve the initial selection from localStorage
+    // and skip the expensive Supabase round-trip entirely.
+    if (initialBranches.length > 0) {
+      const branchList = initialBranches;
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('clerixs_selected_branch') : null;
+
+      if (userRole === 'branch_manager') {
+        const assigned = branchList[0] || null;
+        setCurrentBranchState(assigned);
+        if (assigned) {
+          document.cookie = `clerixs_selected_branch=${assigned.id}; path=/; max-age=31536000`;
+          localStorage.setItem('clerixs_selected_branch', assigned.id);
+        }
+      } else if (stored === 'all' && userRole === 'org_owner') {
+        setCurrentBranchState(null);
+        document.cookie = `clerixs_selected_branch=all; path=/; max-age=31536000`;
+      } else {
+        const initialId = stored || (branchList[0]?.id ?? null);
+        if (initialId && initialId !== 'all') {
+          const selected = branchList.find((b) => b.id === initialId) || null;
+          setCurrentBranchState(selected);
+          if (selected) {
+            document.cookie = `clerixs_selected_branch=${selected.id}; path=/; max-age=31536000`;
+          }
+        } else {
+          setCurrentBranchState(null);
+        }
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Fallback: fetch branches client-side (used only if initialBranches not provided)
     const fetchBranches = async () => {
       setLoading(true);
       const { data: user } = await supabase.auth.getUser();
@@ -52,13 +89,12 @@ export const BranchProvider = ({
 
       try {
         if (userRole === 'org_owner') {
-          // Owners see all active branches in the organization
           const { data: orgBranches, error } = await supabase
             .from('branches')
             .select('id, name, city, state, phone, is_active')
             .eq('organization_id', organizationId)
             .eq('is_active', true);
-            
+
           if (error) {
             console.error('Failed to load branches', error);
           } else {
@@ -72,7 +108,6 @@ export const BranchProvider = ({
             }));
           }
         } else if (userRole === 'branch_manager') {
-          // Branch managers are locked into their single assigned branch
           const { data: membershipData, error: memError } = await supabase
             .from('organization_memberships')
             .select(`
@@ -98,7 +133,6 @@ export const BranchProvider = ({
           } else if (membershipData) {
             const bMems = membershipData.branch_memberships as any;
             const bMem = Array.isArray(bMems) ? bMems[0] : bMems;
-            
             if (bMem && bMem.branches) {
               branchList = [{
                 id: bMem.branch_id,
@@ -111,7 +145,6 @@ export const BranchProvider = ({
             }
           }
         } else {
-          // Staff see only branches they are assigned to
           const { data: memberships, error: memError } = await supabase
             .from('organization_memberships')
             .select(`
@@ -161,7 +194,6 @@ export const BranchProvider = ({
 
       setBranches(branchList);
 
-      // Determine current branch
       const stored = localStorage.getItem('clerixs_selected_branch');
       if (userRole === 'branch_manager') {
         const assigned = branchList[0] || null;
@@ -185,12 +217,13 @@ export const BranchProvider = ({
           setCurrentBranchState(null);
         }
       }
-      
+
       setLoading(false);
     };
-    
+
     fetchBranches();
-  }, [organizationId, userRole, supabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organizationId, userRole]);
 
   const setCurrentBranch = (branchId: string) => {
     if (userRole === 'branch_manager') return; // Branch manager is isolated and cannot change branch

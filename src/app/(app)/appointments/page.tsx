@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Appointments',
 };
 import { Plus } from 'lucide-react';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, getSessionUser, getSessionProfile } from '@/lib/supabase/server';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { ListFilter } from '@/components/ui/list-filter';
@@ -21,9 +21,8 @@ export default async function AppointmentsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const supabase = await createClient();
   const resolvedSearchParams = await searchParams;
-  
+
   const query = resolvedSearchParams?.query?.toString() || '';
   const statusFilter = resolvedSearchParams?.status?.toString() || 'All';
   const view = resolvedSearchParams?.view?.toString() || 'list';
@@ -32,14 +31,14 @@ export default async function AppointmentsPage({
   const page = parseInt(resolvedSearchParams?.page?.toString() || '1', 10);
   const itemsPerPage = 50;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // Cached — no extra DB round-trip vs layout
+  const [user, profile] = await Promise.all([getSessionUser(), getSessionProfile()]);
   if (!user) redirect('/auth/login');
-
-  const { data: profile } = await supabase.from('profiles').select('default_organization_id').eq('id', user.id).single();
   const orgId = profile?.default_organization_id;
   if (!orgId) redirect('/dashboard');
 
-  // Build Filter Groups Data (Cached or fast query)
+  // Only extra query needed: doctor list for filter (not in layout)
+  const supabase = await createClient();
   const { data: doctors } = await supabase
     .from('organization_memberships')
     .select('id, profiles(full_name)')

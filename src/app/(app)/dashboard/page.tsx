@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Dashboard',
 };
-import { createClient } from '@/lib/supabase/server';
+import { createClient, getSessionUser, getSessionProfile, getSessionMembership } from '@/lib/supabase/server';
 import { BranchBreakdown } from '@/components/dashboard/branch-breakdown';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -84,7 +84,6 @@ export default async function DashboardPage({
   searchParams: Promise<{ filter?: string, date?: string }>;
 }) {
   const { filter = 'month', date = '' } = await searchParams;
-  const supabase = await createClient();
 
   let orgId = '';
   let fullName = 'there';
@@ -106,38 +105,26 @@ export default async function DashboardPage({
   let needsAttentionCount = 0;
 
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData?.user) {
-      redirect('/auth/login');
-    }
+    // Cached helpers — deduplicated with layout, zero extra DB round-trips for auth/profile/membership
+    const [user, profile] = await Promise.all([getSessionUser(), getSessionProfile()]);
+    if (!user) redirect('/auth/login');
 
     const cookieStore = await cookies();
     selectedBranchId = cookieStore.get('clerixs_selected_branch')?.value || 'all';
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name, default_organization_id, specialty')
-      .eq('id', userData.user.id)
-      .single();
-
     orgId = profile?.default_organization_id || '';
-    fullName = profile?.full_name 
-      ? profile.full_name.trim().split(' ')[0] 
+    fullName = profile?.full_name
+      ? profile.full_name.trim().split(' ')[0]
       : 'there';
-    specialty = profile?.specialty || '';
+    specialty = (profile as any)?.specialty || '';
 
-    if (!orgId) {
-      redirect('/onboarding');
-    }
+    if (!orgId) redirect('/onboarding');
 
-    const { data: membership } = await supabase
-      .from('organization_memberships')
-      .select('role')
-      .eq('organization_id', orgId)
-      .eq('profile_id', userData.user.id)
-      .single();
-
+    const membership = await getSessionMembership(orgId);
     isOwner = membership?.role === 'org_owner';
+
+    // Create supabase client once for all the business queries below
+    const supabase = await createClient();
 
     // Determine start date for filters
     const now = new Date();
